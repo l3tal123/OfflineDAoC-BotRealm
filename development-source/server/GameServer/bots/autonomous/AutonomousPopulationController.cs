@@ -39,7 +39,7 @@ public static class AutonomousPopulationController
     private static readonly HashSet<long> OrphanChecked = new();
     private static volatile OfflineWorldBotRecord[] _cachedRoster = Array.Empty<OfflineWorldBotRecord>();
     private static bool _cachedEnabled;
-    private static int _cachedRampMinutes = 15;
+    private static int _cachedRampMinutes = 2;
     private static int _polling;
     private static int _loginGeneration;
 
@@ -142,8 +142,10 @@ public static class AutonomousPopulationController
                 .ToList();
 
             // Ten thousand actors require about eleven scheduled logins per
-            // second to reach 33% at five minutes and 100% at fifteen. Keep
-            // every pulse bounded while retaining modest catch-up headroom.
+            // second to reach 33% at five minutes and 100% at fifteen; the
+            // default two-minute ramp of a 1,500-bot roster needs about twelve
+            // and a half. Keep every pulse bounded while retaining modest
+            // catch-up headroom.
             int enqueueCount = Math.Min(Math.Min(missing, available.Count), MaximumSpawnEnqueuePerPoll);
             for (int i = 0; i < enqueueCount; i++)
             {
@@ -353,7 +355,7 @@ public static class AutonomousPopulationController
         // Pure reads: SQLite WAL readers never block the writer, so this no
         // longer holds the shared write lock that game-loop transactions wait on.
         _cachedEnabled = ReadBool("population_enabled", false);
-        _cachedRampMinutes = ReadInt("startup_ramp_minutes", 15);
+        _cachedRampMinutes = ReadInt("startup_ramp_minutes", 2);
         _cachedRoster = DOLDB<OfflineWorldBotRecord>
             .SelectObjects(DB.Column("IsRetired").IsEqualTo(false))
             .Where(record => !HiredCompanions165.IsHired(record.BotId))   // True 1.65 Mode: their owners bring them

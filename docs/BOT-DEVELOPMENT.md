@@ -36,7 +36,9 @@ live caller** and is effectively dev-only code.
   second, computes a target with `AutonomousPopulationRamp`, picks the next realm by
   `AutonomousRealmLoginBalancer`, and spawns real actors. `AutonomousBotRegistry` is the live set.
   `AutonomousPopulationProperties` holds the gates: `population_enabled`, `active_only`, `startup_ramp_minutes`,
-  `ai_budget_ms`, `world_actor_only`, `allow_character_deletion`.
+  `ai_budget_ms`, `world_actor_only`, `allow_character_deletion`. `startup_ramp_minutes` (set to 2 in
+  `runtime/true165/true165-rules.json`) spreads every login evenly across that window; a ramp of five minutes or
+  less is linear, a longer one still front-loads the first 33 percent into five minutes.
 - **Brain attach:** `GameBot` gets a `BotBrain` (`bots/BotBrain*.cs`, `partial`; 5.5k lines in the main file).
 - **Per-tick order in `BotBrain.Think()`** (`bots/BotBrain.cs:1286`): companion buff/engagement watch ->
   poison supply -> animist target restore -> stealth -> pet focus shield -> stuck watchdog -> stable ride (owns

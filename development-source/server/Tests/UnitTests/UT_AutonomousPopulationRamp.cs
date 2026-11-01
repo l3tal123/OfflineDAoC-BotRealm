@@ -31,12 +31,45 @@ public sealed class UT_AutonomousPopulationRamp
     }
 
     [Test]
+    public void TwoMinuteRampLogsTheWholeRosterInEvenly()
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(AutonomousPopulationRamp.DesiredActiveCount(true, 1_500, 2, TimeSpan.Zero), Is.Zero);
+            Assert.That(AutonomousPopulationRamp.DesiredActiveCount(true, 1_500, 2, TimeSpan.FromSeconds(30)), Is.EqualTo(375));
+            Assert.That(AutonomousPopulationRamp.DesiredActiveCount(true, 1_500, 2, TimeSpan.FromSeconds(60)), Is.EqualTo(750));
+            Assert.That(AutonomousPopulationRamp.DesiredActiveCount(true, 1_500, 2, TimeSpan.FromSeconds(90)), Is.EqualTo(1_125));
+            Assert.That(AutonomousPopulationRamp.DesiredActiveCount(true, 1_500, 2, TimeSpan.FromSeconds(119)), Is.EqualTo(1_487));
+            Assert.That(AutonomousPopulationRamp.DesiredActiveCount(true, 1_500, 2, TimeSpan.FromMinutes(2)), Is.EqualTo(1_500));
+        });
+    }
+
+    [Test]
+    public void TwoMinuteRampStaggersEveryLoginInsideTheWindow()
+    {
+        TimeSpan first = AutonomousPopulationRamp.NominalLoginOffset(0, 1_500, 2);
+        TimeSpan last = AutonomousPopulationRamp.NominalLoginOffset(1_499, 1_500, 2);
+
+        Assert.That(first, Is.GreaterThan(TimeSpan.Zero));
+        Assert.That(first, Is.LessThan(TimeSpan.FromSeconds(5)));
+        Assert.That(last, Is.EqualTo(TimeSpan.FromMinutes(2)));
+    }
+
+    [Test]
     public void SpawnQueueCanKeepUpWithTenThousandBotCurve()
     {
         double peakPerSecond = Math.Max(3_300d / TimeSpan.FromMinutes(5).TotalSeconds,
             6_700d / TimeSpan.FromMinutes(10).TotalSeconds);
         Assert.That(AutonomousPopulationController.MaximumSpawnEnqueuePerPoll,
             Is.GreaterThanOrEqualTo((int)Math.Ceiling(peakPerSecond)));
+    }
+
+    [Test]
+    public void SpawnQueueCanKeepUpWithTheDefaultTwoMinuteRamp()
+    {
+        double neededPerSecond = 1_500d / TimeSpan.FromMinutes(2).TotalSeconds;
+        Assert.That(AutonomousPopulationController.MaximumSpawnEnqueuePerPoll,
+            Is.GreaterThanOrEqualTo((int)Math.Ceiling(neededPerSecond)));
     }
 
     [Test]

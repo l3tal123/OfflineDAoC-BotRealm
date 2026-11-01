@@ -23,18 +23,28 @@ public static class AutonomousPopulationRamp
             return target;
 
         double elapsed = Math.Clamp(sinceStartup.TotalMinutes, 0, rampMinutes);
-        double earlyMinutes = Math.Min(EarlyRampMinutes, rampMinutes);
-        int earlyTarget = Math.Max(1, (int)Math.Ceiling(target * EarlyPopulationFraction));
         int desired;
-        if (elapsed <= earlyMinutes)
+        if (rampMinutes <= EarlyRampMinutes)
         {
-            // Stagger the first 33%, rather than scheduling a startup burst.
-            desired = (int)Math.Floor(earlyTarget * elapsed / earlyMinutes + 1e-9);
+            // A short ramp (the default two minutes) spreads the whole roster evenly across the window, so the
+            // last login lands when the window closes instead of a third arriving at five minutes (past the end
+            // of the window) and the rest jumping in at once.
+            desired = (int)Math.Floor(target * elapsed / rampMinutes + 1e-9);
         }
         else
         {
-            double remainingMinutes = Math.Max(1d, rampMinutes - earlyMinutes);
-            desired = earlyTarget + (int)Math.Floor((target - earlyTarget) * (elapsed - earlyMinutes) / remainingMinutes + 1e-9);
+            double earlyMinutes = EarlyRampMinutes;
+            int earlyTarget = Math.Max(1, (int)Math.Ceiling(target * EarlyPopulationFraction));
+            if (elapsed <= earlyMinutes)
+            {
+                // Stagger the first 33%, rather than scheduling a startup burst.
+                desired = (int)Math.Floor(earlyTarget * elapsed / earlyMinutes + 1e-9);
+            }
+            else
+            {
+                double remainingMinutes = Math.Max(1d, rampMinutes - earlyMinutes);
+                desired = earlyTarget + (int)Math.Floor((target - earlyTarget) * (elapsed - earlyMinutes) / remainingMinutes + 1e-9);
+            }
         }
         return Math.Min(target, desired);
     }
@@ -44,6 +54,9 @@ public static class AutonomousPopulationRamp
         int target = Math.Max(0, rosterCount);
         if (target == 0 || ordinal < 0 || ordinal >= target)
             return TimeSpan.MaxValue;
+
+        if (rampMinutes > 0 && rampMinutes <= EarlyRampMinutes)
+            return TimeSpan.FromMinutes(rampMinutes * (ordinal + 1d) / target);
 
         double earlyMinutes = Math.Min(EarlyRampMinutes, Math.Max(0, rampMinutes));
         int earlyTarget = Math.Max(1, (int)Math.Ceiling(target * EarlyPopulationFraction));
