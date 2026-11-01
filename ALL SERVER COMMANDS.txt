@@ -726,11 +726,11 @@ NORMAL PLAYER COMMANDS
   /search
   Handler: DOL.GS.Commands.QuestSearchCommandHandler
 
-/sell   (GM ONLY in True 1.65: not in the 1.64 client command list or the DAoC manual)
+/sell
   Sell items to a targeted merchant. Specify a single bag, a range or all
   Use: /sell 4 to sell all items bag 4
   /sell 2-3 to sell all items in bags 2 and 3
-  /sell all to sell all items
+  /sell all to sell everything in your bags (add nopot to keep potions)
   Handler: DOL.GS.Commands.SellCommandHandler
 
 /send (aliases: /tell, /t)
@@ -1023,7 +1023,7 @@ Your hired companion
 
 GM ONLY IN TRUE 1.65 (normal players are told "That command does not exist in True 1.65 Mode.")
 ===============================================================================================
-Also GM only (listed with the player commands above, marked GM ONLY): /switch, /sell, /craftmacro, /faction.
+Also GM only (listed with the player commands above, marked GM ONLY): /switch, /craftmacro, /faction.
 The launcher's right-click "Teleport to" on a bot is GM only too (it shows with "Make Me a GM" on).
 
 /api

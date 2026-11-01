@@ -90,8 +90,10 @@ namespace DOL.GS
             "&raid",                                                            // /raid 40 and /raid 80 (plan section 17)
             "&spawn",                                                           // conjured helpers (1.65: hired at the inns)
             // Not in the 1.64 client's command list or the DAoC manual (owner 2026-11-01: "if these were period accurate
-            // leave them in"; /transfercorpse is in both and stays): weapon slot swap, bag selling, crafting macro, chat.
-            "&switch", "&sell", "&craftmacro", "&faction",
+            // leave them in"; /transfercorpse is in both and stays): weapon slot swap, crafting macro, chat. /sell is
+            // not on this list (owner 2026-11-01): selling to a merchant is an ordinary player action and /sell all is
+            // the requested quality-of-life form; the bag and range forms come with the same command.
+            "&switch", "&craftmacro", "&faction",
         ];
 
         private static readonly Logging.Logger ClickLog = Logging.LoggerManager.Create(typeof(Classic165Mode));

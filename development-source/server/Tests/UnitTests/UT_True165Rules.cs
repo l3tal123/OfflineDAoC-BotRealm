@@ -43,6 +43,7 @@ namespace DOL.UnitTests
         }
 
         [TestCase("&autoloot")]
+        [TestCase("&sell")]      // owner 2026-11-01: /sell all is an ordinary player action (bag selling included)
         [TestCase("&say")]
         [TestCase("&stuck")]
         [TestCase("&summon")]

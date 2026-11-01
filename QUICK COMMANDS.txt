@@ -58,6 +58,11 @@ TASKS AND QUESTS
   one right-click per drop. Gamebots always use it, so their kills never become
   bags to walk to.
 
+/sell all
+  Target a merchant and sell everything in your five bags in one command.
+  Items that merchant won't buy stay in the bags. /sell 4 sells bag 4 only,
+  /sell 2-3 sells those bags, and adding nopot keeps your potions.
+
 At level 5 a courier brings the quest "The Traveler's Inn": turn it in at the
 innkeeper. At level 50 a messenger brings "The Horn of Rallying": turn it in at
 the inn's Horn Handler.
@@ -92,7 +97,7 @@ Right-click the broker, then click a choice (or /whisper it):
 GM ONLY IN TRUE 1.65
 /tele, /tc, /grind, /mobs, /spawn, /raid, /freelevel, /vault,
 /buff, /xp, /rp, /hardcore, /classrog, /bountylocation, /bountyrent, /dropmr, /api,
-/switch, /sell, /craftmacro, /faction, and the launcher's "Teleport to" on a bot
+/switch, /craftmacro, /faction, and the launcher's "Teleport to" on a bot
   A normal player gets "That command does not exist in True 1.65 Mode."
   Companions are hired at the inns instead of /spawn and /raid.
 
