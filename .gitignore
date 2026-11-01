@@ -77,3 +77,8 @@ source/new-client/godot/.godot/
 
 # Per-run AI timing report
 runtime/server/bot-ai-delay.json
+
+# Fork-local, never commit: the release downloader's part cache (multi-GB) and staged release assets.
+# Keep them outside the repository tree when possible; these cover the in-repo defaults.
+release/.downloads/
+release-assets/

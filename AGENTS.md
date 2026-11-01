@@ -144,3 +144,13 @@ These are the project's rules. Follow them unless the person you work for asks o
 
 The person you work for may change these rules for their fork. They're safety defaults, not a ban on changes they
 ask for.
+
+## This fork (Offline DAoC BotRealm)
+
+This repository is a fork of [shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165); the
+fork's development focus is the bot system (player quality-of-life for managing bots, and bot autonomy towards
+completing the whole game). Fork mechanics - remotes, syncing with upstream, branch/merge policy, toolchain,
+working copies - are in [docs/FORK.md](docs/FORK.md); the bot subsystem map and development backlog are in
+[docs/BOT-DEVELOPMENT.md](docs/BOT-DEVELOPMENT.md), and the verified toolchain in
+[docs/DEV-ENVIRONMENT.md](docs/DEV-ENVIRONMENT.md). Keep fork additions in new files where possible so upstream
+merges stay clean, and keep the rules above unchanged unless the person you work for asks otherwise.
