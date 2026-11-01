@@ -10,6 +10,9 @@ anything I could not confirm from code is marked "uncertain". This document adds
 numbers. Measured size: `GameServer/bots` 68 top-level C# files (~17.8k lines),
 `bots/autonomous` 163 files (~38.2k lines), `bots/specs` 43 files, `mode165` 27 files (~5.2k lines); ~100 bot
 fixtures under `Tests/UnitTests`.
+Updated 2026-11-01 after the Living Server port: section 1.12 and the affected capability/gap rows describe the
+ported behaviour-quality layer and player group control; the server builds and the NUnit suite passes
+(3,099 passed / 0 failed / 69 skipped), but none of the ported behaviour has been checked in a live game yet.
 
 ## 1. Architecture map
 
@@ -153,6 +156,31 @@ files under `state-165/`: `bot-goals.json` (launcher writes it with the server s
 `rvr-relic-campaigns.json`, `realm-event-records.sqlite3` (launcher RvR / Battlegrounds / Realm Events tabs).
 Request files (`bot-world.request`, `realm-events.request.json`, `bot-ai-delay.json`) stay in the server folder.
 
+### 1.12 Behaviour-quality layer (ported from the Living Server reference, 2026-11-01)
+
+The reference's behaviour-quality fixes are now in the fork. All of them only change bot *choices*; none changes
+a combat, XP or monster number, and each has its own `ServerProperty` switch.
+
+| File | What it does |
+|---|---|
+| `AutonomousRouteGoalFix.cs` | Snaps an off-mesh goal onto its zone's floor after a path failure, budgets the floor step, remembers failed goals/crossings for six minutes, and skips the capital relocation when the goal, not the bot, is at fault. |
+| `AutonomousPveBossDanger.cs` | Remembers where a monster 10+ levels above the victim killed a bot and keeps camps and routes away from it (six hours). |
+| `AutonomousRepeatDeathSpots.cs` | Remembers the bot's own three deaths within 1,200 units in three hours and avoids that spot. |
+| `AutonomousPveDangerBypass.cs` | Bends solo leveling routes around red/purple monsters and remembered danger spots. |
+| `AutonomousKeepGateGoals.cs` | Stops offering goals inside a keep courtyard the bot may not enter through a closed outer gate. |
+| `SiegeDefenseBalance.cs` | Steers the bot-siege defense share by the last results so sieges stay contested. |
+| `BotIncomingFireReaction.cs`, `BotBrain.IncomingFire.cs` | A bot hit by a player-shaped attacker reacts after 0.3-2.5 s (by hit kind, tank/caster, familiar/unseen enemy); a distant area splash is not a personal call and does not pull a bot off the mob it is fighting. Monster hits still aggro immediately. |
+| `BotQuietSongs.cs` | Repeated song twists restart without playing the cast sound (the first start and harmful pulses stay audible). |
+| `AutonomousDeathDiagnostics.cs` | `BOT_DEATH_165` now carries the killer kind and the danger-memory outcome, and is the single place that feeds the two danger memories above. |
+| `AutonomousDungeonBossGoals.cs` | Optional (default **off**): a party that ground a dungeon camp for five minutes may take that dungeon's named boss once per task when it is a real data-quest kill target or has its own drop table. The camp filter still avoids quest monsters. |
+| `AutonomousRaidHothead.cs` | Optional (default **off**): one raid in twenty has a raider who charges the final encounter before the muster is complete (period-neutral rewrite of the reference's Leeroy beat). |
+| `AutonomousBotSchedule.cs` | Optional (default **off**): session or clock-based online windows, short breaks and rare linkdead freezes for autonomous bots. |
+
+Player-side group control is in `BotGroupInvite` + `Group`: `/invite <name>` reaches a nearby world bot (6,000
+units, same region), a bot on duty refuses with a reason (dead, siege, relic, realm-event force, realm raid, stable
+route, temporary helper), and bots a player brought into their group are released when that player leaves the
+group instead of following them from outside it.
+
 ## 2. Current capabilities
 
 | Capability | Where | State |
@@ -169,12 +197,16 @@ Request files (`bot-world.request`, `realm-events.request.json`, `bot-ai-delay.j
 | Hired companions: hire, summon, gear, spec, RA, repairs, revive | `Hire165`, `CompanionWindows165` | Implemented |
 | Quests / tasks (`/task`, classic quests) | - | **Not implemented for bots** |
 | Epic quests (Lord of Deceit, Symbol of the Broken, Last Heir) | `Epics165` (player helpers only) | **Player only** |
-| Housing, player<->world-bot trade, player invites world bot to group | - | **Not implemented** |
+| Behaviour quality: route give-up fix, danger/death-spot memory, danger bends, keep-gate goals, incoming-fire reaction, quiet song twists, siege-defence steering, richer death diagnostics | see 1.12 | Implemented (each has a switch) |
+| Player control: invite a nearby world bot by name or target (duty refusal), bots released when their leader leaves the group | `BotGroupInvite`, `Group.GamebotsLedBy`/`ReleaseGamebotsLedBy`, `commands/playercommands/invite.cs` | Implemented |
+| Housing, player<->world-bot trade, giving a world bot an item, tasking an individual world bot | - | **Not implemented** |
+| Dungeon boss goals, raid hothead, bot schedule/breaks | `AutonomousDungeonBossGoals`, `AutonomousRaidHothead`, `AutonomousBotSchedule` | Implemented, all default **off** |
 | Boats | - | Not in the bot travel layer (uncertain whether any boat route exists in the 1.65 world) |
 
 Partial / thin areas: low-level survivability (README known issue: levels 6-9 die a lot); support bots hold
-combat while only their pet fights (README known issue); bots never aid a *player* group or react to player
-requests beyond chat; item drops on ~2,100 coin-only monsters (content gap, not bot code).
+combat while only their pet fights (README known issue); a player can now invite a nearby world bot into their
+group, but bots still never initiate aid or react to player requests beyond chat; item drops on ~2,100
+coin-only monsters (content gap, not bot code).
 
 ## 3. Gaps and weak points (verified in code)
 
@@ -185,15 +217,18 @@ requests beyond chat; item drops on ~2,100 coin-only monsters (content gap, not 
    quest sense.
 2. **Epic finales are player-only.** `mode165/Epics165.cs` is a helper set for the three level-50 finales; the
    bots only ever meet those encounters as raid bosses (`AutonomousRealmRaid`).
-3. **Player <-> world-bot interaction is missing.** Trade windows are `GamePlayer`-only
-   (`gameutils/PlayerTradeWindow.cs`); a player cannot invite an autonomous bot into their group (bot groups are
-   formed only by `AutonomousBotGroupCoordinator`), cannot give it an item, and cannot task it. Companion
-   gear moves through a vault window (`CompanionGearVault165`) instead.
-4. **No per-bot steering, and companion management is in-game only.** The only launcher actions on a bot are
-   "Teleport to" (GM only, `MainForm.cs:1215`) and "Delete" (`MainForm.cs:1204`); population and goals are
-   global, and in game there is no command to tell one world bot to switch goal, hold or regroup. Hired
-   companions are not listed by the launcher at all (`MainForm.cs:2845`), so they are managed one at an inn or
-   with `/companionui`.
+3. **Player <-> world-bot interaction is only partly there.** Since the Living Server port a player can invite a
+   nearby autonomous bot into their group: by target, or by name within 6,000 units in the same region, with a
+   duty refusal (dead, siege, relic, realm-event force, realm raid, stable route, temporary helper), and a bot the
+   player brought along is released when that player leaves the group instead of following from outside it.
+   Still missing: trade windows are `GamePlayer`-only (`gameutils/PlayerTradeWindow.cs`), so a player cannot give a
+   world bot an item, and there is no way to task or steer one world bot. Companion gear moves through a vault
+   window (`CompanionGearVault165`) instead.
+4. **No per-bot steering, and companion management is in-game only.** The launcher shows population, groups, the
+   live world map (with bot selection), goals and RvR records, and still offers "Teleport to" (GM only,
+   `MainForm.cs:1215`) and "Delete" (`MainForm.cs:1204`), but there is no in-game command to tell one world bot to
+   switch goal, hold or regroup. Hired companions are not listed by the launcher at all (`MainForm.cs:2845`), so
+   they are managed one at an inn or with `/companionui`.
 5. **Goals need a restart.** `AutonomousBotGoalPolicy.Initialize` runs once from
    `Classic165Mode.OnPropertiesLoaded`; `BotGoalSettings.Save` refuses to run while the server is up. The
    launcher's "Bot Goals Setting" tab therefore means "set, then restart".
@@ -202,9 +237,11 @@ requests beyond chat; item drops on ~2,100 coin-only monsters (content gap, not 
    Many of those are legitimately about real players (clients, chat, pilot), but shared rules code
    (resist/stat/skill/effect calculators, spell handlers) is exactly where the original parity audit found
    bugs; there is no test or grep gate that keeps the list from regrowing.
-7. **Death/failure recovery is watchdog-driven.** `AutonomousStuckWatchdog` (15 min no movement, 45 min no
-   progress) teleports a bot to its capital (`AUTONOMOUS_STUCK_15M_RECOVERY`, `AUTONOMOUS_GOAL_STALL_45M_RECOVERY`).
-   This is a safety net, not a fix, and it hides route/camp bugs from the dashboard.
+7. **Death/failure recovery used to be watchdog-only; the ported route fixes reduce, but do not remove, that.**
+   `AutonomousStuckWatchdog` (15 min no movement, 45 min no progress) still teleports a bot to its capital
+   (`AUTONOMOUS_STUCK_15M_RECOVERY`, `AUTONOMOUS_GOAL_STALL_45M_RECOVERY`). The ported goal-snap, failed-goal
+   memory and pocket-escape rules (1.12) handle most of what used to reach the watchdog, but it remains the last
+   resort and hides any remaining route/camp bug from the dashboard.
 8. **Route/level reliability depends on hand-authored data.** Camps need CapnBry coordinates *and* a live NPC
    nearby; zones CapnBry lists as empty fall back to 1,500-unit live clusters
    (`BuildCampCatalogDraft`); dungeons use `dungeon_navigation_points.json`; DF uses proof files under
@@ -226,7 +263,7 @@ coin-only monsters, DF seal stock, support-pet combat, login panel. See `README.
 
 **Build / test (from `development-source/server`)**
 - `dotnet build "Dawn of Light.sln" -c Release`
-- `dotnet test Tests/Tests.csproj -c Release --no-build` (~2,900 NUnit tests; ~100 fixtures cover bots)
+- `dotnet test Tests/Tests.csproj -c Release --no-build` (~3,200 NUnit tests; ~100 fixtures cover bots)
 - single fixture: `dotnet test Tests/Tests.csproj --filter "FullyQualifiedName~UT_AutonomousBotDecisionEngine"`
 - Never build while a server runs (it stalls the game loop, see AGENTS.md rule 10).
 
@@ -253,6 +290,10 @@ folder instead. Paths come from `Classic165Mode.StatePath`/`StateDirectory`.
   `offline_local_options` (`MakeMeGM`): written by the launcher, polled live by the server.
 - `AutonomousPopulationProperties` and `AutonomousDiagnosticsProperties` document every bot property;
   `bot_goal_attempt_tracking`, `bot_equipment_upgrade_tracking`, `bot_training_tracking` default to on.
+- Ported behaviour switches (see 1.12): `bot_incoming_fire_reaction` (true), `bot_route_goal_fix`,
+  `bot_pve_boss_danger`, `bot_repeat_death_spots`, `bot_pve_danger_bypass`, `bot_keep_gate_goals` and
+  `rvr_siege_defense_steering` (true), `bot_dungeon_boss_goals`, `bot_raid_hothead`, `bot_living_breaks` (false),
+  `bot_schedule_mode` ("off"). The group-duty rules need no switch.
 
 **Useful log tags (grep the server console log)**
 - Lifecycle: `WORLD_MODE`, `AUTONOMOUS_STATUS_PERSISTENCE`, `AUTONOMOUS_BETWEEN_TASK_TIMEOUT`,
@@ -260,7 +301,9 @@ folder instead. Paths come from `Classic165Mode.StatePath`/`StateDirectory`.
 - Camps/travel: `AUTONOMOUS_CAMP_UNREACHABLE_PULLS`, `AUTONOMOUS_CAMP_ROUTE_QUARANTINE`,
   `AUTONOMOUS_CAMP_DANGER_BENCH`, `AUTONOMOUS_ROUTE_STALL_TRACE`, `AUTONOMOUS_ROUTE_RECOVERY`,
   `AUTONOMOUS_ROUTE_POCKET_ESCAPE`, `AUTONOMOUS_STABLE_ROUTE_*`, `AUTONOMOUS_TOWN_TELEPORT_*`,
-  `AUTONOMOUS_CAPITAL_TRANSIT`.
+  `AUTONOMOUS_CAPITAL_TRANSIT`, `AUTONOMOUS_GOAL_SNAP*`, `AUTONOMOUS_FLOOR_STEP`, `AUTONOMOUS_POCKET_NUDGE`.
+- Behaviour (1.12): `BOT_SCHEDULE_MODE`, `BOT_SCHEDULE_LOGOUT`, `BOT_SCHEDULE_LINKDEAD`, `BOT_RAID_HOTHEAD`,
+  `AUTONOMOUS_DUNGEON_BOSS_*` (all only with their switch on).
 - Groups: `AUTONOMOUS_GROUP_FORMED`, `AUTONOMOUS_GROUP_ASSEMBLED`, `AUTONOMOUS_GROUP_MEETUP_PLANNED`,
   `AUTONOMOUS_GROUP_REGROUP_*`, `AUTONOMOUS_GROUP_MATCHMAKING_TIMEOUT`, `AUTONOMOUS_GROUP_RESURRECTION_WAIT`.
 - Economy/rules: `AUTONOMOUS_SERVICE_ARRIVED`, `AUTONOMOUS_SHOPPING_INDEX`, `AUTONOMOUS_SEAL_PURCHASE`,
@@ -273,4 +316,6 @@ folder instead. Paths come from `Classic165Mode.StatePath`/`StateDirectory`.
 
 Fixtures worth reading first: `UT_AutonomousBotDecisionEngine`, `UT_AutonomousPopulationRamp`,
 `UT_AutonomousGoalDiagnostics`, `UT_AutonomousLootFlow`, `UT_BotGoalSettings`, `UT_True165Rules`,
-`UT_AutonomousRvrDirector`, `UT_RealmRaid*`, `UT_AutonomousStuckWatchdog`, `UT_AutonomousStableRoutePlanner`.
+`UT_AutonomousRvrDirector`, `UT_RealmRaid*`, `UT_AutonomousStuckWatchdog`, `UT_AutonomousStableRoutePlanner`,
+and for the 2026-11-01 port `UT_BotGroupInvite165`, `UT_BotBehaviourRouteGoalFix`, `UT_BotIncomingFireReaction`,
+`UT_BotQuietSongs`, `UT_DungeonBossGoals`, `UT_AutonomousBotSchedule`, `UT_AutonomousRaidHothead`.
