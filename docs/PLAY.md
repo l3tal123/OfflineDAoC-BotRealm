@@ -66,12 +66,18 @@ The world fills with gamebots that level, group, craft, trade and fight on their
 - **Add bots** with the **+ Lv.1** button on a realm's card in the launcher. Hold **Shift** for 10 at a time, or
   **Ctrl** for 100. Bots start at level 1 and level up in the world, like you.
 - **Start small** and add more as your PC allows. Every bot is simulated by the server on your PC.
-- The launcher's tabs show the active population, a live world map, the **Realm Exchange**, groups, RvR,
-  battlegrounds, realm events and realm records. **Bot Goals Setting** sets what the bots aim for.
+- The launcher's tabs show the active population, a live world map, the **Realm Exchange**, the **Bot Inspector**,
+  groups, RvR, battlegrounds, realm events and realm records. **Bot Goals Setting** sets what the bots aim for.
 - **Realm Exchange** (launcher tab) lists every item on the exchange — the item, who listed it and its price — for
   all realms or one, and its **Purchase history** view shows the trades the server has recorded: item, seller,
   buyer, price and time. Open the tab or press **REFRESH REALM EXCHANGE** to read the world database; it never
   reads in the background.
+- **Bot Inspector** (launcher tab) shows one bot in detail: coin, health, power and endurance, its eight stats with
+  the item and buff parts, equipped gear with condition and durability, backpack and vault contents, specializations
+  and spec points spent and available, realm abilities, abilities, spells and styles, its Realm Exchange listings
+  and active buffs, plus where it is and what it is doing. Right-click a bot in **Active Population** and choose
+  **Inspect bot** (or double-click it) to open the tab on that bot; the **BOT** selector works too. It reads one bot
+  when you ask — opening the tab, changing the selector or pressing **REFRESH** — and never polls.
 - **Options** (launcher tab) sets the **XP rate**: one number from 1 to 5000 that multiplies experience from every
   source — kills, quests, tasks, missions, praying — for you and for every kind of gamebot. 1 is normal, 2.5 is two
   and a half times. It saves with the server stopped and applies at the next start. The same tab has **Make Me a GM**

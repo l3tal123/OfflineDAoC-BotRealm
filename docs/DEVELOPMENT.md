@@ -111,8 +111,17 @@ The launcher only runs True 1.65 Mode. There is no normal-mode switch:
 `runtime/server/config/serverconfig.xml` is a copy of the 1.65 config (it points at the same database).
 
 At start the server logs `WORLD_MODE mode=1.65 state=...`. Per-mode state files live in `runtime/server/state-165/`:
-`bot-goals.json`, `bot-world.json`, `rvr-world.json`, `rvr-relic-campaigns.json`, `realm-event-records.sqlite3`.
-Short-lived launcher-to-server request files (`bot-world.request` and the like) stay in `runtime/server/`.
+`bot-goals.json`, `bot-world.json`, `bot-inspect.json`, `rvr-world.json`, `rvr-relic-campaigns.json`,
+`realm-event-records.sqlite3`.
+Short-lived launcher-to-server request files (`bot-world.request`, `bot-inspect.request` and the like) stay in
+`runtime/server/`.
+
+The **Bot Inspector** is the one exception to the "one snapshot for all bots" rule: the launcher writes
+`bot-inspect.request` (`<request id>|<bot id>`), the server answers in `state-165/bot-inspect.json` within a quarter
+second, and the launcher keeps only the answer whose request id matches. A spawned bot is read from its live actor
+(stats, effects, in-memory inventory); a bot that is not in the world is described from its last saved
+`offline_world_bots` row and its persisted `Inventory` rows, and the record says so. Read-only: nothing is written to
+the database or to the bot.
 
 Running the server by hand (for debugging):
 
@@ -361,6 +370,7 @@ Reference outputs that only the tools copy has (not applied): `drops165-missing.
 - `AutonomousRvr*.cs`, `AutonomousRealmRaid.cs`, `RealmRaid*.cs`: RvR events and raids;
 - `AutonomousZone*.cs`: routing over roads, seams and pockets in `runtime/server/navmesh/*.json`;
 - `AutonomousPopulationController.cs`: the population ramp;
+- `AutonomousBotInspector.cs`: the launcher Bot Inspector's one-bot read (`bot-inspect.request` -> `bot-inspect.json`);
 - `BotGoalSettings.cs`: shared with the launcher.
 
 Useful log tags:

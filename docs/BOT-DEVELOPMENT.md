@@ -155,9 +155,11 @@ Relevant log tags: `BOT_DEATH_165`, `BOT_HEALER_165`, `BOT_RESTOCKED_165`, `BOT_
 launcher dashboard reads; `offline_bot_commands` (launcher `OfflineBotCommandRecord`) is polled by
 `AutonomousPopulationController` (today only `TeleportToBot`); `offline_hired_companions` is server-only. State
 files under `state-165/`: `bot-goals.json` (launcher writes it with the server stopped, read at start),
-`bot-world.json` (dashboard -> launcher Active Population / Groups), `rvr-world.json`,
+`bot-world.json` (dashboard -> launcher Active Population / Groups), `bot-inspect.json` (one bot on demand, for the
+launcher Bot Inspector: live actor when spawned, last saved record and inventory otherwise), `rvr-world.json`,
 `rvr-relic-campaigns.json`, `realm-event-records.sqlite3` (launcher RvR / Battlegrounds / Realm Events tabs).
-Request files (`bot-world.request`, `realm-events.request.json`, `bot-ai-delay.json`) stay in the server folder.
+Request files (`bot-world.request`, `bot-inspect.request`, `realm-events.request.json`, `bot-ai-delay.json`) stay in
+the server folder.
 
 ### 1.12 Behaviour-quality layer (ported from the Living Server reference, 2026-11-01)
 
@@ -197,6 +199,7 @@ group instead of following them from outside it.
 | Economy and loot: vendor, repair, ammo/poison, crafting, Realm Exchange, DF seals, walk-to-bag loot | `AutonomousBotEconomy`, `CrafterBots165`, `BotLootWalk165` | Implemented |
 | Death: con loss, sickness, healer visit, release/return; rest at player rates | `DeathPenalty165`, `BotRestRecovery` | Implemented |
 | Chat, guilds, map markers, dashboard | `AutonomousBotChat*`, `AutonomousBotGuilds`, `AutonomousBotMapMarkers`, `AutonomousBotDashboard` | Implemented (cosmetic/QoL) |
+| Bot Inspector: one bot's coin, stats, gear, bag, specs, training, abilities, listings, buffs | `AutonomousBotInspector` (server), `MainForm.BotInspector.cs` (launcher) | Implemented (read-only) |
 | Hired companions: hire, summon, gear, spec, RA, repairs, revive | `Hire165`, `CompanionWindows165` | Implemented |
 | Quests / tasks (`/task`, classic quests) | - | **Not implemented for bots** |
 | Epic quests (Lord of Deceit, Symbol of the Broken, Last Heir) | `Epics165` (player helpers only) | **Player only** |
@@ -228,7 +231,8 @@ coin-only monsters (content gap, not bot code).
    world bot an item, and there is no way to task or steer one world bot. Companion gear moves through a vault
    window (`CompanionGearVault165`) instead.
 4. **No per-bot steering, and companion management is in-game only.** The launcher shows population, groups, the
-   live world map (with bot selection), goals and RvR records, and still offers "Teleport to" (GM only,
+   live world map (with bot selection), goals and RvR records, reads one bot in detail in the **Bot Inspector**
+   (money, stats, gear, bag, specs and training - read only), and still offers "Teleport to" (GM only,
    `MainForm.cs:1215`) and "Delete" (`MainForm.cs:1204`), but there is no in-game command to tell one world bot to
    switch goal, hold or regroup. Hired companions are not listed by the launcher at all (`MainForm.cs:2845`), so
    they are managed one at an inn or with `/companionui`.
@@ -282,6 +286,7 @@ coin-only monsters, DF seal stock, support-pet combat, login panel. See `README.
 
 **State files (`runtime/server/state-165/`)**
 `bot-goals.json` (weights), `bot-world.json` + `bot-world.request` (dashboard snapshot/refresh),
+`bot-inspect.json` + `bot-inspect.request` (Bot Inspector: one bot, on demand),
 `rvr-world.json` (RvR objectives), `rvr-relic-campaigns.json` (relic campaigns), `realm-event-records.sqlite3`
 (event history); `bot-ai-delay.json` (BOT AI DELAY card) and `realm-events.request.json` sit in the server
 folder instead. Paths come from `Classic165Mode.StatePath`/`StateDirectory`.

@@ -511,6 +511,19 @@ internal sealed partial class MainForm : Form
         exchange.Controls.Add(BuildRealmExchangePanel());
         exchange.Enter += async (_, _) => await RefreshRealmExchangeAsync();
 
+        var inspector = new TabPage("Bot Inspector") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
+        _botInspectorTab = inspector;
+        inspector.Controls.Add(BuildBotInspectorPanel());
+        inspector.Enter += async (_, _) =>
+        {
+            UpdateBotInspectorChoices();
+            InspectChoice? choice = SelectedInspectChoice();
+            // One request when the tab opens on a bot that is not on screen yet, or on a reading older
+            // than a couple of minutes: the inspector never polls, REFRESH does the rest.
+            if (choice != null && (choice.BotId != _inspectedBotId || DateTime.Now - _inspectedAt > TimeSpan.FromMinutes(2)))
+                await RefreshBotInspectorAsync();
+        };
+
         var groups = new TabPage("Active Groups") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
         groups.Controls.Add(BuildActiveGroupsPanel());
         var rvr = new TabPage("Active RvR") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
@@ -520,6 +533,7 @@ internal sealed partial class MainForm : Form
         tabs.TabPages.Add(population);
         tabs.TabPages.Add(worldMap);
         tabs.TabPages.Add(exchange);
+        tabs.TabPages.Add(inspector);
         tabs.TabPages.Add(groups);
         tabs.TabPages.Add(rvr);
         var battlegrounds = new TabPage("Battlegrounds") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
@@ -1157,6 +1171,14 @@ internal sealed partial class MainForm : Form
             _grid.CurrentCell = row.Cells[eventArgs.ColumnIndex >= 0 ? eventArgs.ColumnIndex : 0];
         };
         var menu = new ContextMenuStrip();
+        var inspectItem = new ToolStripMenuItem("Inspect bot");
+        inspectItem.Click += async (_, _) =>
+        {
+            if (SelectedBot() is BotRow selected)
+                await InspectBotAsync(selected);
+        };
+        menu.Items.Add(inspectItem);
+        menu.Items.Add(new ToolStripSeparator());
         var teleportItem = new ToolStripMenuItem("Teleport to");
         teleportItem.Click += async (_, _) => await TeleportToSelectedBotAsync();
         menu.Items.Add(teleportItem);
@@ -1169,14 +1191,25 @@ internal sealed partial class MainForm : Form
             BotRow? bot = SelectedBot();
             // True 1.65: teleporting is a GM tool, like /tele (owner 2026-11-01); it shows only with "Make Me a GM" on.
             teleportItem.Visible = _makeMeGm.Checked;
+            bool canInspect = bot?.BotId is > 0;
             bool canTeleport = _makeMeGm.Checked && bot is { BotId: not null, IsOnline: true, DeletionQueued: false } && IsServerRunning();
             bool canDelete = bot?.CanDelete == true;
+            inspectItem.Enabled = canInspect;
+            inspectItem.ToolTipText = canInspect
+                ? $"Open the Bot Inspector on {bot!.Name}: money, stats, gear, bag, specs and training."
+                : "Only world bots saved by the server can be inspected.";
             teleportItem.Enabled = canTeleport;
             teleportItem.ToolTipText = canTeleport ? $"Teleport your logged-in character to {bot!.Name}." : "The server and selected playerbot must both be online.";
             deleteItem.Enabled = canDelete;
-            args.Cancel = bot == null || !canTeleport && !canDelete;
+            args.Cancel = bot == null || !canInspect && !canTeleport && !canDelete;
         };
         _grid.ContextMenuStrip = menu;
+        _grid.CellDoubleClick += async (_, eventArgs) =>
+        {
+            if (eventArgs.RowIndex < 0 || _grid.Rows[eventArgs.RowIndex].DataBoundItem is not BotRow bot || bot.BotId is not > 0)
+                return;
+            await InspectBotAsync(bot);
+        };
         return _grid;
     }
 
@@ -1235,6 +1268,7 @@ internal sealed partial class MainForm : Form
             _playButton.Enabled = !_stoppingServer && snapshot.ServerState == "Running" && _newClient != null;
             UpdateOptionControls(snapshot);
             ApplyFilter();
+            UpdateBotInspectorChoices();
             UpdateDeleteButton();
             RenderActiveGroups();
             RenderActiveRvr();
