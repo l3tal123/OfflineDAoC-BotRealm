@@ -20,6 +20,16 @@ already uses and never changes game state.
   and Darkness Falls all have their proper place. When the new client's converted content is installed, its painted
   zone maps (`new-client/godot/content/maps/{original,x4plus}/z###.png`) are drawn as the panel background; without
   that content the same zones are drawn as realm-coloured rectangles.
+- **Zoom and pan** – the wheel zooms about the cursor (100%–800%, 25% a step), `+` / `−` zoom about the middle,
+  `RESET` returns to the fitted view, and dragging pans a zoomed map (any mouse button; middle-drag works at any
+  zoom). The map is laid out once at 100% and scaled, so the painted zone maps stay sharp; dots grow slightly with the
+  zoom and the region caption, tooltip and `ZOOM n%` badge stay at screen size. Changing the `VIEW` region resets the
+  zoom, so one region's zoom never carries into another.
+- **Double-click a dot** – selects that bot in the **Active Population** tab: the tab comes to the front and the row is
+  selected and scrolled into view. If an Active Population filter (realm, search text, online-only) would hide the
+  row, the filter is relaxed first; nothing else about the selection changes.
+
+![Zoomed Albion view (probe render)](images/world-map-albion-zoom.png)
 
 Positions come from the server, never from the launcher: the launcher only shows what the live snapshot says.
 
@@ -63,15 +73,20 @@ uses the painted maps. The client does not need to be running; only the server m
   new-client content (Albion, Midgard, Hibernia and Darkness Falls; overview and single-region views) to check zone
   placement, dot placement and the painted background. The probe lives under
   `development-source/server/build/map-probe/` (git-ignored) and is not part of the shipped launcher.
-- **Not verified here:** a live in-game run with a running server, and the hover tooltip in a real window (the
-  offscreen probe cannot move the mouse). Test those when the playable install is ready.
+- Zoom/select probe checks (same offscreen harness): overview and single-region zoom levels (100% → 156% → 195% →
+  back), dots kept after zooming, `RESET` and a `VIEW` change return to 100%, and a synthetic double-click on a
+  painted dot raised the bot's id while a double-click on empty map raised nothing. Renders were inspected as images
+  (`world-map-overview-zoom.png`, `world-map-albion-zoom.png`).
+- **Not verified here:** a live in-game run with a running server, the hover tooltip and the real
+  double-click → Active Population hand-off in a real window (the offscreen probe cannot move a real mouse or click).
+  Test those when the playable install is ready.
 
 ## Known limits / next steps
 
 - Autonomous world bots only (what the Active Population tab lists); hired companions and the player's own character
   are not on the map yet.
-- No zoom or pan; the map fits the panel. The dropdown switches region.
+- The `VIEW` dropdown switches region; zoom and pan are remembered only until the region changes (by design).
 - Bots without a reported region (an older server build) are counted in the header but not drawn — deploying the new
   server build fixes that.
-- Possible follow-ups: companions/player dots, click a dot to select the bot in the Active Population grid, group
-  markers, RvR objective markers.
+- Possible follow-ups: companions/player dots, group markers, RvR objective markers, a minimap-style position for the
+  player's own character, and keyboard shortcuts for zoom/pan.

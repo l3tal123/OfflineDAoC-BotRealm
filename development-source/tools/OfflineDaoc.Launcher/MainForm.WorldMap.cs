@@ -20,6 +20,7 @@ internal sealed partial class MainForm
     private BotWorldMapControl? _worldMap;
     private ComboBox? _worldMapRegion;
     private Label? _worldMapHint;
+    private Label? _worldMapZoom;
     private readonly System.Windows.Forms.Timer _worldMapRefresh = new() { Interval = 2_000 };
     private bool _refreshingWorldMap;
     private bool _updatingWorldMapChoices;
@@ -72,9 +73,31 @@ internal sealed partial class MainForm
             _worldMap.Invalidate();
         };
         bar.Controls.Add(_worldMapRegion);
+        Button zoomOut = CompactWorldMapButton("−");
+        _helpTip.SetToolTip(zoomOut, "Zoom the map out (or scroll the wheel down over the map).");
+        zoomOut.Click += (_, _) => _worldMap?.ZoomOut();
+        bar.Controls.Add(zoomOut);
+        Button zoomIn = CompactWorldMapButton("+");
+        _helpTip.SetToolTip(zoomIn, "Zoom the map in (or scroll the wheel up over the map).");
+        zoomIn.Click += (_, _) => _worldMap?.ZoomIn();
+        bar.Controls.Add(zoomIn);
+        Button zoomReset = CompactWorldMapButton("RESET");
+        zoomReset.Width = 62;
+        _helpTip.SetToolTip(zoomReset, "Return to the whole map at 100%.");
+        zoomReset.Click += (_, _) => _worldMap?.ResetView();
+        bar.Controls.Add(zoomReset);
+        _worldMapZoom = new Label
+        {
+            Text = "100%",
+            AutoSize = true,
+            ForeColor = DaocTheme.GoldLight,
+            Font = new Font("Georgia", 8.5f, FontStyle.Bold),
+            Margin = new Padding(10, 4, 0, 0),
+        };
+        bar.Controls.Add(_worldMapZoom);
         _worldMapHint = new Label
         {
-            Text = "live positions, refreshed every 2 s — hover a dot for name, level, class and task",
+            Text = "scroll = zoom  •  drag = pan  •  hover a dot for details  •  double-click a dot to select it",
             AutoSize = true,
             ForeColor = DaocTheme.Muted,
             Font = new Font("Georgia", 8.5f, FontStyle.Italic),
@@ -88,8 +111,89 @@ internal sealed partial class MainForm
             Dock = DockStyle.Fill,
             Margin = new Padding(12, 2, 12, 10),
         };
+        _worldMap.BotActivated += SelectBotFromWorldMap;
+        _worldMap.ZoomChanged += SyncWorldMapZoomLabel;
         page.Controls.Add(_worldMap, 0, 1);
         return page;
+    }
+
+    private static Button CompactWorldMapButton(string text)
+    {
+        Button button = ActionButton(text, DaocTheme.Tint(126, 104, 67));
+        if (button is RuneButton rune)
+            rune.ShowOrnaments = false;
+        button.Width = 30;
+        button.Height = 22;
+        button.Font = new Font("Georgia", 9f, FontStyle.Bold);
+        button.Margin = new Padding(8, 3, 0, 0);
+        button.AccessibleName = text;
+        return button;
+    }
+
+    private void SyncWorldMapZoomLabel()
+    {
+        if (_worldMapZoom != null && _worldMap != null)
+            _worldMapZoom.Text = $"{_worldMap.ZoomPercent}%";
+    }
+
+    /// <summary>
+    /// Double-clicking a dot on the live world map brings that bot up in the Active Population tab: the tab switches,
+    /// any filter that would hide the row is relaxed, and the row is selected and scrolled into view. It changes no
+    /// game state; it is the same selection the grid itself offers.
+    /// </summary>
+    private void SelectBotFromWorldMap(long botId)
+    {
+        BotRow? bot = _bots.FirstOrDefault(row => row.BotId == botId);
+        if (bot == null)
+        {
+            _footer.Text = "World map: that bot is no longer in the roster — refresh to see the current population.";
+            return;
+        }
+
+        DataGridViewRow? row = FindBotGridRow(botId);
+        if (row == null && (_search.Text.Length > 0 || _realmFilter.SelectedIndex != 0 || _onlineOnly.Checked))
+        {
+            // The row exists but the Active Population filter would hide it: relax the filter rather than fail.
+            if (_realmFilter.SelectedIndex != 0)
+                _realmFilter.SelectedItem = "All realms";
+            if (_search.Text.Length > 0)
+                _search.Text = string.Empty;
+            if (_onlineOnly.Checked)
+                _onlineOnly.Checked = false;
+            ApplyFilter();
+            row = FindBotGridRow(botId);
+        }
+
+        if (row == null)
+        {
+            _footer.Text = $"World map: {bot.Name} could not be shown in Active Population.";
+            return;
+        }
+
+        if (_tabs != null && _populationTab != null)
+            _tabs.SelectedTab = _populationTab;
+        try
+        {
+            _grid.ClearSelection();
+            row.Selected = true;
+            _grid.CurrentCell = row.Cells[0];
+            if (row.Index >= 0)
+                _grid.FirstDisplayedScrollingRowIndex = row.Index;
+        }
+        catch (InvalidOperationException)
+        {
+            // The grid is mid-refresh; the row stays selected on the next paint.
+        }
+        _grid.Focus();
+        _footer.Text = $"World map: selected {bot.Name} — level {bot.Level} {bot.ClassName}, {bot.ZoneName}.";
+    }
+
+    private DataGridViewRow? FindBotGridRow(long botId)
+    {
+        foreach (DataGridViewRow row in _grid.Rows)
+            if (row.DataBoundItem is BotRow bound && bound.BotId == botId)
+                return row;
+        return null;
     }
 
     private async Task RefreshWorldMapAsync()
@@ -114,8 +218,7 @@ internal sealed partial class MainForm
                 _lastWorldMapSnapshot = snapshot;
             _worldMap.SetSnapshot(_lastWorldMapSnapshot);
             UpdateWorldMapChoices();
-            if (_worldMapHint != null)
-                _worldMapHint.Text = "live positions, refreshed every 2 s — hover a dot for name, level, class and task";
+            SyncWorldMapZoomLabel();
         }
         catch (Exception)
         {
@@ -194,16 +297,65 @@ internal sealed partial class MainForm
         private LiveBotStatus? _hoverBot;
         private int _selectedRegionId;
 
+        // View state: the map content is laid out once at 100% inside _mapArea, and this zoom/pan pair maps those
+        // content coordinates onto the control. Zooming never re-lays-out the map, so painted zone maps stay sharp
+        // (the source PNGs are larger than their on-screen rectangles at 100%).
+        private const float MinZoom = 1f;
+        private const float MaxZoom = 8f;
+        private const float ZoomStep = 1.25f;
+        private Rectangle _mapArea;
+        private float _zoom = 1f;
+        private PointF _pan;
+        private bool _panning;
+        private Point _panAnchorScreen;
+        private PointF _panAnchorOffset;
+
         public BotWorldMapControl(string databasePath, string? clientFolder)
         {
             _databasePath = databasePath;
             _clientFolder = clientFolder;
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
+                     ControlStyles.StandardClick | ControlStyles.StandardDoubleClick |
+                     ControlStyles.Selectable, true);
+            TabStop = false;
             BackColor = DaocTheme.Panel;
             ForeColor = DaocTheme.Text;
             Cursor = Cursors.Default;
         }
+
+        /// <summary>Raised with the bot id when a dot is double-clicked; the host selects that bot in the population grid.</summary>
+        public event Action<long>? BotActivated;
+
+        /// <summary>Raised whenever the zoom level changes, so the host can show the percentage.</summary>
+        public event Action? ZoomChanged;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int ZoomPercent => (int)Math.Round(_zoom * 100);
+
+        /// <summary>Zooms in one step around the middle of the map.</summary>
+        public void ZoomIn() => SetZoom(_zoom * ZoomStep, MapCentre());
+
+        /// <summary>Zooms out one step around the middle of the map.</summary>
+        public void ZoomOut() => SetZoom(_zoom / ZoomStep, MapCentre());
+
+        /// <summary>Returns to the whole map at 100%.</summary>
+        public void ResetView()
+        {
+            bool changed = Math.Abs(_zoom - MinZoom) > 0.0001f || _pan != PointF.Empty;
+            _zoom = MinZoom;
+            _pan = PointF.Empty;
+            ClampPan();
+            if (!changed)
+                return;
+            ZoomChanged?.Invoke();
+            Invalidate();
+        }
+
+        private Point MapCentre() => _mapArea.Width > 0
+            ? new Point(_mapArea.X + _mapArea.Width / 2, _mapArea.Y + _mapArea.Height / 2)
+            : new Point(Width / 2, Height / 2);
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -215,6 +367,11 @@ internal sealed partial class MainForm
                 if (_selectedRegionId == value)
                     return;
                 _selectedRegionId = value;
+                // A different view starts fitted: a zoom meant for one region is not meaningful in another.
+                _zoom = MinZoom;
+                _pan = PointF.Empty;
+                ClampPan();
+                ZoomChanged?.Invoke();
                 Invalidate();
             }
         }
@@ -268,21 +425,50 @@ internal sealed partial class MainForm
 
         // ------------------------------------------------------------------ input
 
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            // Take focus so wheel events arrive here instead of the tab control underneath.
+            if (!Focused)
+                Focus();
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            if (e.Delta == 0 || _mapArea.Width <= 0 || _mapArea.Height <= 0)
+                return;
+            SetZoom(e.Delta > 0 ? _zoom * ZoomStep : _zoom / ZoomStep, e.Location);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (!Focused)
+                Focus();
+            // Middle-drag always pans; left-drag pans a zoomed map but not when it starts on a dot (that is a select).
+            bool canPan = e.Button == MouseButtons.Middle ||
+                          (e.Button == MouseButtons.Left && _zoom > MinZoom && HitTestBot(e.Location) == null);
+            if (!canPan)
+                return;
+            _panning = true;
+            _panAnchorScreen = e.Location;
+            _panAnchorOffset = _pan;
+            Cursor = Cursors.SizeAll;
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            LiveBotStatus? nearest = null;
-            float best = 8f * 8f;
-            foreach ((LiveBotStatus bot, _, PointF at, _) in _dots)
+            if (_panning)
             {
-                float dx = at.X - e.X, dy = at.Y - e.Y;
-                float distance = dx * dx + dy * dy;
-                if (distance < best)
-                {
-                    best = distance;
-                    nearest = bot;
-                }
+                _pan = new PointF(_panAnchorOffset.X + (e.X - _panAnchorScreen.X),
+                    _panAnchorOffset.Y + (e.Y - _panAnchorScreen.Y));
+                ClampPan();
+                Invalidate();
+                return;
             }
+            LiveBotStatus? nearest = HitTestBot(e.Location);
             if (!ReferenceEquals(nearest, _hoverBot))
             {
                 _hoverBot = nearest;
@@ -295,15 +481,98 @@ internal sealed partial class MainForm
             }
         }
 
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (!_panning)
+                return;
+            _panning = false;
+            Cursor = _hoverBot != null ? Cursors.Hand : Cursors.Default;
+        }
+
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
+            if (_panning)
+                return;
             if (_hoverBot != null)
             {
                 _hoverBot = null;
                 Cursor = Cursors.Default;
                 Invalidate();
             }
+        }
+
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            base.OnMouseDoubleClick(e);
+            if (e.Button != MouseButtons.Left)
+                return;
+            LiveBotStatus? bot = HitTestBot(e.Location);
+            if (bot != null)
+                BotActivated?.Invoke(bot.BotId);
+        }
+
+        private LiveBotStatus? HitTestBot(Point location)
+        {
+            LiveBotStatus? nearest = null;
+            float best = HitRadius * HitRadius;
+            foreach ((LiveBotStatus bot, _, PointF at, _) in _dots)
+            {
+                float dx = at.X - location.X, dy = at.Y - location.Y;
+                float distance = dx * dx + dy * dy;
+                if (distance < best)
+                {
+                    best = distance;
+                    nearest = bot;
+                }
+            }
+            return nearest;
+        }
+
+        private float HitRadius => Math.Max(8f, 4.5f * (float)Math.Sqrt(_zoom));
+
+        // ------------------------------------------------------------------ view transform
+
+        /// <summary>Content coordinates are the 100% layout inside <see cref="_mapArea"/>; this maps them to the screen.</summary>
+        private PointF ViewPoint(float x, float y) =>
+            new(_mapArea.X + x * _zoom + _pan.X, _mapArea.Y + y * _zoom + _pan.Y);
+
+        private RectangleF ViewRect(RectangleF content)
+        {
+            PointF origin = ViewPoint(content.X, content.Y);
+            return new RectangleF(origin.X, origin.Y, content.Width * _zoom, content.Height * _zoom);
+        }
+
+        private void SetZoom(float zoom, Point anchor)
+        {
+            zoom = Math.Clamp(zoom, MinZoom, MaxZoom);
+            if (Math.Abs(zoom - _zoom) < 0.0001f)
+                return;
+            // Keep the content point under the anchor (the cursor) exactly where it is while the scale changes.
+            float anchorX = (anchor.X - _mapArea.X - _pan.X) / _zoom;
+            float anchorY = (anchor.Y - _mapArea.Y - _pan.Y) / _zoom;
+            _zoom = zoom;
+            _pan = new PointF(anchor.X - _mapArea.X - anchorX * _zoom,
+                anchor.Y - _mapArea.Y - anchorY * _zoom);
+            ClampPan();
+            ZoomChanged?.Invoke();
+            Invalidate();
+        }
+
+        /// <summary>Keeps the content covering the map area: no gap beyond an edge, and centred when it is smaller.</summary>
+        private void ClampPan()
+        {
+            if (_mapArea.Width <= 0 || _mapArea.Height <= 0)
+                return;
+            float scaledWidth = _mapArea.Width * _zoom;
+            float scaledHeight = _mapArea.Height * _zoom;
+            _pan.X = scaledWidth <= _mapArea.Width
+                ? (_mapArea.Width - scaledWidth) / 2f
+                : Math.Min(0f, Math.Max(_mapArea.Width - scaledWidth, _pan.X));
+            _pan.Y = scaledHeight <= _mapArea.Height
+                ? (_mapArea.Height - scaledHeight) / 2f
+                : Math.Min(0f, Math.Max(_mapArea.Height - scaledHeight, _pan.Y));
         }
 
         // ------------------------------------------------------------------ paint
@@ -338,20 +607,45 @@ internal sealed partial class MainForm
             if (mapArea.Width < 80 || mapArea.Height < 80)
                 return;
 
+            _mapArea = mapArea;
+            ClampPan();
+
             _dots.Clear();
+            var contentArea = new RectangleF(0, 0, mapArea.Width, mapArea.Height);
+            GraphicsState view = graphics.Save();
+            graphics.SetClip(mapArea, CombineMode.Intersect);
             if (_selectedRegionId != 0 && _regions.TryGetValue(_selectedRegionId, out MapRegion? single))
-                DrawRegion(graphics, single, mapArea, alpha, detailed: true, now);
+                DrawRegion(graphics, single, contentArea, alpha, detailed: true, now);
             else
-                DrawOverview(graphics, mapArea, alpha, now);
+                DrawOverview(graphics, contentArea, alpha, now);
+            graphics.Restore(view);
 
             DrawHeader(graphics, header, ageSeconds);
+            if (_selectedRegionId != 0 && _regions.TryGetValue(_selectedRegionId, out MapRegion? selectedRegion))
+                DrawRegionTitle(graphics, selectedRegion, mapArea);
             if (_dots.Count == 0)
             {
                 using var empty = new SolidBrush(DaocTheme.Muted);
                 graphics.DrawString(_serverRunning ? "No bots have a live position yet." : "Server is not running.",
-                    _statusFont, empty, mapArea.X + 8, mapArea.Y + 8);
+                    _statusFont, empty, mapArea.X + 8, mapArea.Y + (_selectedRegionId != 0 ? 34 : 8));
             }
+            if (_zoom > MinZoom)
+                DrawZoomBadge(graphics, mapArea);
             DrawTooltip(graphics);
+        }
+
+        private void DrawZoomBadge(Graphics graphics, Rectangle mapArea)
+        {
+            string text = $"ZOOM {ZoomPercent}%   •   drag to pan   •   RESET to fit";
+            SizeF size = graphics.MeasureString(text, _zoneFont);
+            var box = new RectangleF(mapArea.Right - size.Width - 20, mapArea.Bottom - size.Height - 12,
+                size.Width + 12, size.Height + 4);
+            using (var fill = new SolidBrush(Color.FromArgb(190, DaocTheme.StoneDark)))
+                graphics.FillRectangle(fill, box);
+            using (var border = new Pen(Color.FromArgb(150, DaocTheme.StoneLight)))
+                graphics.DrawRectangle(border, box.X, box.Y, box.Width, box.Height);
+            using var brush = new SolidBrush(DaocTheme.Muted);
+            graphics.DrawString(text, _zoneFont, brush, box.X + 6, box.Y + 2);
         }
 
         private double SnapshotAgeSeconds()
@@ -396,7 +690,7 @@ internal sealed partial class MainForm
 
         // ---------------------------------------------------------------- overview
 
-        private void DrawOverview(Graphics graphics, Rectangle area, float alpha, DateTime now)
+        private void DrawOverview(Graphics graphics, RectangleF area, float alpha, DateTime now)
         {
             List<MapRegion> shown = [];
             HashSet<int> withBots = _snapshot?.Bots
@@ -428,77 +722,83 @@ internal sealed partial class MainForm
             {
                 int column = i % columns;
                 int row = i / columns;
-                var cell = new Rectangle(
-                    (int)Math.Round(area.X + column * (cellWidth + gap)),
-                    (int)Math.Round(area.Y + row * (cellHeight + gap)),
-                    (int)Math.Round(cellWidth),
-                    (int)Math.Round(cellHeight));
+                var cell = new RectangleF(
+                    area.X + column * (cellWidth + gap),
+                    area.Y + row * (cellHeight + gap),
+                    cellWidth,
+                    cellHeight);
                 DrawRegionPanel(graphics, shown[i], cell, alpha, detailed: false, now);
             }
         }
 
-        private void DrawRegionPanel(Graphics graphics, MapRegion region, Rectangle cell, float alpha, bool detailed,
+        private void DrawRegionPanel(Graphics graphics, MapRegion region, RectangleF cell, float alpha, bool detailed,
             DateTime now)
         {
+            Rectangle screenCell = Rectangle.Round(ViewRect(cell));
             using (var panel = new SolidBrush(Color.FromArgb(150, DaocTheme.StoneDark)))
-                graphics.FillRectangle(panel, cell);
+                graphics.FillRectangle(panel, screenCell);
             using (var border = new Pen(Color.FromArgb(180, DaocTheme.StoneLight)))
-                graphics.DrawRectangle(border, cell.X, cell.Y, cell.Width - 1, cell.Height - 1);
+                graphics.DrawRectangle(border, screenCell.X, screenCell.Y, screenCell.Width - 1, screenCell.Height - 1);
 
             const int labelHeight = 20;
-            var titleRect = new Rectangle(cell.X + 6, cell.Y + 4, cell.Width - 12, labelHeight);
+            var titleRect = ViewRect(new RectangleF(cell.X + 6, cell.Y + 4, cell.Width - 12, labelHeight));
             using (var titleBrush = new SolidBrush(RealmColor(region.Realm)))
-                graphics.DrawString(region.Name.ToUpperInvariant(), _regionFont, titleBrush, titleRect);
+                graphics.DrawString(region.Name.ToUpperInvariant(), _regionFont, titleBrush, titleRect.X, titleRect.Y);
             using (var countBrush = new SolidBrush(DaocTheme.Muted))
             {
                 int count = CountBotsInRegion(region.Id);
                 string countText = count == 1 ? "1 bot" : $"{count} bots";
                 SizeF size = graphics.MeasureString(countText, _zoneFont);
-                graphics.DrawString(countText, _zoneFont, countBrush, cell.Right - 8 - size.Width, cell.Y + 7);
+                graphics.DrawString(countText, _zoneFont, countBrush,
+                    screenCell.Right - 8 - size.Width, screenCell.Y + 7);
             }
 
-            var mapRect = new Rectangle(cell.X + 6, cell.Y + labelHeight + 2, cell.Width - 12, cell.Height - labelHeight - 10);
+            var mapRect = new RectangleF(cell.X + 6, cell.Y + labelHeight + 2, cell.Width - 12, cell.Height - labelHeight - 10);
             DrawRegionMap(graphics, region, mapRect, alpha, detailed);
 
             // Frame the region's zone area with the realm colour so the panels read apart.
-            RectangleF bounds = RegionScreenBounds(region, mapRect);
+            RectangleF bounds = ViewRect(RegionFitBounds(region, mapRect));
             using (var frame = new Pen(Color.FromArgb(150, RealmColor(region.Realm)), detailed ? 2f : 1f))
                 graphics.DrawRectangle(frame, bounds.X, bounds.Y, bounds.Width, bounds.Height);
         }
 
-        private void DrawRegion(Graphics graphics, MapRegion region, Rectangle area, float alpha, bool detailed,
+        private void DrawRegion(Graphics graphics, MapRegion region, RectangleF area, float alpha, bool detailed,
             DateTime now)
         {
-            var mapRect = new Rectangle(area.X, area.Y + 6, area.Width, area.Height - 6);
+            var mapRect = new RectangleF(area.X, area.Y + 6, area.Width, area.Height - 6);
             DrawRegionMap(graphics, region, mapRect, alpha, detailed);
-            using (var title = new SolidBrush(DaocTheme.GoldLight))
-            {
-                int count = CountBotsInRegion(region.Id);
-                string text = $"{region.Name.ToUpperInvariant()} — {(count == 1 ? "1 bot" : count + " bots")}";
-                SizeF size = graphics.MeasureString(text, _regionFont);
-                using var background = new SolidBrush(Color.FromArgb(210, DaocTheme.StoneDark));
-                graphics.FillRectangle(background, area.X + 4, area.Y + 2, size.Width + 12, size.Height + 6);
-                graphics.DrawString(text, _regionFont, title, area.X + 10, area.Y + 5);
-            }
         }
 
-        private void DrawRegionMap(Graphics graphics, MapRegion region, Rectangle mapRect, float alpha, bool detailed)
+        /// <summary>The selected region's caption, drawn as a screen overlay so it stays readable while the map is zoomed.</summary>
+        private void DrawRegionTitle(Graphics graphics, MapRegion region, Rectangle area)
         {
-            RectangleF bounds = RegionScreenBounds(region, mapRect);
+            using var title = new SolidBrush(DaocTheme.GoldLight);
+            int count = CountBotsInRegion(region.Id);
+            string text = $"{region.Name.ToUpperInvariant()} — {(count == 1 ? "1 bot" : count + " bots")}";
+            SizeF size = graphics.MeasureString(text, _regionFont);
+            using var background = new SolidBrush(Color.FromArgb(210, DaocTheme.StoneDark));
+            graphics.FillRectangle(background, area.X + 4, area.Y + 2, size.Width + 12, size.Height + 6);
+            graphics.DrawString(text, _regionFont, title, area.X + 10, area.Y + 5);
+        }
+
+        private void DrawRegionMap(Graphics graphics, MapRegion region, RectangleF mapRect, float alpha, bool detailed)
+        {
+            RectangleF bounds = RegionFitBounds(region, mapRect);
             if (bounds.Width <= 0 || bounds.Height <= 0)
                 return;
             float scale = bounds.Width / Math.Max(1, region.WorldWidth);
+            RectangleF screenBounds = ViewRect(bounds);
 
             using (var water = new SolidBrush(Color.FromArgb(120, DaocTheme.Void)))
-                graphics.FillRectangle(water, bounds);
+                graphics.FillRectangle(water, screenBounds);
 
             foreach (MapZone zone in region.Zones)
             {
-                var zoneRect = new RectangleF(
+                var zoneRect = ViewRect(new RectangleF(
                     bounds.X + (zone.OffsetX - region.MinX) * scale,
                     bounds.Y + (zone.OffsetY - region.MinY) * scale,
                     Math.Max(1f, zone.Width * scale),
-                    Math.Max(1f, zone.Height * scale));
+                    Math.Max(1f, zone.Height * scale)));
                 Bitmap? image = ZoneImage(zone.Id);
                 if (image != null)
                 {
@@ -524,21 +824,26 @@ internal sealed partial class MainForm
             {
                 if (bot.RegionId != region.Id || !_regions.ContainsKey(bot.RegionId))
                     continue;
-                float x = bounds.X + (bot.X - region.MinX) * scale;
-                float y = bounds.Y + (bot.Y - region.MinY) * scale;
-                if (!bounds.Contains(x, y))
+                float contentX = bounds.X + (bot.X - region.MinX) * scale;
+                float contentY = bounds.Y + (bot.Y - region.MinY) * scale;
+                if (!bounds.Contains(contentX, contentY))
+                    continue;
+                PointF at = ViewPoint(contentX, contentY);
+                if (!screenBounds.Contains(at))
                     continue;
                 Color color = RealmColor(bot.Realm);
                 color = Color.FromArgb((int)Math.Round(255 * alpha), color.R, color.G, color.B);
-                DrawDot(graphics, bot, x, y, color);
-                _dots.Add((bot, bounds, new PointF(x, y), color));
+                DrawDot(graphics, bot, at.X, at.Y, color);
+                _dots.Add((bot, screenBounds, at, color));
             }
         }
 
         private void DrawDot(Graphics graphics, LiveBotStatus bot, float x, float y, Color color)
         {
             bool hovered = ReferenceEquals(bot, _hoverBot);
-            float radius = hovered ? 6f : 4.2f;
+            // Dots grow a little with the zoom so they stay findable on a large map, but only up to a point.
+            float zoomScale = Math.Min(1.9f, Math.Max(1f, (float)Math.Sqrt(_zoom)));
+            float radius = (hovered ? 6f : 4.2f) * zoomScale;
             using (var outline = new SolidBrush(Color.FromArgb(Math.Max(60, (int)color.A), 8, 8, 10)))
                 graphics.FillEllipse(outline, x - radius - 1.6f, y - radius - 1.6f, 2 * radius + 3.2f, 2 * radius + 3.2f);
             if (!bot.IsAlive)
@@ -703,15 +1008,16 @@ internal sealed partial class MainForm
             return count;
         }
 
-        private RectangleF RegionScreenBounds(MapRegion region, Rectangle mapRect)
+        /// <summary>Fits a region's zone rectangle inside an area, in content (100%) coordinates.</summary>
+        private static RectangleF RegionFitBounds(MapRegion region, RectangleF area)
         {
             if (region.WorldWidth <= 0 || region.WorldHeight <= 0)
                 return RectangleF.Empty;
-            float scale = Math.Min(mapRect.Width / (float)region.WorldWidth, mapRect.Height / (float)region.WorldHeight);
+            float scale = Math.Min(area.Width / (float)region.WorldWidth, area.Height / (float)region.WorldHeight);
             float width = region.WorldWidth * scale;
             float height = region.WorldHeight * scale;
-            return new RectangleF(mapRect.X + (mapRect.Width - width) / 2f,
-                mapRect.Y + (mapRect.Height - height) / 2f, width, height);
+            return new RectangleF(area.X + (area.Width - width) / 2f,
+                area.Y + (area.Height - height) / 2f, width, height);
         }
 
         private static int RealmOfRegion(int regionId) => regionId switch

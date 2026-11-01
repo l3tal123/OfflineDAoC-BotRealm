@@ -107,6 +107,8 @@ internal sealed partial class MainForm : Form
         ShowAlways = true,
     };
     private readonly DataGridView _grid = new();
+    private DaocTabControl? _tabs;
+    private TabPage? _populationTab;
     private readonly DataGridView _auctionGrid = new();
     private readonly BindingSource _rvrSource = new();
     private readonly DataGridView _rvrGrid = new();
@@ -487,7 +489,9 @@ internal sealed partial class MainForm : Form
     private Control BuildTabs()
     {
         var tabs = new DaocTabControl { Dock = DockStyle.Fill };
+        _tabs = tabs;
         var population = new TabPage("Active Population") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
+        _populationTab = population;
         var populationLayout = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
         populationLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 43));
         populationLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
