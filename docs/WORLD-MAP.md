@@ -89,12 +89,10 @@ uses the painted maps. The client does not need to be running; only the server m
   (the offscreen probes cannot move a real mouse or click a real window). Test those when the playable install is
   ready.
 
-## Known limits / next steps
+## Known limits
 
 - Autonomous world bots only (what the Active Population tab lists); hired companions and the player's own character
   are not on the map yet.
 - The `VIEW` dropdown switches region; zoom and pan are remembered only until the region changes (by design).
 - Bots without a reported region (an older server build) are counted in the header but not drawn — deploying the new
   server build fixes that.
-- Possible follow-ups: companions/player dots, group markers, RvR objective markers, a minimap-style position for the
-  player's own character, and keyboard shortcuts for zoom/pan.

@@ -1,7 +1,7 @@
-# Bot subsystem: map, capabilities, gaps and development backlog
+# Bot subsystem: architecture map, capabilities and gaps
 
-This is the fork's working document for bot work. It describes how a bot thinks and acts today, what the
-system can already do, where the real weak points are, and a prioritised backlog. Read
+This is the fork's working document for the bot system. It describes how a bot thinks and acts today, what the
+system can already do, and where the real weak points are. Read
 [AGENTS.md](../AGENTS.md) and [DEVELOPMENT.md](DEVELOPMENT.md) first; the rules there are binding.
 
 **How this was produced.** A read-only audit of the source tree at commit `d9c235c` (2026-11-01): files were
@@ -222,131 +222,7 @@ requests beyond chat; item drops on ~2,100 coin-only monsters (content gap, not 
 Known issues already documented by upstream (not re-derived here): low-level deaths, gear wear pace, 2,100
 coin-only monsters, DF seal stock, support-pet combat, login panel. See `README.md` "Known issues in v0.1".
 
-## 4. Prioritised development backlog
-
-Difficulty: S = days, M = a week or two, L = multi-week. Every package must keep AGENTS.md rules 2-5 (no ToA+,
-no difficulty changes, bots on player rules, quest QoL never gated) and must not touch world numbers. Unit
-tests: `dotnet test Tests/Tests.csproj --filter "FullyQualifiedName~UT_<Name>"`; in-game checks are reported
-separately (rule 13).
-
-### (a) Player quality of life for managing bots
-
-**Q1. In-game control channel for world bots.** Why (QoL): the player can only watch bots on the launcher;
-there is no way to steer one. Files: new `commands/playercommands/BotControlCommand.cs` (`/bot list`, `/bot task
-<name> <kind>`, `/bot hold|come|rest <name>`), `AutonomousPopulationController` (it already polls
-`offline_bot_commands`), `AutonomousObjectiveAssignments` (reassign/hold), `AutonomousWorldBotController`.
-Difficulty M. Risks: keep assignment durability (`Assign`/`AssignForcedRaid`), never bypass camp/travel
-authority, never apply to companions (rule 9). Verify: unit tests for parsing + transitions; in game watch
-`AUTONOMOUS_GOAL_*` and the dashboard.
-
-**Q2. Live goal reconfiguration (no restart).** Why (QoL): the "Bot Goals Setting" tab only takes effect at the
-next server start. Files: `BotGoalSettings.cs`, `AutonomousBotGoalPolicy.cs` (`Initialize` currently called once
-from `Classic165Mode.OnPropertiesLoaded`), `AutonomousObjectiveAssignments.ReconcileIfDue` (apply between
-passes), a `RealmEventControls`-style mailbox, launcher `BotGoalsSettingsControl`/`TrueMode`/`MainForm`.
-Difficulty M. Risks: allocation thrash mid-task; saved task clocks must survive; invalid file must keep the old
-policy. Verify: `UT_BotGoalSettings` + a test that a swap only affects later assignments.
-
-**Q3. Dashboard "why" and per-bot detail.** Why (QoL): `offline_world_bots` already stores
-`ObjectivePhase`/`ObjectiveProgress`/`CurrentCampId` and `AutonomousGoalDiagnostics` knows why an attempt ended,
-but the launcher grid shows activity only, so failures are invisible outside the log. Files:
-`AutonomousBotDashboard.cs` (extend `BotStatus`), launcher `MainForm` (`BotRow`, `ReadSnapshot`, grid), optional
-CSV export. Difficulty S/M. Verify: `UT_AutonomousBotDashboard` + a live `bot-world.request` snapshot.
-
-**Q4. Companion management panel.** Why (QoL): companions are the player's real group and the launcher ignores
-them entirely (`MainForm.cs:2845`). Files: new launcher panel over `offline_hired_companions` +
-`CompanionWindows165`/`HiredCompanions165` row builders (name, class, level, spec points, gear condition, ammo,
-sickness; summon/dismiss/repair). Difficulty M. Risks: keep the world-bot roster query excluding companions; no
-protocol change if an existing window op is reused. Verify: panel matches the in-game companion window; unit
-tests for the row builder.
-
-**Q5. Let the player recruit a world bot into their group (opt-in).** Why (QoL + autonomy): the biggest
-disconnect is that world bots are "other players" who never group with you, while their chat already says "I
-could group". Files: `BotGroupInvite`, `GameBot.EnterPlayerLedGroup`, `AutonomousBotGroupCoordinator` (exclude
-player-led bots), assignment suspension (`AutonomousStuckWatchdog`, `AutonomousObjectiveAssignments`), optional
-launcher toggle. Difficulty L. Risks: XP/loot ownership, leash/regroup, population controller must not recycle
-the bot, rules 3/9. Verify: unit tests for assignment suspend/resume; in-game group with one bot through a camp
-and a death.
-
-### (b) Bot autonomy / game completion
-
-**A1. Quest support for bots (classic quests first).** Why (autonomy): it is the largest missing path to
-"finish the game"; bots actively avoid quest monsters today. Files: new `bots/autonomous/AutonomousQuest*`
-(planner/executor) over `classic-quests.json`/`Quests.ClassicQuests`, `AutonomousObjectiveAssignments` (new kind
-or between-task flag), `AutonomousWorldBotController.Tick` dispatch, `AutonomousAuditedCampPolicy` (allow the
-quest's monsters). Difficulty L. Risks: quest data coverage and period accuracy; no simulated turn-ins; rule 5.
-Verify: one quest per realm end-to-end in game with logs; planner unit tests.
-
-**A2. Epic quest automation.** Why (autonomy): `Epics165` builds the three level-50 finales for players only, so
-bots can kill the bosses but never run the chain. Files: `mode165/Epics165.cs`, an epic planner alongside A1,
-`AutonomousRealmRaid` (finale encounters), level-50 goal weights. Difficulty L (depends on A1). Risks: period
-accuracy of steps; do not duplicate raid events. Verify: `UT_*` for the planner; in-game run of one finale as a
-group task.
-
-**A3. Low-level survivability pass.** Why (autonomy): README's top known issue, and code comments record level-1
-bots walking tens of thousands of units and dying on the road (518 of 609 deaths in one run). Files:
-`AutonomousWorldBotController.SelectCamp`/`PreferNearbyQuiet`, `AutonomousBotEconomy` (armour purchase before
-the first camp), `AutonomousDeathRecoveryPolicy`, `BotAttributeProgression`. Difficulty M. Risks: rule 3 - only
-bot choices change, no monster/XP numbers. Verify: headless 50-bot level-1 cohort for an hour; compare death,
-`AUTONOMOUS_FIRST_LOOT` and `AUTONOMOUS_XP_PROGRESS` logs.
-
-**A4. Adaptive warband sizing for keeps and relics.** Why (autonomy): `AutonomousRvrDirector.CanAttemptKeep`
-requires 5+ bots, average level 40 and a healer, so small realms never siege. Files: `AutonomousRvrDirector`
-(use the guards/doors already in `Objective`), `AutonomousBotGroupCoordinator.MaximumGroupedForObjective`,
-`AutonomousRvrEventLayer`, `AutonomousSiegePolicy`. Difficulty M. Risks: rule 3 (keep stats are fixed); wipes
-cost bot hours. Verify: `UT_AutonomousRvrDirector`, `UT_AutonomousSiegePolicy`; 20-bot-realm headless run,
-grep `RVR_SIEGE_STARTED`/`RVR_KEEP_TAKEN`.
-
-**A5. Crafting and exchange depth.** Why (autonomy): `CrafterBots165` works one town errand at a time (up to 10
-combines, no more than every 10 min, errand at most every 30 min via `TownErrands165`), so high-skill products
-(siege kits beyond rams, real crafted gear) stay rare; its own history comment records the earlier version
-stalling at skill 5 after five hours. Files: `CrafterBots165.cs`, `AutonomousBotEconomy` (listing/relist),
-`Exchange165`, `BotSiegeRuntime`. Difficulty M. Risks: economy inflation; every coin/recipe must stay real.
-Verify: recipe/material selection unit tests; headless economy run with `BOT_CRAFTED_165` and
-`AUTONOMOUS_SEAL_PURCHASE` counts.
-
-**A6. Endgame loop completeness at level 50.** Why (autonomy): level 50 weights are 20/40/40 with no
-battlegrounds and no quests, so the loop is camps + RvR + raids, and DF solo is gated at 25+. Files:
-`AutonomousObjectiveAssignments` (tenure kinds/cooldowns), `AutonomousRealmRaid`, `AutonomousDarknessFalls*`,
-`AutonomousBotGoalPolicy` (optional extra weight). Difficulty M. Risks: starving PvE camps; never invent raid
-events. Verify: `UT_AutonomousRvrDirector`/raid tests; 6-hour headless level-50 run.
-
-### (c) Correctness under True 1.65 player rules
-
-**C1. Rules-parity audit and guard.** Why (correctness): `PlayerRules165` is the fork's central promise but has
-32 call sites while ~750 `is GamePlayer` checks remain in `GameServer`. Files: audit `ResistCalculator`,
-`StatCalculator`, `SkillLevelCalculator`, `SpellHandler`, `CCSpellHandler`, `HealSpellHandler`, ECS effects,
-`AttackComponent`, `WeaponAction`, movement/buff calculators; convert to `PlayerRules165.IsPlayerLike` or
-document why the check is about a real client; add a review checklist so new ones are noticed. Difficulty M.
-Risks: each conversion changes bot combat - verify against period behaviour, never touch formulas (rule 3).
-Verify: new `UT_PlayerRulesParity` tests per converted calculator; in-game A/B only if the owner agrees.
-
-**C2. Rest, wear, ammo and death-penalty conformance tests.** Why (correctness): the four rule subsystems
-(`Supplies165`, `ItemWear165`, `TownErrands165`, `DeathPenalty165`) are asserted in comments more than in tests.
-Files: new `UT_Supplies165`, `UT_ItemWear165`, `UT_DeathPenalty165`, `UT_TownErrands165`; production code only
-where a test exposes a bug. Difficulty M. Risks: tests must not require a database. Verify: `dotnet test` green,
-plus `BOT_RESTOCKED_165`/`BOT_REPAIRED_165`/`BOT_HEALER_165` in game.
-
-**C3. Loot-ownership and no-autoloot hardening.** Why (correctness): the rule spans `BotLootWalk165`, owner
-rules, group/raid loot and the exchange; `UT_AutonomousLootFlow` exists but raid (`RealmRaidLootOwner`), DF and
-companion paths are newer. Add tests: player kills a bot's target, group kill split, raid ledger, companion never
-loots, blocked/created bags. Files: `mode165/BotLootWalk165.cs`, `AutonomousRealmRaid` loot path,
-`Tests/UnitTests/UT_AutonomousLootFlow.cs`. Difficulty S/M. Verify: unit tests + in-game kill with
-`AUTONOMOUS_LOOT_REJECTED`/`AUTONOMOUS_FIRST_LOOT`.
-
-**C4. Death recovery in groups and raids.** Why (correctness): release/return code is large and heavily patched
-(`GameBot.HandOverReleaseReturnToGroup`, `AutonomousSiegeResurrection`,
-`CompanionRaidResurrectionReservations`), and watchdog recoveries suggest holes. Files:
-`mode165/DeathPenalty165.cs`, `AutonomousGroupRecoveryState`, `AutonomousSiegeResurrection`; add a matrix (siege,
-DF, dungeon, group leader, relic carrier). Difficulty M. Verify: `UT_AutonomousGroupRecoveryState`,
-`UT_AutonomousSiegeResurrection` + in-game.
-
-**C5. Separate or remove dead legacy bot code.** Why (maintainability): `BotCommand` is unregistered,
-`BotManager` is unused by world bots, and `BotsUML.md` describes the pre-autonomous design, so contributors can
-"fix" the wrong system. Files: `bots/BotManager.cs`, `bots/BotCommand.cs`, `bots/database/*`, `BotsUML.md`. Mark
-as legacy (or delete with owner approval) and document the autonomous layer in `BotsUML.md`. Difficulty S.
-Verify: build + tests; confirm `/bot` is really unregistered before deleting.
-
-## 5. Developer entry points
+## 4. Developer entry points
 
 **Build / test (from `development-source/server`)**
 - `dotnet build "Dawn of Light.sln" -c Release`
