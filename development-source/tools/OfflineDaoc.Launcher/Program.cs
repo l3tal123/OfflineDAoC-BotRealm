@@ -59,6 +59,32 @@ internal static class Program
                 Environment.Exit(1);
             }
         }
+        // --set-xp-rate <1..5000>: the Options tab's XP rate headless, for scripts and test runs (the same
+        // ServerProperty row the Options tab writes). Writes data\set-xp-rate.log. Never with the server running.
+        int rateAt = Array.FindIndex(args, a => a.Equals("--set-xp-rate", StringComparison.OrdinalIgnoreCase));
+        if (rateAt >= 0)
+        {
+            string root = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+            string log = Path.Combine(root, "data", "set-xp-rate.log");
+            try
+            {
+                if (System.Diagnostics.Process.GetProcessesByName("CoreServer").Length > 0)
+                    throw new InvalidOperationException("the server is running");
+                if (args.Length < rateAt + 2)
+                    throw new ArgumentException("usage: --set-xp-rate <1..5000>");
+                if (!XpRateSetting.TryParse(args[rateAt + 1], out double rate))
+                    throw new ArgumentException("the rate must be a number between 1 and 5000");
+                TrueMode.Mode mode = TrueMode.Describe(root, true);
+                XpRateSetting.Persist(mode.DatabasePath, rate);
+                File.AppendAllText(log, $"{DateTime.Now:s} XP rate set to x{XpRateSetting.Format(rate)}\r\n");
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText(log, $"{DateTime.Now:s} FAILED: {ex.Message}\r\n");
+                Environment.Exit(1);
+            }
+        }
         ApplicationConfiguration.Initialize();
         // OfflineDAoC True 1.65 has no normal mode (owner 2026-10-31): no --mode= switch any more.
         Application.Run(new MainForm());

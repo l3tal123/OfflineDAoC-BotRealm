@@ -123,12 +123,15 @@ CoreServer.exe --start -config=./config/serverconfig-165.xml
 
 Type `exit` to stop it. Run `OfflineDAoC.exe --refresh-165` first if the content files changed.
 
-Other headless launcher options (both refuse while `CoreServer` runs):
+Other headless launcher options (all refuse while `CoreServer` runs):
 
 - `OfflineDAoC.exe --refresh-165`: the content refresh only, then exit (code 0 = ok, 1 = failed). It writes
   `runtime/data/true165-refresh.log`.
 - `OfflineDAoC.exe --add-bots 1.65 <realm 1-3> <count> <level>`: adds gamebot rows, the same rows the launcher's ADD
   BOTS buttons write. It writes `runtime/data/add-bots.log`. `normal` is refused.
+- `OfflineDAoC.exe --set-xp-rate <1..5000>`: the Options tab's XP rate (`ServerProperty` `xp_rate_multiplier`, the
+  `XpRateSetting`/`XpRateMultiplier165` pair, 1 to 5000, clamped), then exit. It writes
+  `runtime/data/set-xp-rate.log`.
 
 ---
 
