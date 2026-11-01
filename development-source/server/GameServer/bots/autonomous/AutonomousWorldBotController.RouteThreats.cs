@@ -71,6 +71,13 @@ namespace DOL.GS
             }
             ReadOnlySpan<Vector3> corridor = route[..count];
 
+            // A solo bot bends around monsters far above it and remembered death spots before the one-monster rules
+            // below (reference Living Server, AutonomousPveDangerBypass). Level 50s too: no level-50 bot ever bent a
+            // route, and two died 72 and 61 times to one glimmer pack.
+            if (!grouped && !detouring && AutonomousBehaviourRecoveryProperties.PVE_DANGER_BYPASS &&
+                TryDangerBypass(bot, nav, zone, corridor))
+                return false;
+
             eCharacterClass characterClass = (eCharacterClass)(bot.CharacterClass?.ID ?? 0);
             bool ranged = BotSpellPower.IsOffensiveCaster(bot) ||
                           characterClass is eCharacterClass.Scout or eCharacterClass.Hunter or eCharacterClass.Ranger;
@@ -244,6 +251,62 @@ namespace DOL.GS
                         blocker.Name, _camp?.ZoneName ?? string.Empty);
                     return true;
             }
+        }
+
+        /// <summary>
+        /// A solo levelling bot bends the next stretch of its route around red/purple monsters and remembered death
+        /// spots (reference AutonomousPveDangerBypass). Every candidate bend is proven on the navmesh before walking it.
+        /// </summary>
+        private long _nextDangerBypassLogTick;
+
+        private bool TryDangerBypass(GameBot bot, IPathfindingMgr nav, Zone zone, ReadOnlySpan<Vector3> corridor)
+        {
+            var mobs = bot.GetNPCsInRadius((ushort)AutonomousPveDangerBypass.ScanRadius)
+                .Where(npc => IsExperienceMonster(npc) && npc.IsAlive && npc.Brain is StandardMobBrain mob &&
+                              mob.AggroRange > 0 && mob.AggroLevel > 0)
+                .Select(npc => new AutonomousPveDangerBypass.MobView(new(npc.X, npc.Y), npc.Level, npc.Name, true))
+                .ToArray();
+            DateTime utc = DateTime.UtcNow;
+            float spotScan = AutonomousPveDangerBypass.ScanRadius + AutonomousPveDangerBypass.RememberedSpotRadius;
+            var spots = AutonomousBehaviourRecoveryProperties.PVE_BOSS_DANGER
+                ? AutonomousPveBossDanger.SpotsNear(bot.CurrentRegionID, bot.X, bot.Y, bot.Level, utc, spotScan)
+                : new List<(int X, int Y, int KillerLevel)>();
+            if (AutonomousBehaviourRecoveryProperties.REPEAT_DEATH_SPOTS)
+                foreach (var (x, y) in AutonomousRepeatDeathSpots.SpotsNear(bot.DatabaseID, bot.CurrentRegionID, bot.X, bot.Y, utc, spotScan))
+                    spots.Add((x, y, bot.Level));
+            List<AutonomousPveDangerBypass.Danger> dangers = AutonomousPveDangerBypass.BuildDangers(bot.Level, mobs, spots);
+            if (dangers.Count == 0)
+                return false;
+            Vector3 here = corridor[0];
+            Vector3 ahead = AutonomousPveDangerBypass.PointAlong(corridor, AutonomousPveDangerBypass.LookAhead);
+            Zone aheadZone = bot.CurrentRegion.GetZone((int)ahead.X, (int)ahead.Y);
+            foreach (Vector2 candidate in AutonomousPveDangerBypass.BypassCandidates(new(here.X, here.Y), new(ahead.X, ahead.Y), dangers))
+            {
+                if (bot.CurrentRegion.GetZone((int)candidate.X, (int)candidate.Y) != zone)
+                    continue;
+                Vector3? floor = nav.GetClosestPoint(zone, new(candidate.X, candidate.Y, here.Z), 96, 96, 768, nav.DefaultFilters);
+                if (!floor.HasValue || Vector2.DistanceSquared(new(floor.Value.X, floor.Value.Y), candidate) > 150 * 150 ||
+                    !AutonomousZoneItinerary.HasCompleteCorridor(nav, zone, here, floor.Value) ||
+                    aheadZone == zone && !AutonomousZoneItinerary.HasCompleteCorridor(nav, zone, floor.Value, ahead))
+                    continue;
+                _routeRecoveryWaypoint = floor.Value;
+                _routeRecoveryArrivalRadius = 60;
+                _nextMoveOrderTick = 0;
+                bot.ForcePathReplot();
+                long now = GameLoop.GameLoopTime;
+                if (now >= _nextDangerBypassLogTick && Log.IsInfoEnabled)
+                {
+                    _nextDangerBypassLogTick = now + 60_000;
+                    var nearest = dangers.OrderBy(danger => Vector2.DistanceSquared(danger.Center, candidate)).First();
+                    Log.Info($"AUTONOMOUS_DANGER_BYPASS bot={bot.Name} id={bot.DatabaseID} level={bot.Level} danger=\"{nearest.Name}\" " +
+                             $"dangerLevel={nearest.Level} radius={(int)nearest.Radius} dangers={dangers.Count} zone=\"{zone.Description}\" " +
+                             $"at={bot.X},{bot.Y} bend={(int)candidate.X},{(int)candidate.Y}");
+                }
+                SetStatus(bot, "Going around a dangerous area", GoalText(),
+                    "Taking the long way around monsters far above this level", string.Empty, _camp?.ZoneName ?? string.Empty);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

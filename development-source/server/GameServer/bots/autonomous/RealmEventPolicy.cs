@@ -43,11 +43,26 @@ namespace DOL.GS
         public const int RelicAttackers = 240;
 
         [DOL.GS.ServerProperties.ServerProperty("autonomous", "rvr_siege_defense_ratio",
-            "Bot defenders a siege may draw, as a share of its attacker cap (128 keep / 240 relic); walls, doors and keep guards are extra.", 0.5)]
+            "Bot defenders a siege may draw, as a share of its attacker cap (128 keep / 240 relic); walls, doors and keep guards are extra. Recent siege results move the share actually used up or down by up to 0.25 (SiegeDefenseBalance).", 0.5)]
         public static double DefenseRatio = 0.5;
 
+        /// <summary>The share in use: the configured value steered by the last sieges' results (reference SiegeDefenseBalance).</summary>
+        public static double EffectiveDefenseRatio => AutonomousBehaviourRecoveryProperties.SIEGE_DEFENSE_STEERING
+            ? SiegeDefenseBalance.Ratio(DefenseRatio)
+            : DefenseRatio;
+
         public static int AttackerCap(bool relic) => relic ? RelicAttackers : KeepAttackers;
-        public static int DefenderCap(bool relic) => Math.Max(8, (int)Math.Round(AttackerCap(relic) * Math.Clamp(DefenseRatio, 0.25, 2.0)));
+
+        /// <summary>
+        /// Defenders a siege takes: the effective share of the larger of the army that marched and the attackers present now,
+        /// at least 8 and at most the cap. The reference sized it on the marched army alone; later reinforcements outgrew it.
+        /// </summary>
+        public static int DefendersFor(int marchedAttackers, int currentAttackers, double ratio, int cap) =>
+            Math.Clamp((int)Math.Round(Math.Max(marchedAttackers, currentAttackers) * Math.Clamp(ratio, 0.25, 2.0)),
+                8, Math.Max(8, cap));
+
+        public static int DefenderCap(bool relic) =>
+            Math.Max(8, (int)Math.Round(AttackerCap(relic) * Math.Clamp(EffectiveDefenseRatio, 0.25, 2.0)));
         public static int ThirdRealmCap(bool relic) => AttackerCap(relic) / 2;
 
         /// <summary>Attackers needed to start the battle: 85% of the cap at the posts, half of it on a strike or at the deadline.</summary>

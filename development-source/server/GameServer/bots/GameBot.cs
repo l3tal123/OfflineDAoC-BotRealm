@@ -1102,8 +1102,10 @@ namespace DOL.GS
 
         /// <summary>BOT_DEATH_165 (owner 2026-10-31 runs: level 6-9 solo bots died to a single green or blue monster 20-40%
         /// of the time): what killed the bot and what it had - attackers on it, health, Constitution, the sickness penalty,
-        /// worn armor pieces and the weapon's skill. For True 1.65 gamebots only.</summary>
-        private void LogDeath165(GameObject killer)
+        /// worn armor pieces and the weapon's skill. For True 1.65 gamebots only. Appended is the living-world death
+        /// diagnostic (AutonomousDeathDiagnostics): the kind of killer, whether it had reached its camp, what it was doing
+        /// and the danger memory written for the death.</summary>
+        private void LogDeath165(GameObject killer, string diagnostics)
         {
             if (!Classic165Mode.IsOn || !IsAutonomousWorldBot)
                 return;
@@ -1123,7 +1125,8 @@ namespace DOL.GS
                          $"maxhp={MaxHealth} con={GetModified(eProperty.Constitution)} con_lost={TotalConstitutionLostAtDeath} " +
                          $"eff={Effectiveness:0.00} eff_tracked={_effectiveness165:0.00} armor={armorPieces}/6 " +
                          $"weapon=\"{weapon?.Name}\" wskill={(weapon == null ? 0 : GetWeaponSkill(weapon)):0} " +
-                         $"spec={(weapon == null ? 0 : WeaponSpecLevel(weapon))} region={CurrentRegionID} at={X},{Y}");
+                         $"spec={(weapon == null ? 0 : WeaponSpecLevel(weapon))} region={CurrentRegionID} at={X},{Y}" +
+                         (string.IsNullOrEmpty(diagnostics) ? string.Empty : " " + diagnostics));
             }
             catch (Exception e)
             {
@@ -1139,7 +1142,14 @@ namespace DOL.GS
             _deathRegionId = CurrentRegionID;
             _deathLocation = new Point3D(X, Y, Z);
             (_lastDeathRvR165, _pendingConLoss165) = DeathPenalty165.OnDeath(this, killer, ref _deathsLevel165, ref _deathsThisLevel165);
-            LogDeath165(killer);
+            // The reference records the danger memory for an autonomous world bot's death in one place
+            // (AutonomousDeathDiagnostics.Record): a boss far above its level, and a spot where it keeps dying. Caller
+            // guard and order as there (its own IsAutonomousWorldBot check runs first, then Marks, then monster spots).
+            // The returned fragment extends the existing BOT_DEATH_165 line, so the log still has one death line.
+            string deathDiagnostics = IsAutonomousWorldBot && PersistentRecord != null
+                ? AutonomousDeathDiagnostics.Record(this, killer, PersistentRecord.Activity)
+                : null;
+            LogDeath165(killer, deathDiagnostics);
             IsReturningAfterRelease = false;
             _stableReturnPlan = null;
             CompleteStableMasterRoute();

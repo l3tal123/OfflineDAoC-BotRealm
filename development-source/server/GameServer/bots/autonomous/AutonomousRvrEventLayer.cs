@@ -653,8 +653,9 @@ public static partial class AutonomousRvrEventLayer
     /// <summary>
     /// Each realm's share of a bot siege. Run 2026-10-07: battle reinforcements filled defenders and the third realm to
     /// the attacker cap (64 each), so armies that marched with 33-34 met 54-56 defenders plus the keep's guards and every
-    /// siege failed. Defenders answer the army that actually marched (DefenseRatio of it, at least 8); the third realm
-    /// keeps its own cap.
+    /// siege failed. Defenders answer the larger of the army that marched and the attackers present now (the effective
+    /// defense share of it, at least 8); recent results steer that share (SiegeDefenseBalance). The third realm keeps
+    /// its own cap.
     /// </summary>
     private static int SiegeRealmCap(ActiveEvent active, eRealm realm) =>
         realm == active.AttackerRealm ? Capacity(active) : realm == active.DefenderRealm ? DefenderCapFor(active) :
@@ -665,7 +666,8 @@ public static partial class AutonomousRvrEventLayer
         if (!SiegeScheduling) return Capacity(active);
         int cap = RealmEventPolicy.DefenderCap(active.RelicKeep);
         return active.MarchedAttackers <= 0 ? cap
-            : Math.Clamp((int)Math.Round(active.MarchedAttackers * Math.Clamp(RealmEventPolicy.DefenseRatio, 0.25, 2.0)), 8, cap);
+            : RealmEventPolicy.DefendersFor(active.MarchedAttackers, active.Attackers.Values.Sum(),
+                RealmEventPolicy.EffectiveDefenseRatio, cap);
     }
 
     private static int Capacity(ActiveEvent active) => active.DefenseReaction ? 240 : active.Retake ? active.RetakeCap :
@@ -1510,6 +1512,10 @@ public static partial class AutonomousRvrEventLayer
 
     private static void EndEvent(ActiveEvent active, long nowTick, string reason, eRealm winner = eRealm.None)
     {
+        // A finished bot siege nudges the defense share so the next ones stay contested (reference SiegeDefenseBalance).
+        if (!active.DefenseReaction && (reason.StartsWith("Keep captured") || reason.StartsWith("Siege defended")))
+            SiegeDefenseBalance.Record(reason.StartsWith("Keep captured") &&
+                (winner == eRealm.None || winner == active.AttackerRealm));
         foreach (eRealm realm in new[] { active.AttackerRealm, active.DefenderRealm, OtherRealm(active) })
             RealmEventNotices.Queue(active.TargetId, realm, RealmEventBanter.SiegeOutcome(Place(active.Target.Name),
                 realm == active.DefenderRealm, reason.StartsWith("Siege defended"), reason.StartsWith("Rally failed"), winner, realm));

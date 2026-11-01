@@ -63,6 +63,9 @@ namespace DOL.GS
             public readonly HashSet<long> Released = new();
             public long NextRefill;
             public long NextPostWarning;
+            /// <summary>This raid has a hothead (AutonomousRaidHothead): a dragon raid's charge at staging, once.</summary>
+            public bool HotheadRolled, HotheadDone;
+            public string HotheadName;
         }
         private sealed class Party
         {
@@ -240,13 +243,35 @@ namespace DOL.GS
                             raid.StagingBest = present;
                             raid.StagingArrivalTick = now;
                         }
-                        if (RealmRaidRecruitmentPolicy.Ready(raid.Forced, now - raid.Created, present, DragonLanded(raid)))
+                        bool ready = RealmRaidRecruitmentPolicy.Ready(raid.Forced, now - raid.Created, present, DragonLanded(raid));
+                        // A dragon raid's hothead: half the raid is there, not all, and it goes; the raid goes in after
+                        // it. A raid that was ready before that moment still has it: the hothead jumps its pull.
+                        GameBot hothead = null;
+                        GameLiving[] staged = null;
+                        if (raid.HotheadRolled && !raid.HotheadDone && !raid.Definition.IsDungeon && DragonLanded(raid) &&
+                            (ready || AutonomousRaidHothead.GoesNow(
+                                AutonomousRaidHothead.ShouldChargeStaging(present, RealmRaidRecruitmentPolicy.AutonomousMinimumPresent, now - raid.Created),
+                                present)))
+                        {
+                            raid.HotheadDone = true;
+                            staged = StagedBots(raid);
+                            hothead = AutonomousRaidHothead.Pick(staged);
+                            if (hothead != null)
+                            {
+                                ready = true;
+                                Log.Info($"REALM_RAID_HOTHEAD_START event={raid.Definition.Id} bot=\"{hothead.Name}\" present={present} " +
+                                         $"required={RealmRaidRecruitmentPolicy.AutonomousMinimumPresent}");
+                            }
+                        }
+                        if (ready)
                         {
                             raid.Started = true;
                             raid.Deadline = raid.Forced ? long.MaxValue : now + RealmRaidRecruitmentPolicy.BattleMilliseconds;
                             RealmEventRecords.Progress(raid.Definition.Id, "Battle", "Expedition began advancing to the encounter.", raid.Support.Length, present);
                             RealmEventNotices.Queue(raid.Definition.Id, raid.Definition.Realm,
                                 $"The {raid.Definition.Name} expedition is advancing with {present} staged level-50 adventurers.");
+                            if (hothead != null && AutonomousRaidHothead.Charge(hothead, raid.Boss, staged, raid.Definition.Name))
+                                raid.HotheadName = hothead.Name;
                         }
                         else if (RealmRaidRecruitmentPolicy.StagingExpired(raid.Forced, now, raid.Created, raid.HubDepartedTick, present, DragonLanded(raid),
                                      raid.StagingArrivalTick))
@@ -398,6 +423,9 @@ namespace DOL.GS
                 }
                 if (raid == null) return false;
                 Raids[id] = raid;
+                // One raid in twenty has a raider who can't wait for the final encounter (bot_raid_hothead, off by default).
+                raid.HotheadRolled = AutonomousRaidHothead.On && AutonomousRaidHothead.RollForRaid(Random.Shared.NextDouble());
+                if (raid.HotheadRolled) Log.Info($"RAID_HOTHEAD_ROLLED event={id}");
                 RealmEventRecords.Begin(id, definition.Name, definition.IsNeutral ? "Neutral raid" : definition.IsDungeon ? "Epic dungeon" : "Dragon",
                     GlobalConstants.RealmToName(realm), (forced ? "Forced" : "Automatic") + " rally via " + raid.Hub.Name);
                 raid.ForcedParties.AddRange(recruits);
@@ -457,6 +485,14 @@ namespace DOL.GS
             p.Members.Count(b => IsEligible(b) && b.IsAlive && !b.IsOnStableMasterRoute && b.Group != null &&
                 b.CurrentRegionID == (raid.Definition.IsDungeon ? raid.DungeonRoute.Entrance.SourceRegion : raid.Definition.Region) &&
                 AtStaging(raid, b)));
+
+        /// <summary>The raiders actually at the staging posts (the hothead's pool: same test as PresentAtStaging).</summary>
+        private static GameLiving[] StagedBots(Raid raid) => raid.Parties.Values
+            .SelectMany(p => p.Members)
+            .Where(b => IsEligible(b) && b.IsAlive && !b.IsOnStableMasterRoute && b.Group != null &&
+                b.CurrentRegionID == (raid.Definition.IsDungeon ? raid.DungeonRoute.Entrance.SourceRegion : raid.Definition.Region) &&
+                AtStaging(raid, b))
+            .Cast<GameLiving>().ToArray();
 
         private static bool AtStaging(Raid raid, GameBot bot)
         {
@@ -1106,6 +1142,13 @@ namespace DOL.GS
             if (!stoppedByPlayer)
                 Cooldowns[raid.Definition.Id] = now + (30 + Random.Shared.Next(61)) * 60_000L;
             RealmEventNotices.Queue(raid.Definition.Id, raid.Definition.Realm, RealmEventBanter.RaidOutcome(raid.Definition.Name, outcome));
+            // The raiders as they were (raid.Support is emptied above when the parties are released): the hothead's
+            // charge is only worth telling the realm about when the raid actually ended.
+            if (!string.IsNullOrEmpty(raid.HotheadName))
+            {
+                string hotheadBoss = (raid.DungeonRoute?.FinalBosses ?? [raid.Boss]).FirstOrDefault(n => n != null)?.Name ?? raid.Boss?.Name;
+                AutonomousRaidHothead.AfterRaid(raid.Definition.Realm, raid.HotheadName, hotheadBoss, outcome == "Boss defeated", recipients);
+            }
         }
 
         private const string StoppedByPlayer = "Stopped by the player";
