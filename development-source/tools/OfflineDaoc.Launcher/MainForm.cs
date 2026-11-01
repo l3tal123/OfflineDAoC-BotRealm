@@ -513,6 +513,10 @@ internal sealed partial class MainForm : Form
         exchange.Controls.Add(BuildRealmExchangePanel());
         exchange.Enter += async (_, _) => await RefreshRealmExchangeAsync();
 
+        var serverStats = new TabPage("Server Stats") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
+        serverStats.Controls.Add(BuildServerStatsPanel());
+        serverStats.Enter += async (_, _) => await RefreshServerStatsAsync();
+
         var inspector = new TabPage("Bot Inspector") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
         _botInspectorTab = inspector;
         inspector.Controls.Add(BuildBotInspectorPanel());
@@ -535,6 +539,7 @@ internal sealed partial class MainForm : Form
         tabs.TabPages.Add(population);
         tabs.TabPages.Add(worldMap);
         tabs.TabPages.Add(exchange);
+        tabs.TabPages.Add(serverStats);
         tabs.TabPages.Add(inspector);
         tabs.TabPages.Add(groups);
         tabs.TabPages.Add(rvr);

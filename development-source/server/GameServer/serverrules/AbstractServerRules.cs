@@ -2513,6 +2513,7 @@ namespace DOL.GS.ServerRules
         public virtual void ResetKeep(GuardLord lord, GameObject killer)
         {
             PlayerMgr.UpdateStats(lord);
+            ServerStatistics165.ObserveKeepCapture(lord, killer);
         }
 
         /// <summary>

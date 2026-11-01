@@ -70,7 +70,15 @@ The world fills with gamebots that level, group, craft, trade and fight on their
   coin keeps it.
 - **Start small** and add more as your PC allows. Every bot is simulated by the server on your PC.
 - The launcher's tabs show the active population, a live world map, the **Realm Exchange**, the **Bot Inspector**,
-  groups, RvR, battlegrounds, realm events and realm records. **Bot Goals Setting** sets what the bots aim for.
+  **Server Stats**, groups, RvR, battlegrounds, realm events and realm records. **Bot Goals Setting** sets what the
+  bots aim for.
+- **Server Stats** (launcher tab) shows the world's tallies: **mobs killed**, **deaths**, **money looted**,
+  **PvP kills**, **realm points earned** and **keeps captured**, counting you and every gamebot, plus four **Top 10**
+  boards: most mobs killed, most deaths, most PvP kills and most keeps captured, with each character's name, whether
+  it is a player or a bot, its realm and its count. It reads the counters the server keeps from this build on (realm
+  points include all earlier play), asks the server once when you open the tab or press **REFRESH SERVER STATS**, and
+  never polls. Open it while the server is running for fresh numbers; with the server stopped it shows the last
+  numbers it published.
 - **Realm Exchange** (launcher tab) lists every item on the exchange — the item, who listed it and its price — for
   all realms or one, and its **Purchase history** view shows the trades the server has recorded: item, seller,
   buyer, price and time. Open the tab or press **REFRESH REALM EXCHANGE** to read the world database; it never

@@ -70,11 +70,17 @@ namespace DOL.GS
                     return TryPickUpResult.Blocked;
                 if (recipients.Length == 0 && players.Length == 0)
                     return TryPickUpResult.Blocked;
+                long botCopper = money.Value - playerShare;
+                for (int i = 0; i < recipients.Length && botCopper > 0; i++)
+                    ServerStatistics165.RecordMoneyLoot(recipients[i], botCopper / recipients.Length + (i < botCopper % recipients.Length ? 1 : 0));
                 for (int i = 0; i < players.Length && playerShare > 0; i++)
                 {
                     long part = playerShare / players.Length + (i < playerShare % players.Length ? 1 : 0);
                     if (part > 0)
+                    {
                         players[i].AddMoney(part, "You get {0} as your share of the expedition's loot.");
+                        ServerStatistics165.RecordMoneyLoot(players[i], part);
+                    }
                 }
                 money.Value = 0; // Paid bags can never be paid again, including after a save-queue failure.
                 money.RemoveFromWorld();

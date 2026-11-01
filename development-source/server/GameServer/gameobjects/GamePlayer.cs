@@ -3694,6 +3694,7 @@ namespace DOL.GS
                 base.GainRealmPoints(amount);
 
             RealmPoints += amount;
+            ServerStatistics165.RecordRealmPoints(this, amount);
             m_statistics.AddToTotalRealmPointsEarned((uint) amount);
 
             if (m_guild != null && Client.Account.PrivLevel == 1)
@@ -9777,6 +9778,7 @@ namespace DOL.GS
             {
                 AddMoney(moneyToPlayer, LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.PickupObject.YouPickUp", Money.GetString(moneyToPlayer)));
                 InventoryLogging.LogInventoryAction("(ground)", this, eInventoryActionType.Loot, moneyToPlayer);
+                ServerStatistics165.RecordMoneyLoot(this, moneyToPlayer);
             }
 
             money.RemoveFromWorld();

@@ -111,10 +111,10 @@ The launcher only runs True 1.65 Mode. There is no normal-mode switch:
 `runtime/server/config/serverconfig.xml` is a copy of the 1.65 config (it points at the same database).
 
 At start the server logs `WORLD_MODE mode=1.65 state=...`. Per-mode state files live in `runtime/server/state-165/`:
-`bot-goals.json`, `bot-world.json`, `bot-inspect.json`, `rvr-world.json`, `rvr-relic-campaigns.json`,
-`realm-event-records.sqlite3`.
-Short-lived launcher-to-server request files (`bot-world.request`, `bot-inspect.request` and the like) stay in
-`runtime/server/`.
+`bot-goals.json`, `bot-world.json`, `bot-inspect.json`, `server-stats.json`, `server-stats-state.json`, `rvr-world.json`,
+`rvr-relic-campaigns.json`, `realm-event-records.sqlite3`.
+Short-lived launcher-to-server request files (`bot-world.request`, `bot-inspect.request`, `server-stats.request` and the
+like) stay in `runtime/server/`.
 
 The **Bot Inspector** is the one exception to the "one snapshot for all bots" rule: the launcher writes
 `bot-inspect.request` (`<request id>|<bot id>`), the server answers in `state-165/bot-inspect.json` within a quarter
@@ -122,6 +122,15 @@ second, and the launcher keeps only the answer whose request id matches. A spawn
 (stats, effects, in-memory inventory); a bot that is not in the world is described from its last saved
 `offline_world_bots` row and its persisted `Inventory` rows, and the record says so. Read-only: nothing is written to
 the database or to the bot.
+
+The launcher's **Server Stats** tab uses the same broker with one value: the launcher writes `server-stats.request`
+(`<request id>`) and the server answers in `state-165/server-stats.json` with world totals (mobs killed, deaths, money
+looted, PvP kills, realm points earned, keeps captured, counting players and gamebots) and four top-10 boards (mobs
+killed, deaths, PvP kills, keeps captured). `ServerStatistics165` bumps in-memory counters only (a kill or keep is
+credited to the participant that did the most damage, a pet resolving to its owner); the counters are saved to
+`state-165/server-stats-state.json` every 30 seconds and on shutdown, and realm points are re-read from the saved
+characters and bot records at startup. Old play therefore counts fully for realm points, and for PvP kills/keeps the
+character table's all-time numbers seed a player's row.
 
 Running the server by hand (for debugging):
 
@@ -347,6 +356,7 @@ Reference outputs that only the tools copy has (not applied): `drops165-missing.
 | `BotLootWalk165.cs` | The bags autoloot did not take: bots walk to the ones they may take; companions never loot. |
 | `BaseClassBots165.cs` | Gamebots start as a base class and are promoted at level 5 (`PlannedClassId`). |
 | `WelcomePurse165.cs` | New characters start with 1 gold (`ServerProperty` `starting_money` = 10,000 copper, from `runtime/true165/true165-rules.json`); characters that already existed get the same purse added once, recorded by a `OfflineWelcomePurse165` custom parameter per character so a restart never pays twice. World bots get the same 1 gold: the launcher writes it when it adds a bot, and a bot made before the rule is topped up to it once on the first roster read (`WelcomePursePaid` on its `offline_world_bots` record). |
+| `ServerStatistics165.cs` | The launcher's Server Stats tab: in-memory world counters (mobs killed, deaths, money looted, PvP kills, keeps captured) and four top-10 boards, counted for players and gamebots, served on demand through `server-stats.request` -> `state-165/server-stats.json` and saved to `state-165/server-stats-state.json`; realm points are read from the saved world. |
 | `CrafterBots165.cs` | About 1 in 5 gamebots craft real recipes and list the products on the Realm Exchange; siegecrafters build siege kits. |
 | `Charm165.cs` | Bots charm real monsters with learned charm spells only. |
 | `Coin165.cs` | Per-monster coin chance from `runtime/true165/coin165.json`. |

@@ -201,6 +201,7 @@ group instead of following them from outside it.
 | Death: con loss, sickness, healer visit, release/return; rest at player rates | `DeathPenalty165`, `BotRestRecovery` | Implemented |
 | Chat, guilds, map markers, dashboard | `AutonomousBotChat*`, `AutonomousBotGuilds`, `AutonomousBotMapMarkers`, `AutonomousBotDashboard` | Implemented (cosmetic/QoL) |
 | Bot Inspector: one bot's coin, stats, gear, bag, specs, training, abilities, listings, buffs | `AutonomousBotInspector` (server), `MainForm.BotInspector.cs` (launcher) | Implemented (read-only) |
+| Server Stats: world totals (mobs killed, deaths, money looted, PvP kills, RP earned, keeps captured) and top-10 boards, counting players and bots | `ServerStatistics165` (server), `MainForm.ServerStats.cs` (launcher) | Implemented (read-only, on demand) |
 | Hired companions: hire, summon, gear, spec, RA, repairs, revive | `Hire165`, `CompanionWindows165` | Implemented |
 | Quests / tasks (`/task`, classic quests) | - | **Not implemented for bots** |
 | Epic quests (Lord of Deceit, Symbol of the Broken, Last Heir) | `Epics165` (player helpers only) | **Player only** |

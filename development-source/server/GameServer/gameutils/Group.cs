@@ -600,7 +600,10 @@ namespace DOL.GS
             {
                 long share = quotient + (index < remainder ? 1 : 0);
                 if (share > 0)
+                {
                     AutonomousBotEconomy.AddMoney(eligible[index].DatabaseID, share);
+                    ServerStatistics165.RecordMoneyLoot(eligible[index], share);
+                }
             }
             _ = money.RemoveFromWorld();
             return TryPickUpResult.Success;
@@ -667,6 +670,7 @@ namespace DOL.GS
                     {
                         eligibleMember.AddMoney(moneyToPlayer, LanguageMgr.GetTranslation(eligibleMember.Client.Account.Language, eligibleMembers.Count > 1 ? "GamePlayer.PickupObject.YourLootShare" : "GamePlayer.PickupObject.YouPickUp", Money.GetString(splitMoney)));
                         InventoryLogging.LogInventoryAction("(ground)", eligibleMember, eInventoryActionType.Loot, splitMoney);
+                        ServerStatistics165.RecordMoneyLoot(eligibleMember, moneyToPlayer);
                     }
                 }
             }

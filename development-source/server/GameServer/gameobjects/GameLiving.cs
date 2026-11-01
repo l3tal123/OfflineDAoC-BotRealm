@@ -1997,6 +1997,7 @@ namespace DOL.GS
 
 		public virtual void ProcessDeath(GameObject killer)
 		{
+			ServerStatistics165.ObserveDeath(this, killer);
 			attackComponent.StopAttack();
 			List<GamePlayer> playerAttackers = new();
 

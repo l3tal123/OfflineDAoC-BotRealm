@@ -1835,6 +1835,7 @@ namespace DOL.GS
                 return TryPickUpResult.DoesNotWant;
 
             money.RemoveFromWorld();
+            ServerStatistics165.RecordMoneyLoot(this, money.Value);
             AutonomousStuckWatchdog.MarkProgress(this, eAutonomousProgressKind.Loot);
             MarkAutonomousStateDirty();
             return TryPickUpResult.Success;
@@ -1923,6 +1924,7 @@ namespace DOL.GS
             if (!IsAutonomousWorldBot || amount <= 0)
                 return;
             AutonomousRealmPoints += amount;
+            ServerStatistics165.RecordRealmPoints(this, amount);
             RealmLevel = Math.Max(RealmLevel, AutonomousBotRealmPointRewards.RealmLevelFor(AutonomousRealmPoints));
             AutonomousStuckWatchdog.MarkProgress(this, eAutonomousProgressKind.RealmPoints);
             MarkAutonomousStateDirty();
