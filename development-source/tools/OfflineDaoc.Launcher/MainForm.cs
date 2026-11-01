@@ -26,8 +26,6 @@ internal sealed partial class MainForm : Form
     private readonly string _logsDirectory;
     private readonly BindingSource _botSource = new();
     private readonly List<BotRow> _bots = [];
-    private readonly BindingSource _auctionSource = new();
-    private readonly List<AuctionRow> _auctions = [];
     private readonly List<GroupRow> _groups = [];
     private readonly Label _serverState = CardValue();
     private readonly Label _onlineValue = CardValue();
@@ -79,8 +77,6 @@ internal sealed partial class MainForm : Form
         Cursor = Cursors.Hand,
         AccessibleName = "Show online bots only",
     };
-    private readonly TextBox _auctionSearch = new() { PlaceholderText = "Search item, seller or state", Width = 300 };
-    private readonly TabControl _auctionRealmTabs = new() { Width = 280, Height = 29, SizeMode = TabSizeMode.Fixed, ItemSize = new Size(87, 22) };
     private readonly TextBox _groupSearch = new() { PlaceholderText = "Search bot, zone or faction", Width = 340 };
     private readonly CheckBox _makeMeGm = new() { Text = "Make Me a GM", AutoSize = true, ForeColor = DaocTheme.Parchment, Font = new Font("Georgia", 9f, FontStyle.Bold) };
     private readonly CheckBox _rvrAnnouncements = new() { Text = "RvR and battleground announcements", AutoSize = true, Checked = true, ForeColor = DaocTheme.Parchment, Font = new Font("Georgia", 9f, FontStyle.Bold) };
@@ -118,7 +114,6 @@ internal sealed partial class MainForm : Form
     private readonly DataGridView _grid = new();
     private DaocTabControl? _tabs;
     private TabPage? _populationTab;
-    private readonly DataGridView _auctionGrid = new();
     private readonly BindingSource _rvrSource = new();
     private readonly DataGridView _rvrGrid = new();
     private readonly DataGridView _rvrObjectivesGrid = new();
@@ -132,7 +127,6 @@ internal sealed partial class MainForm : Form
     private bool _rvrSortAscending = true;
     private readonly FlowLayoutPanel _groupsPanel = new();
     private Button? _refreshButton;
-    private Button? _refreshExchangeButton;
     private Button? _deleteBotButton;
     private Button? _deleteAllBotsButton;
     private readonly List<Button> _realmGenerateButtons = [];
@@ -144,7 +138,6 @@ internal sealed partial class MainForm : Form
     private RollingServerLog? _serverLog;
     private bool _stoppingServer;
     private bool _refreshing;
-    private bool _refreshingExchange;
     private bool _loadingOptions;
     private bool _savingOptions;
     private double _loadedXpRate = XpRateSetting.Minimum;
@@ -154,9 +147,6 @@ internal sealed partial class MainForm : Form
     private string _dashboardFooterSummary = string.Empty;
     private string _botSortProperty = "Name";
     private bool _botSortAscending = true;
-    private string _auctionSortProperty = "ItemName";
-    private bool _auctionSortAscending = true;
-    private ExchangeSalesForm? _salesLedger;
 
     public MainForm()
     {
@@ -215,8 +205,8 @@ internal sealed partial class MainForm : Form
         _realmFilter.SelectedIndexChanged += (_, _) => ApplyFilter();
         _search.TextChanged += (_, _) => ApplyFilter();
         _onlineOnly.CheckedChanged += (_, _) => ApplyFilter();
-        _auctionSearch.TextChanged += (_, _) => ApplyAuctionFilter();
-        _auctionRealmTabs.SelectedIndexChanged += (_, _) => ApplyAuctionFilter();
+        _exchangeRealm.SelectedIndexChanged += (_, _) => ApplyExchangeFilter();
+        _exchangeSearch.TextChanged += (_, _) => ApplyExchangeFilter();
         _groupSearch.TextChanged += (_, _) => ApplyGroupSearch();
         _groupSearch.KeyDown += (_, e) =>
         {
@@ -517,6 +507,10 @@ internal sealed partial class MainForm : Form
             await RefreshWorldMapAsync();
         };
 
+        var exchange = new TabPage("Realm Exchange") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
+        exchange.Controls.Add(BuildRealmExchangePanel());
+        exchange.Enter += async (_, _) => await RefreshRealmExchangeAsync();
+
         var groups = new TabPage("Active Groups") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
         groups.Controls.Add(BuildActiveGroupsPanel());
         var rvr = new TabPage("Active RvR") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
@@ -525,6 +519,7 @@ internal sealed partial class MainForm : Form
         options.Controls.Add(BuildOptionsPanel());
         tabs.TabPages.Add(population);
         tabs.TabPages.Add(worldMap);
+        tabs.TabPages.Add(exchange);
         tabs.TabPages.Add(groups);
         tabs.TabPages.Add(rvr);
         var battlegrounds = new TabPage("Battlegrounds") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
@@ -1075,110 +1070,6 @@ internal sealed partial class MainForm : Form
         return panel;
     }
 
-    private Control BuildAuctionPanel()
-    {
-        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 3, ColumnCount = 1, Padding = new Padding(7), BackColor = DaocTheme.Tint(48, 38, 26) };
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 39));
-        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        var exchangeHeader = new Panel { Dock = DockStyle.Fill, BackColor = DaocTheme.Tint(69, 51, 31) };
-        exchangeHeader.Controls.Add(new Label
-        {
-            Dock = DockStyle.Fill,
-            Text = "✦  THE REALM EXCHANGE  ✦    Camelot • Jordheim • Tir na Nog",
-            TextAlign = ContentAlignment.MiddleLeft,
-            Font = new Font("Georgia", 10f, FontStyle.Bold),
-            ForeColor = DaocTheme.GoldLight,
-            BackColor = DaocTheme.Tint(69, 51, 31),
-            Padding = new Padding(11, 0, 0, 0),
-            BorderStyle = BorderStyle.Fixed3D,
-        });
-        var salesButton = ActionButton("50 MOST RECENTLY SOLD", DaocTheme.Gold);
-        salesButton.Dock = DockStyle.Right;
-        salesButton.Width = 215;
-        salesButton.Click += (_, _) =>
-        {
-            if (_salesLedger == null || _salesLedger.IsDisposed)
-            {
-                _salesLedger = new ExchangeSalesForm(_database);
-                _salesLedger.Show(this);
-            }
-            else { _salesLedger.WindowState = FormWindowState.Normal; _salesLedger.Activate(); }
-        };
-        exchangeHeader.Controls.Add(salesButton);
-        _refreshExchangeButton = ActionButton("REFRESH REALM EXCHANGE", DaocTheme.Tint(126, 104, 67));
-        _refreshExchangeButton.Dock = DockStyle.Right;
-        _refreshExchangeButton.Width = 215;
-        _refreshExchangeButton.Click += async (_, _) => await RefreshRealmExchangeAsync();
-        exchangeHeader.Controls.Add(_refreshExchangeButton);
-        layout.Controls.Add(exchangeHeader, 0, 0);
-
-        var filters = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(0, 6, 0, 3), BackColor = DaocTheme.Tint(48, 38, 26) };
-        _auctionSearch.BackColor = DaocTheme.Tint(220, 204, 163);
-        _auctionSearch.ForeColor = DaocTheme.Ink;
-        _auctionSearch.BorderStyle = BorderStyle.FixedSingle;
-        filters.Controls.Add(_auctionSearch);
-        foreach (string realm in new[] { "Albion", "Midgard", "Hibernia" })
-            _auctionRealmTabs.TabPages.Add(realm);
-        _auctionRealmTabs.SelectedIndex = 0;
-        filters.Controls.Add(_auctionRealmTabs);
-        filters.Controls.Add(new Label
-        {
-            AutoSize = true,
-            Margin = new Padding(12, 6, 0, 0),
-            Text = "Listings expire after 24h • startup/manual refresh only",
-            ForeColor = DaocTheme.Tint(196, 174, 126),
-            Font = new Font("Georgia", 8f, FontStyle.Italic),
-        });
-        layout.Controls.Add(filters, 0, 1);
-
-        ConfigureAuctionGrid();
-        layout.Controls.Add(_auctionGrid, 0, 2);
-        return layout;
-    }
-
-    private void ConfigureAuctionGrid()
-    {
-        _auctionGrid.Dock = DockStyle.Fill;
-        _auctionGrid.ReadOnly = true;
-        _auctionGrid.AllowUserToAddRows = false;
-        _auctionGrid.AllowUserToDeleteRows = false;
-        _auctionGrid.AllowUserToResizeRows = false;
-        _auctionGrid.AutoGenerateColumns = false;
-        _auctionGrid.RowHeadersVisible = false;
-        _auctionGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        _auctionGrid.BackgroundColor = DaocTheme.Tint(205, 187, 144);
-        _auctionGrid.BorderStyle = BorderStyle.Fixed3D;
-        _auctionGrid.GridColor = DaocTheme.Tint(127, 103, 64);
-        _auctionGrid.EnableHeadersVisualStyles = false;
-        _auctionGrid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-        {
-            BackColor = DaocTheme.Tint(80, 59, 35), ForeColor = DaocTheme.GoldLight,
-            SelectionBackColor = DaocTheme.Tint(80, 59, 35), Font = new Font("Georgia", 8.25f, FontStyle.Bold), Padding = new Padding(2),
-        };
-        _auctionGrid.DefaultCellStyle = new DataGridViewCellStyle
-        {
-            BackColor = DaocTheme.Tint(215, 199, 157), ForeColor = DaocTheme.Ink,
-            SelectionBackColor = DaocTheme.Tint(117, 85, 45), SelectionForeColor = Color.White, Padding = new Padding(2),
-            Font = new Font("Georgia", 8.25f),
-        };
-        _auctionGrid.AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle { BackColor = DaocTheme.Tint(201, 182, 138) };
-        _auctionGrid.ColumnHeadersHeight = 28;
-        _auctionGrid.RowTemplate.Height = 25;
-        _auctionGrid.DataSource = _auctionSource;
-        _auctionGrid.Columns.Add(TextColumn("Item", "ItemName", 230, DataGridViewAutoSizeColumnMode.Fill));
-        _auctionGrid.Columns.Add(TextColumn("Seller", "Seller", 130));
-        _auctionGrid.Columns.Add(TextColumn("Level", "ItemLevel", 60));
-        _auctionGrid.Columns.Add(TextColumn("Qty", "Quantity", 55));
-        _auctionGrid.Columns.Add(TextColumn("Sale type", "CurrentBid", 105));
-        _auctionGrid.Columns.Add(TextColumn("Price", "Buyout", 120));
-        _auctionGrid.Columns.Add(TextColumn("Expires / remaining", "Expires", 210));
-        _auctionGrid.Columns.Add(TextColumn("Realm", "State", 85));
-        foreach (DataGridViewColumn column in _auctionGrid.Columns)
-            column.SortMode = DataGridViewColumnSortMode.Programmatic;
-        _auctionGrid.ColumnHeaderMouseClick += (_, eventArgs) => SortAuctionsByColumn(eventArgs.ColumnIndex);
-    }
-
     private Control BuildGrid()
     {
         _grid.Dock = DockStyle.Fill;
@@ -1364,97 +1255,6 @@ internal sealed partial class MainForm : Form
             if (_refreshButton != null)
                 _refreshButton.Text = "REFRESH";
         }
-    }
-
-    private async Task RefreshRealmExchangeAsync()
-    {
-        if (_refreshingExchange)
-            return;
-
-        _refreshingExchange = true;
-        if (_refreshExchangeButton != null)
-        {
-            _refreshExchangeButton.Enabled = false;
-            _refreshExchangeButton.Text = "READING EXCHANGE…";
-        }
-        _footer.Text = "Reading the Realm Exchange inventory…";
-        try
-        {
-            List<AuctionRow> auctions = await Task.Run(ReadRealmExchangeSnapshot);
-            _auctions.Clear();
-            _auctions.AddRange(auctions);
-            ApplyAuctionFilter();
-            _dashboardFooterSummary = $"Realm Exchange {_auctions.Count:N0} listings • Exchange updated {DateTime.Now:T}";
-            _footer.Text = _dashboardFooterSummary;
-        }
-        catch (Exception exception)
-        {
-            _footer.Text = $"Realm Exchange refresh failed: {exception.Message}";
-        }
-        finally
-        {
-            _refreshingExchange = false;
-            if (_refreshExchangeButton != null)
-            {
-                _refreshExchangeButton.Text = "REFRESH REALM EXCHANGE";
-                _refreshExchangeButton.Enabled = true;
-            }
-        }
-    }
-
-    private List<AuctionRow> ReadRealmExchangeSnapshot()
-    {
-        var auctions = new List<AuctionRow>();
-        if (!File.Exists(_database))
-            return auctions;
-
-        using var connection = new SQLiteConnection($"Data Source={_database};Version=3;Read Only=True;Pooling=False;Default Timeout=5");
-        connection.Open();
-        if (!TableExists(connection, "Inventory") || !TableExists(connection, "ItemTemplate") ||
-            !TableExists(connection, "ItemUnique"))
-            return auctions;
-
-        using var command = connection.CreateCommand();
-        string listedUtcColumn = ColumnExists(connection, "Inventory", "RealmExchangeListedUtc")
-            ? "COALESCE(i.RealmExchangeListedUtc, '')" : "''";
-        command.CommandText = $"""
-            SELECT COALESCE(NULLIF(u.Name, ''), NULLIF(t.Name, ''), 'Unknown item') AS ItemName,
-                   COALESCE(c.Name, b.Name, 'Unknown seller') AS Seller,
-                   COALESCE(u.Level, t.Level, 0) AS ItemLevel,
-                   i.Count,
-                   i.SellPrice,
-                   CASE i.OwnerLot WHEN 65001 THEN 'Albion' WHEN 65002 THEN 'Midgard' WHEN 65003 THEN 'Hibernia' ELSE 'Unknown' END AS RealmName,
-                   i.OwnerID, {listedUtcColumn} AS ListedUtc
-            FROM Inventory i
-            LEFT JOIN ItemTemplate t ON t.Id_nb = i.ITemplate_Id
-            LEFT JOIN ItemUnique u ON u.Id_nb = i.UTemplate_Id
-            LEFT JOIN DOLCharacters c ON c.DOLCharacters_ID = i.OwnerID
-            LEFT JOIN offline_world_bots b ON i.OwnerID = ('offlinebot:' || b.BotId)
-            WHERE i.OwnerLot IN (65001, 65002, 65003)
-              AND i.SellPrice > 0
-            ORDER BY RealmName, ItemLevel DESC, ItemName
-            """;
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            long buyoutCopper = reader.GetInt64(4);
-            string expiry = "Never (player listing)";
-            if (reader.GetString(6).StartsWith("offlinebot:", StringComparison.OrdinalIgnoreCase))
-            {
-                expiry = "24h from first load";
-                if (DateTime.TryParse(reader.GetString(7), System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.RoundtripKind, out DateTime listedUtc))
-                {
-                    DateTime expiresUtc = listedUtc.ToUniversalTime().AddHours(24);
-                    TimeSpan remaining = expiresUtc - DateTime.UtcNow;
-                    expiry = remaining <= TimeSpan.Zero ? "Expired - removing" :
-                        $"{(int)remaining.TotalHours}h {remaining.Minutes:00}m • {expiresUtc.ToLocalTime():MMM d HH:mm}";
-                }
-            }
-            auctions.Add(new AuctionRow(reader.GetString(0), reader.GetString(1), reader.GetInt32(2), reader.GetInt32(3),
-                "Fixed price", FormatCopper(buyoutCopper), buyoutCopper, expiry, reader.GetString(5)));
-        }
-        return auctions;
     }
 
     private Dictionary<Button, bool> CaptureAndDisableButtonsForSnapshot()
@@ -2038,77 +1838,6 @@ internal sealed partial class MainForm : Form
         {
             column.HeaderCell.SortGlyphDirection = column.DataPropertyName.Equals(_botSortProperty, StringComparison.Ordinal)
                 ? _botSortAscending ? SortOrder.Ascending : SortOrder.Descending
-                : SortOrder.None;
-        }
-    }
-
-    private void ApplyAuctionFilter()
-    {
-        var search = _auctionSearch.Text.Trim();
-        string realm = _auctionRealmTabs.SelectedTab?.Text ?? "Albion";
-        IEnumerable<AuctionRow> filtered = _auctions.Where(row => row.State.Equals(realm, StringComparison.OrdinalIgnoreCase) &&
-            (search.Length == 0 || $"{row.ItemName} {row.Seller} {row.State}".Contains(search, StringComparison.OrdinalIgnoreCase)));
-        _auctionSource.DataSource = SortAuctions(filtered).ToList();
-        _auctionSource.ResetBindings(false);
-        UpdateAuctionSortGlyph();
-    }
-
-    private void SortAuctionsByColumn(int columnIndex)
-    {
-        if (columnIndex < 0 || columnIndex >= _auctionGrid.Columns.Count)
-            return;
-
-        string property = _auctionGrid.Columns[columnIndex].DataPropertyName;
-        if (string.IsNullOrWhiteSpace(property))
-            return;
-
-        if (_auctionSortProperty.Equals(property, StringComparison.Ordinal))
-            _auctionSortAscending = !_auctionSortAscending;
-        else
-        {
-            _auctionSortProperty = property;
-            _auctionSortAscending = true;
-        }
-
-        ApplyAuctionFilter();
-    }
-
-    private IEnumerable<AuctionRow> SortAuctions(IEnumerable<AuctionRow> rows)
-    {
-        static IOrderedEnumerable<AuctionRow> TextAscending(IEnumerable<AuctionRow> source, Func<AuctionRow, string> selector) =>
-            source.OrderBy(selector, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(row => row.ItemName, StringComparer.OrdinalIgnoreCase);
-        static IOrderedEnumerable<AuctionRow> TextDescending(IEnumerable<AuctionRow> source, Func<AuctionRow, string> selector) =>
-            source.OrderByDescending(selector, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(row => row.ItemName, StringComparer.OrdinalIgnoreCase);
-
-        return (_auctionSortProperty, _auctionSortAscending) switch
-        {
-            ("ItemLevel", true) => rows.OrderBy(row => row.ItemLevel).ThenBy(row => row.ItemName, StringComparer.OrdinalIgnoreCase),
-            ("ItemLevel", false) => rows.OrderByDescending(row => row.ItemLevel).ThenBy(row => row.ItemName, StringComparer.OrdinalIgnoreCase),
-            ("Quantity", true) => rows.OrderBy(row => row.Quantity).ThenBy(row => row.ItemName, StringComparer.OrdinalIgnoreCase),
-            ("Quantity", false) => rows.OrderByDescending(row => row.Quantity).ThenBy(row => row.ItemName, StringComparer.OrdinalIgnoreCase),
-            ("Buyout", true) => rows.OrderBy(row => row.BuyoutCopper).ThenBy(row => row.ItemName, StringComparer.OrdinalIgnoreCase),
-            ("Buyout", false) => rows.OrderByDescending(row => row.BuyoutCopper).ThenBy(row => row.ItemName, StringComparer.OrdinalIgnoreCase),
-            ("Seller", true) => TextAscending(rows, row => row.Seller),
-            ("Seller", false) => TextDescending(rows, row => row.Seller),
-            ("CurrentBid", true) => TextAscending(rows, row => row.CurrentBid),
-            ("CurrentBid", false) => TextDescending(rows, row => row.CurrentBid),
-            ("Expires", true) => TextAscending(rows, row => row.Expires),
-            ("Expires", false) => TextDescending(rows, row => row.Expires),
-            ("State", true) => TextAscending(rows, row => row.State),
-            ("State", false) => TextDescending(rows, row => row.State),
-            (_, true) => TextAscending(rows, row => row.ItemName),
-            _ => TextDescending(rows, row => row.ItemName),
-        };
-    }
-
-    private void UpdateAuctionSortGlyph()
-    {
-        foreach (DataGridViewColumn column in _auctionGrid.Columns)
-        {
-            column.HeaderCell.SortGlyphDirection = column.DataPropertyName.Equals(_auctionSortProperty, StringComparison.Ordinal)
-                ? _auctionSortAscending ? SortOrder.Ascending : SortOrder.Descending
                 : SortOrder.None;
         }
     }
@@ -3216,7 +2945,6 @@ internal sealed partial class MainForm : Form
         public string RvrFormation => GroupId.Length > 0 ? $"Warband {GroupId}" : "Solo roamer";
     }
 
-    private sealed record AuctionRow(string ItemName, string Seller, int ItemLevel, int Quantity, string CurrentBid, string Buyout, long BuyoutCopper, string Expires, string State);
     private sealed record GroupRow(string GroupId, string Realm, string Phase, string SharedGoal, string Status,
         string LeaderName, string RendezvousName, string PullerName, List<BotRow> Members);
     private sealed class GroupMetadata

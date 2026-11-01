@@ -9,13 +9,16 @@ using DOL.GS.GameEvents;
 namespace DOL.GS;
 
 /// <summary>
-/// Bounded, durable history. One of 50 existing rows is updated in the SAME
+/// Bounded, durable history. One existing row is updated in the SAME
 /// transaction as item ownership and payment. No polling, per-bot work, or
 /// successful-looking entries for purchases that fail to commit.
+/// Capacity 500 (owner 2026-11-01): the launcher dashboard's Realm Exchange
+/// purchase history has enough depth to be useful; the table stays fixed-size,
+/// so a purchase still updates exactly one row.
 /// </summary>
 public static class RealmExchangeSaleLedger
 {
-    public const int Capacity = 50;
+    public const int Capacity = 500;
     private sealed class State
     {
         internal readonly object Gate = new();

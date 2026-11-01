@@ -51,7 +51,7 @@ public sealed class UT_RealmExchangeSaleLedger
         Assert.That(RealmExchangeSaleLedger.CommitSale(_database, Sale(1, seller, buyer), _payment), Is.True);
         var fresh = Open();
         var rows = fresh.SelectAllObjects<RealmExchangeSaleRecord>();
-        Assert.That(rows.Count, Is.EqualTo(50));
+        Assert.That(rows.Count, Is.EqualTo(RealmExchangeSaleLedger.Capacity));
         var sold = rows.Single(row => row.SaleSequence > 0);
         Assert.Multiple(() =>
         {
@@ -67,38 +67,40 @@ public sealed class UT_RealmExchangeSaleLedger
     }
 
     [Test]
-    public void KeepsOnlyLatestFiftyAndContinuesAfterReload()
+    public void KeepsOnlyTheLatestCapacityAndContinuesAfterReload()
     {
-        for (int i = 1; i <= 53; i++)
+        for (int i = 1; i <= RealmExchangeSaleLedger.Capacity + 3; i++)
             Assert.That(RealmExchangeSaleLedger.CommitSale(_database, Sale(i), _payment), Is.True);
         var fresh = Open();
-        Assert.That(RealmExchangeSaleLedger.CommitSale(fresh, Sale(54), fresh.SelectAllObjects<DbSinglePermission>().Single()), Is.True);
+        Assert.That(RealmExchangeSaleLedger.CommitSale(fresh, Sale(RealmExchangeSaleLedger.Capacity + 4),
+            fresh.SelectAllObjects<DbSinglePermission>().Single()), Is.True);
         var rows = Open().SelectAllObjects<RealmExchangeSaleRecord>().OrderByDescending(row => row.SaleSequence).ToArray();
-        Assert.That(rows.Length, Is.EqualTo(50));
-        Assert.That(rows[0].ItemName, Is.EqualTo("Fortifying Cloth Gloves 54"));
+        Assert.That(rows.Length, Is.EqualTo(RealmExchangeSaleLedger.Capacity));
+        Assert.That(rows[0].ItemName, Is.EqualTo($"Fortifying Cloth Gloves {RealmExchangeSaleLedger.Capacity + 4}"));
         Assert.That(rows[^1].ItemName, Is.EqualTo("Fortifying Cloth Gloves 5"));
-        Assert.That(rows.Select(row => row.SaleSequence), Is.EqualTo(Enumerable.Range(5, 50).Reverse().Select(value => (long)value)));
+        Assert.That(rows.Select(row => row.SaleSequence),
+            Is.EqualTo(Enumerable.Range(5, RealmExchangeSaleLedger.Capacity).Reverse().Select(value => (long)value)));
     }
 
     [Test]
     public void FailedCommitPreservesPreviousHistoryAndOtherPaymentRows()
     {
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= RealmExchangeSaleLedger.Capacity; i++)
             Assert.That(RealmExchangeSaleLedger.CommitSale(_database, Sale(i), _payment), Is.True);
         var missing = new DbSinglePermission { PlayerID = "deleted", Command = "before" };
         Assert.That(_database.AddObject(missing), Is.True);
         var fresh = Open();
         Assert.That(fresh.DeleteObject(fresh.SelectAllObjects<DbSinglePermission>().Single(row => row.PlayerID == "deleted")), Is.True);
         _payment.Command = "must-rollback";
-        Assert.That(RealmExchangeSaleLedger.CommitSale(_database, Sale(51), _payment, missing), Is.False);
+        Assert.That(RealmExchangeSaleLedger.CommitSale(_database, Sale(RealmExchangeSaleLedger.Capacity + 1), _payment, missing), Is.False);
         var afterFailure = Open();
         Assert.That(afterFailure.SelectAllObjects<DbSinglePermission>().Single().Command, Is.EqualTo("before"));
         Assert.That(afterFailure.SelectAllObjects<RealmExchangeSaleRecord>().Min(row => row.SaleSequence), Is.EqualTo(1));
-        Assert.That(afterFailure.SelectAllObjects<RealmExchangeSaleRecord>().Max(row => row.SaleSequence), Is.EqualTo(50));
+        Assert.That(afterFailure.SelectAllObjects<RealmExchangeSaleRecord>().Max(row => row.SaleSequence), Is.EqualTo(RealmExchangeSaleLedger.Capacity));
         _payment.Command = "paid";
-        Assert.That(RealmExchangeSaleLedger.CommitSale(_database, Sale(52), _payment), Is.True);
-        Assert.That(Open().SelectAllObjects<RealmExchangeSaleRecord>().Single(row => row.SaleSequence == 51).ItemName,
-            Is.EqualTo("Fortifying Cloth Gloves 52"));
+        Assert.That(RealmExchangeSaleLedger.CommitSale(_database, Sale(RealmExchangeSaleLedger.Capacity + 2), _payment), Is.True);
+        Assert.That(Open().SelectAllObjects<RealmExchangeSaleRecord>().Single(row => row.SaleSequence == RealmExchangeSaleLedger.Capacity + 1).ItemName,
+            Is.EqualTo($"Fortifying Cloth Gloves {RealmExchangeSaleLedger.Capacity + 2}"));
     }
 
     [Test]
