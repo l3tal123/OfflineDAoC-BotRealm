@@ -59,7 +59,7 @@ internal sealed partial class MainForm
         _worldMapRegion = new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
-            Width = 300,
+            Width = 260,
             Font = new Font("Georgia", 9f),
             BackColor = DaocTheme.StoneDark,
             ForeColor = DaocTheme.Text,
@@ -97,7 +97,7 @@ internal sealed partial class MainForm
         bar.Controls.Add(_worldMapZoom);
         _worldMapHint = new Label
         {
-            Text = "scroll = zoom  •  drag = pan  •  hover a dot for details  •  double-click a dot to select it",
+            Text = "wheel zooms  •  drag pans  •  hover a dot for details  •  double-click selects",
             AutoSize = true,
             ForeColor = DaocTheme.Muted,
             Font = new Font("Georgia", 8.5f, FontStyle.Italic),

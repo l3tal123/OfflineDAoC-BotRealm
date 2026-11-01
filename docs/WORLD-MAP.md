@@ -76,10 +76,18 @@ uses the painted maps. The client does not need to be running; only the server m
 - Zoom/select probe checks (same offscreen harness): overview and single-region zoom levels (100% → 156% → 195% →
   back), dots kept after zooming, `RESET` and a `VIEW` change return to 100%, and a synthetic double-click on a
   painted dot raised the bot's id while a double-click on empty map raised nothing. Renders were inspected as images
-  (`world-map-overview-zoom.png`, `world-map-albion-zoom.png`).
-- **Not verified here:** a live in-game run with a running server, the hover tooltip and the real
-  double-click → Active Population hand-off in a real window (the offscreen probe cannot move a real mouse or click).
-  Test those when the playable install is ready.
+  (`world-map-overview-zoom.png`, `world-map-albion-zoom.png`). The same checks pass against the Release build that is
+  deployed.
+- Launcher hand-off probe: the installed `OfflineDAoC.dll` was loaded into a headless harness run from the install's
+  own `runtime/` folder (so it found the real database, server folder and client), the real `MainForm` was constructed
+  without being shown, and it verified: the World Map tab exists in second position and holds the map control, the
+  toolbar's `+`/`−`/`RESET` buttons drive the zoom percentage (125% → 100%), a synthetic row with a filter that hides
+  it is relaxed and selected when the map asks for the bot (realm filter reset, search cleared, row selected, footer
+  names it), and an unknown bot id reports instead of throwing. Probe source:
+  `development-source/server/build/launcher-probe/` (git-ignored).
+- **Not verified here:** a live in-game run with a running server, the hover tooltip and a real mouse double-click
+  (the offscreen probes cannot move a real mouse or click a real window). Test those when the playable install is
+  ready.
 
 ## Known limits / next steps
 
