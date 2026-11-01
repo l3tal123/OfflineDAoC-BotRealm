@@ -57,22 +57,22 @@ git branch --set-upstream-to=origin/main main
 
 ## 2. Syncing the fork with upstream
 
-Use one or more of these; they all do the same operation (fetch `upstream/main`, merge it into fork `main`, push):
+Upstream sync is **manual on purpose**: nothing merges or pushes to this fork automatically, and no scheduled task or
+CI job is set up to do it. The fork's owner decides when upstream changes land in `main`, so upstream work can never
+merge while a development branch or an untested change is in progress. Run the sync yourself when you want it:
 
-| When | How |
+| What | How |
 |---|---|
-| Manual, when you want it | `scripts\sync-fork.cmd` |
-| Preview only | `scripts\sync-fork.cmd -DryRun` |
+| Preview what upstream has | `scripts\sync-fork.cmd -DryRun` |
+| Sync now (merge + push) | `scripts\sync-fork.cmd` |
 | Merge locally, push later | `scripts\sync-fork.cmd -NoPush` |
-| Automatic on this PC | `scripts\register-sync-task.cmd` (daily Windows Scheduled Task) |
-| Automatic in the cloud | Enable Actions in the fork; `.github/workflows/sync-upstream.yml` runs daily at 05:17 UTC and on demand |
 
 The scripts run on the **Windows PowerShell 5.1** that ships with Windows 10/11 (`powershell.exe`), so nothing has to
 be installed first. The `.cmd` wrappers call them with `-ExecutionPolicy Bypass`; if you run a `.ps1` directly, use
 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\sync-upstream.ps1 ...`. If you have PowerShell 7, `pwsh`
 works as well.
 
-### 2.1 The local script
+### 2.1 The sync script
 
 `scripts/sync-upstream.ps1` refuses to run on a dirty tracked working tree (untracked files are left alone),
 refuses to run on a branch other than `main`, fetches `upstream/main`, prints the incoming commits, merges with
@@ -82,41 +82,7 @@ exits with code 2 and lists the conflicted files. Other exit codes: 1 = precondi
 
 It never force-pushes and never rewrites history.
 
-### 2.2 The scheduled task (recommended for this PC)
-
-GitHub disables Actions in forks by default, and scheduled workflows stay paused until the owner enables them, so a
-local task is the dependable "sync while I work" option:
-
-```
-scripts\register-sync-task.cmd                 # daily at 09:00 local time
-scripts\register-sync-task.cmd -DailyAt 18:30  # another time
-scripts\register-sync-task.cmd -RunNow         # register and run once
-scripts\register-sync-task.cmd -Remove         # delete it
-```
-
-The task runs as your Windows user, only while you are logged on, with a 15-minute limit. It pushes with the
-credentials **Git Credential Manager** already stored: sign in once interactively (`git push origin main`) so the
-task can reuse the credential silently. Check its result in **Task Scheduler > Task Scheduler Library >
-OfflineDAoC-ForkSync > History** (a non-zero last run result means the sync failed, usually a conflict or an expired
-credential).
-
-Without a stored credential the task can still merge locally but its push fails; run `git push origin main` by hand
-to see the sign-in prompt.
-
-### 2.3 The GitHub Actions workflow
-
-`.github/workflows/sync-upstream.yml` (fork additions live in new files so upstream merges stay clean) merges
-`upstream/main` into `main` with `GITHUB_TOKEN` and `contents: write`. To turn it on:
-
-1. GitHub > the fork > **Settings > Actions > General**: allow actions (the default "Allow all actions" is fine).
-2. **Actions > Sync fork with upstream**: if it is paused, enable it. Scheduled workflows in a fork are disabled
-   until this is done.
-3. Optional: run it once with **Run workflow** (tick `dry_run` for a report-only run).
-
-A conflicting upstream change makes the job red; resolve it locally as in section 2.4, then push. GitHub notifies
-the repository owner of failed scheduled runs.
-
-### 2.4 Conflict handling (merge policy)
+### 2.2 Conflict handling (merge policy)
 
 Conflicts should be rare because the fork adds **new files** and keeps edits to upstream files small and focused.
 When one happens:
@@ -205,16 +171,15 @@ downloader's multi-GB part cache (`release/.downloads/`) are all git-ignored. Ne
 
 Keep upstream edits focused: every changed line in an upstream-owned file is a potential sync conflict, while a new
 file almost never conflicts. Put fork documentation in `docs/` new files and link it from the fork note at the end
-of [AGENTS.md](../AGENTS.md). Fork-specific scripts belong in `scripts/`, automation in `.github/workflows/`.
+of [AGENTS.md](../AGENTS.md). Fork-specific scripts belong in `scripts/`.
 
 ### 4.1 What the fork changed at setup time
 
-Setup only added tooling; no gameplay code or content was changed:
+Setup only added tooling; no gameplay code or content was changed, and **no automatic sync was added**:
 
-- `scripts/bootstrap-fork.ps1` + `scripts/setup-fork.cmd` - attach/repair this checkout (remotes, config, fetches);
-- `scripts/sync-upstream.ps1` + `scripts/sync-fork.cmd` - merge upstream into the fork and push;
-- `scripts/register-sync-task.ps1` + `scripts/register-sync-task.cmd` - optional daily Windows Scheduled Task for the sync;
-- `.github/workflows/sync-upstream.yml` - optional GitHub Actions sync;
+- `scripts/bootstrap-fork.ps1` + `scripts/setup-fork.cmd` - attach/repair this checkout (remotes, config, fetches,
+  creates the git-ignored `CoreServer/config/serverconfig.xml` the build needs);
+- `scripts/sync-upstream.ps1` + `scripts/sync-fork.cmd` - on-demand sync: merge upstream into the fork and push;
 - `docs/FORK.md` (this page), `docs/BOT-DEVELOPMENT.md`, `docs/DEV-ENVIRONMENT.md`;
 - a fork note appended to `AGENTS.md`, and the ignored `release/.downloads/` cache added to `.gitignore`.
 
@@ -225,8 +190,7 @@ Setup only added tooling; no gameplay code or content was changed:
 | `schannel: ... SEC_E_NO_CREDENTIALS` on fetch/push | This checkout sets `http.sslBackend=openssl` (Git for Windows bundles OpenSSL). If it was reset: `git config --local http.sslBackend openssl`. |
 | `Filename too long` | `git config --local core.longpaths true` (already set; a future fresh clone needs `git config --global core.longpaths true` before cloning). |
 | `sync-upstream.ps1` says the tree is dirty | Commit or stash tracked changes; untracked files are fine and left alone. |
-| Push asks for credentials every time | Sign in once interactively; Git Credential Manager stores it in Windows Credential Manager. In the scheduled task, also check the task's History tab. |
-| Scheduled task runs but nothing syncs | The task's last run result is non-zero: usually a merge conflict (resolve locally) or missing git credentials. Task Scheduler > History shows the exit code. |
-| GitHub Actions workflow never runs | Actions are off or the workflow is paused in the fork (Settings > Actions, Actions tab). Fork schedules are disabled until enabled. |
+| Push asks for credentials every time | Sign in once interactively; Git Credential Manager stores it in Windows Credential Manager for later pushes. |
+| `git push` fails after a script run | The merge is already committed locally; run `git push origin main` once interactively to sign in, then push again. Exit code 3 from the sync script means exactly this. |
 | CRLF / line-ending noise in `git diff` | The repo stores LF; `core.autocrlf=true` (this machine's system setting) checks out CRLF for text files and normalises on commit. Keep a file's existing line endings when editing (AGENTS.md rule 15). |
 | The upstream merge wants to delete a fork file | Upstream never had the file; a delete/modify conflict means upstream renamed/moved something the fork extended. Resolve by moving the fork code onto upstream's new location, not by dropping upstream's change. |
