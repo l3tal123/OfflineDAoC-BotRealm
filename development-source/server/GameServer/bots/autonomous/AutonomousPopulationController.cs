@@ -361,9 +361,34 @@ public static class AutonomousPopulationController
             .Where(record => !HiredCompanions165.IsHired(record.BotId))   // True 1.65 Mode: their owners bring them
             .OrderBy(record => record.BotId)
             .ToArray();
+        PayBotWelcomePurses();
         // A gamebot taken off the roster (launcher removal, retirement, test-roster rollback) leaves its guild.
         long[] rosterIds = _cachedRoster.Select(record => record.BotId).ToArray();
         NpcService.Instance.Post<long[]>(ids => AutonomousBotGuilds.Reconcile(ids), rosterIds);
+    }
+
+    /// <summary>
+    /// True 1.65 Mode: every world bot gets the same 1 gold welcome purse a new character gets. The launcher's ADD BOTS
+    /// already writes it; an older bot is topped up once here, on the first roster read after the server starts. The
+    /// purse is paid on the cached records, so a bot logged in from this roster already carries its coin, and the
+    /// record's marker keeps a restart from paying it again. A failed save is retried at the next roster read because
+    /// the roster is then read from the database again.
+    /// </summary>
+    private static void PayBotWelcomePurses()
+    {
+        try
+        {
+            List<OfflineWorldBotRecord> paid = WelcomePurse165.PayBots(_cachedRoster);
+            if (paid.Count == 0)
+                return;
+            lock (AutonomousBotStatusPersistence.DatabaseWriteLock)
+                GameServer.Database.SaveObject(paid.Cast<DataObject>());
+            Log.Info($"WELCOME_PURSE_165 paid {paid.Count} world bot(s) {Money.GetString(WelcomePurse165.PurseCopper)} each");
+        }
+        catch (Exception exception)
+        {
+            Log.Error("WELCOME_PURSE_165 could not pay the world bots; it is retried at the next roster read.", exception);
+        }
     }
 
     private static volatile bool _populationSatisfied;

@@ -1229,6 +1229,9 @@ public sealed class OfflineWorldBotRecord : DataObject
     [DataElement(AllowDbNull = false)] public bool IsAlive { get; set; }
     [DataElement(AllowDbNull = false)] public string LastUpdateUtc { get; set; } = string.Empty;
     [DataElement(AllowDbNull = false)] public long MoneyCopper { get; set; }
+    // True 1.65 Mode: set once when the bot has been given its 1 gold welcome purse (WelcomePurse165), so a restart
+    // never pays the same bot twice. The launcher's ADD BOTS already writes the purse into MoneyCopper.
+    [DataElement(AllowDbNull = false)] public bool WelcomePursePaid { get; set; }
     [DataElement(AllowDbNull = false)] public int InventoryRevision { get; set; }
     [DataElement(AllowDbNull = false)] public int X { get; set; }
     [DataElement(AllowDbNull = false)] public int Y { get; set; }

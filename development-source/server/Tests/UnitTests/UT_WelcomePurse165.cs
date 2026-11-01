@@ -101,4 +101,52 @@ public sealed class UT_WelcomePurse165
         Assert.That(WelcomePurse165.Pay(_database), Is.EqualTo(0));
         Assert.That(_database.SelectAllObjects<DbCoreCharacter>(), Is.Empty);
     }
+
+    [Test]
+    public void PaysTheOneGoldWelcomePurseToACoinlessWorldBot()
+    {
+        var bot = new OfflineWorldBotRecord { BotId = 7, Name = "coinless", MoneyCopper = 0 };
+
+        Assert.That(WelcomePurse165.PayBot(bot), Is.True);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(bot.MoneyCopper, Is.EqualTo(WelcomePurse165.PurseCopper));
+            Assert.That(bot.WelcomePursePaid, Is.True);
+            Assert.That(bot.Dirty, Is.True, "the object database only saves dirty records");
+        });
+    }
+
+    [Test]
+    public void TopsAWorldBotUpToThePurseButNeverTakesCoinAway()
+    {
+        var poor = new OfflineWorldBotRecord { MoneyCopper = 250 };
+        var rich = new OfflineWorldBotRecord { MoneyCopper = 50_000 };
+
+        Assert.That(WelcomePurse165.PayBots([poor, rich]), Has.Count.EqualTo(2));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(poor.MoneyCopper, Is.EqualTo(10_000), "a bot under the purse is topped up to it");
+            Assert.That(rich.MoneyCopper, Is.EqualTo(50_000), "a bot with more coin keeps its coin");
+            Assert.That(poor.WelcomePursePaid && rich.WelcomePursePaid, Is.True);
+        });
+    }
+
+    [Test]
+    public void PaysEachWorldBotOnlyOnce()
+    {
+        var bot = new OfflineWorldBotRecord { MoneyCopper = 0 };
+
+        Assert.That(WelcomePurse165.PayBots([bot]), Has.Count.EqualTo(1));
+        bot.MoneyCopper = 0;   // the bot spent its purse
+        Assert.That(WelcomePurse165.PayBots([bot]), Is.Empty, "the marker keeps a restart from paying it again");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(WelcomePurse165.PayBot(null), Is.False);
+            Assert.That(WelcomePurse165.PayBots(null), Is.Empty);
+            Assert.That(WelcomePurse165.PayBots([]), Is.Empty);
+        });
+    }
 }

@@ -11,6 +11,9 @@ namespace DOL.GS
     /// server property <c>starting_money</c> (10,000 copper, set in runtime/true165/true165-rules.json); this class pays
     /// the same 1 gold once to every character that already existed before the rule, and records a marker row per
     /// character so a restart, a restored backup or a crash never pays the same purse twice.
+    /// World bots get the same purse (owner 2026-11-02): the launcher's ADD BOTS writes it into a new bot's
+    /// MoneyCopper, and <see cref="PayBots"/> tops up a roster of older bots once, marked on the bot's own record,
+    /// so bots are not left unable to buy their first gear.
     /// </summary>
     public static class WelcomePurse165
     {
@@ -55,6 +58,38 @@ namespace DOL.GS
             {
                 Log.Error($"WELCOME_PURSE_165 could not record the welcome purse for {created.Character.Name}.", error);
             }
+        }
+
+        /// <summary>
+        /// Pays the 1 gold welcome purse to one world bot: a bot below the purse is topped up to it, and the record's
+        /// marker is set so a restart never pays again. Returns true when the record changed (the caller saves it).
+        /// The purse is a floor, not a gift on top: a bot that already has more coin keeps it.
+        /// </summary>
+        public static bool PayBot(OfflineWorldBotRecord bot)
+        {
+            if (bot == null || bot.WelcomePursePaid)
+                return false;
+            if (bot.MoneyCopper < PurseCopper)
+                bot.MoneyCopper = PurseCopper;
+            bot.WelcomePursePaid = true;
+            bot.Dirty = true;   // the object database saves only dirty records
+            return true;
+        }
+
+        /// <summary>
+        /// Pays the welcome purse to every unpaid world bot in a roster and returns the changed records, which the
+        /// caller saves. Used on the population controller's roster read, so the bots it logs in already carry the
+        /// coin and a bot added later is paid on the next roster read.
+        /// </summary>
+        public static List<OfflineWorldBotRecord> PayBots(IEnumerable<OfflineWorldBotRecord> bots)
+        {
+            var paid = new List<OfflineWorldBotRecord>();
+            if (bots == null)
+                return paid;
+            foreach (OfflineWorldBotRecord bot in bots)
+                if (PayBot(bot))
+                    paid.Add(bot);
+            return paid;
         }
 
         /// <summary>

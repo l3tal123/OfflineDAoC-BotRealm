@@ -120,8 +120,9 @@ Pain, Second Wind, First Aid are used).
 - Rest: `BotRestRecovery` + `AutonomousRestPolicy` (health 70 / power 45 / endurance 35 thresholds; recovery
   to full once seated).
 - Economy: `AutonomousBotEconomy` (coin from `offline_world_bots`, vendoring, equipment upgrades, Realm
-  Exchange buy/list, Darkness Falls seals), `AutonomousAuctionValuation`, `Exchange165` (90%/80% relists),
-  `AutonomousBotGuilds`, `AutonomousBotChat`/`AutonomousBotChatCoordinator` (cosmetic only).
+  Exchange buy/list, Darkness Falls seals), `WelcomePurse165` (every world bot starts with the same 1 gold a new
+  character gets; bots made before the rule are topped up once), `AutonomousAuctionValuation`, `Exchange165`
+  (90%/80% relists), `AutonomousBotGuilds`, `AutonomousBotChat`/`AutonomousBotChatCoordinator` (cosmetic only).
 
 ### 1.9 RvR
 

@@ -18,6 +18,8 @@ internal sealed partial class MainForm : Form
     internal const int LiveBotSnapshotMaxAgeMilliseconds = 20_000;
     internal const int LiveBotSnapshotWaitMilliseconds = 3_000;
     internal const int ServerReadinessPollMilliseconds = 500;
+    // True 1.65 Mode: a new world bot gets the same 1 gold a new character gets (WelcomePurse165.PurseCopper).
+    internal const long BotStartingCopper = 10_000;
     private readonly string _root = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
     private readonly string _database;
     private readonly TrueMode.Mode _mode;   // True 1.65 Mode or normal, from data\world-mode.txt
@@ -1964,7 +1966,7 @@ internal sealed partial class MainForm : Form
             insert.Parameters.AddWithValue("@name", identity.Name);
             insert.Parameters.AddWithValue("@level", level);
             insert.Parameters.AddWithValue("@xp", level == 50 ? 169999999950L : 0L);
-            insert.Parameters.AddWithValue("@money", level == 50 ? 100000000L : 0L);
+            insert.Parameters.AddWithValue("@money", level == 50 ? 100000000L : BotStartingCopper);
             insert.Parameters.AddWithValue("@realm", identity.Realm);
             insert.Parameters.AddWithValue("@classId", identity.ClassId);
             insert.Parameters.AddWithValue("@className", identity.ClassName);

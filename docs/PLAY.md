@@ -65,6 +65,9 @@ The world fills with gamebots that level, group, craft, trade and fight on their
 
 - **Add bots** with the **+ Lv.1** button on a realm's card in the launcher. Hold **Shift** for 10 at a time, or
   **Ctrl** for 100. Bots start at level 1 and level up in the world, like you.
+- Every bot starts with **1 gold**, like a new character, so it can buy its first gear. Bots you added before this
+  build are topped up to the same 1 gold once, the next time you start the server; a bot that already has more
+  coin keeps it.
 - **Start small** and add more as your PC allows. Every bot is simulated by the server on your PC.
 - The launcher's tabs show the active population, a live world map, the **Realm Exchange**, the **Bot Inspector**,
   groups, RvR, battlegrounds, realm events and realm records. **Bot Goals Setting** sets what the bots aim for.
