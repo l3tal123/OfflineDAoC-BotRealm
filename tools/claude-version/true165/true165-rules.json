@@ -23,6 +23,7 @@
   "allow_all_realms_df": "False",
   "bot_use_town_teleporters": "False",
   "startup_ramp_minutes": "2",
+  "starting_money": "10000",
   "disabled_regions": "27;165;233-242;244"
  },
  "remove": {

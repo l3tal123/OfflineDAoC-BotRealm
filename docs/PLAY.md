@@ -51,6 +51,8 @@ True 1.65 is a fresh start: saves from Offline DAoC 0.37 and earlier can't be br
 3. Click **ENTER REALM**. The game opens. Your own local account is created automatically the first time.
 4. Choose a realm and create a character, as in the 1.64 client:
    - you start as a base class and choose your class at a trainer at level 5;
+   - you start with **1 gold**, enough to buy basic gear; characters you made before this build get the same 1 gold
+     added once the next time you start the server;
    - you spend your own stat points, and choose your height, face and hair;
    - each realm has 8 character slots.
 5. To finish: quit the game, click **STOP SERVER**, and wait for it to save.

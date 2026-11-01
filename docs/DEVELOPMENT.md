@@ -337,6 +337,7 @@ Reference outputs that only the tools copy has (not applied): `drops165-missing.
 | `XpRateMultiplier165.cs` | The launcher's Options XP rate (`ServerProperty` `xp_rate_multiplier`, 1 to 5000, default 1): one multiplier for every experience gain, players and every kind of gamebot; losses are never scaled. Applied in `GamePlayer.GainExperience`/`ForceGainExperience` and `GameBot.GainExperience`. |
 | `BotLootWalk165.cs` | The bags autoloot did not take: bots walk to the ones they may take; companions never loot. |
 | `BaseClassBots165.cs` | Gamebots start as a base class and are promoted at level 5 (`PlannedClassId`). |
+| `WelcomePurse165.cs` | New characters start with 1 gold (`ServerProperty` `starting_money` = 10,000 copper, from `runtime/true165/true165-rules.json`); characters that already existed get the same purse added once, recorded by a `OfflineWelcomePurse165` custom parameter per character so a restart never pays twice. |
 | `CrafterBots165.cs` | About 1 in 5 gamebots craft real recipes and list the products on the Realm Exchange; siegecrafters build siege kits. |
 | `Charm165.cs` | Bots charm real monsters with learned charm spells only. |
 | `Coin165.cs` | Per-monster coin chance from `runtime/true165/coin165.json`. |
