@@ -6,12 +6,12 @@ namespace OfflineDaoc.Launcher;
 
 /// <summary>
 /// Launcher dashboard tab: the Bot Inspector. Right-click a bot in the Active Population list and choose
-/// "Inspect bot" (or double-click it) and this tab opens on that bot; the BOT selector also lists every
-/// world bot. The server answers one on-demand, read-only description of the bot - money, stats, equipment,
-/// backpack, vault, specializations and trained points, abilities, Realm Exchange listings, active effects,
-/// activity, position and progress. A bot that is not in the world is described from its last saved state.
-/// Nothing is polled: opening the tab after choosing another bot, changing the selector or pressing
-/// REFRESH sends one request.
+/// "Inspect bot" (double-clicking the row now shows the bot on the World Map) and this tab opens on that bot; the BOT
+/// selector also lists every world bot. The server answers one on-demand, read-only description of the bot - money,
+/// stats, equipment, backpack, vault, specializations and trained points, abilities, Realm Exchange listings, active
+/// effects, activity, position and progress. A bot that is not in the world is described from its last saved state.
+/// Nothing is polled: opening the tab after choosing another bot, changing the selector or pressing REFRESH sends one
+/// request. SHOW ON MAP centres the Live World Map on the selected bot.
 /// </summary>
 internal sealed partial class MainForm
 {
@@ -48,6 +48,7 @@ internal sealed partial class MainForm
     };
     private Button? _inspectButton;
     private Button? _refreshInspectButton;
+    private Button? _showOnMapButton;
     private TabPage? _botInspectorTab;
     private TabPage? _inspectOverviewTab;
     private TabPage? _inspectStatsTab;
@@ -93,7 +94,7 @@ internal sealed partial class MainForm
         var controls = new FlowLayoutPanel
         {
             Dock = DockStyle.Right,
-            Width = 880,
+            Width = 1024,
             FlowDirection = FlowDirection.LeftToRight,
             WrapContents = false,
             Padding = new Padding(0, 7, 6, 0),
@@ -122,6 +123,11 @@ internal sealed partial class MainForm
         _refreshInspectButton.Width = 110;
         _refreshInspectButton.Click += async (_, _) => await RefreshBotInspectorAsync();
         controls.Controls.Add(_refreshInspectButton);
+        _showOnMapButton = ActionButton("SHOW ON MAP", DaocTheme.Tint(96, 82, 56));
+        _showOnMapButton.Width = 128;
+        _helpTip.SetToolTip(_showOnMapButton, "Open the Live World Map centred on the selected bot and follow it.");
+        _showOnMapButton.Click += async (_, _) => await ShowInspectedBotOnMapAsync();
+        controls.Controls.Add(_showOnMapButton);
         header.Controls.Add(controls);
 
         _inspectOverview.Multiline = true;
@@ -133,7 +139,7 @@ internal sealed partial class MainForm
         _inspectOverview.Font = new Font("Consolas", 9.5f);
         _inspectOverview.ScrollBars = ScrollBars.Vertical;
         _inspectOverview.WordWrap = false;
-        _inspectOverview.Text = "Right-click a bot in Active Population and choose \"Inspect bot\", or choose one above.";
+        _inspectOverview.Text = "Right-click a bot in Active Population and choose \"Inspect bot\", or choose one above. Double-clicking a population row shows that bot on the World Map; SHOW ON MAP does the same for the bot selected here.";
 
         var body = new DaocTabControl { Dock = DockStyle.Fill };
         _inspectOverviewTab = InspectTab("Overview", _inspectOverview);
@@ -302,6 +308,32 @@ internal sealed partial class MainForm
         }
 
         await RefreshBotInspectorAsync();
+    }
+
+    /// <summary>
+    /// Opens the Live World Map centred on the bot the inspector is showing (owner 2026-11-02). The map follows the
+    /// bot until it is dragged. A bot that is not currently in the world is reported in the inspector status line.
+    /// </summary>
+    private async Task ShowInspectedBotOnMapAsync()
+    {
+        InspectChoice? choice = SelectedInspectChoice();
+        if (choice == null)
+        {
+            _inspectStatus.Text = "Choose a bot first, then press SHOW ON MAP.";
+            return;
+        }
+
+        BotRow? bot = _bots.FirstOrDefault(candidate => candidate.BotId == choice.BotId);
+        if (bot == null)
+        {
+            _inspectStatus.Text = $"{choice.DisplayName} is not in the current roster; refresh the dashboard first.";
+            return;
+        }
+
+        if (await ShowBotOnWorldMapAsync(bot))
+            _inspectStatus.Text = $"World Map: centred on {bot.Name}. The map follows the bot until you drag it.";
+        else
+            _inspectStatus.Text = _footer.Text;
     }
 
     private async Task RefreshBotInspectorAsync()

@@ -233,7 +233,7 @@ coin-only monsters (content gap, not bot code).
    world bot an item, and there is no way to task or steer one world bot. Companion gear moves through a vault
    window (`CompanionGearVault165`) instead.
 4. **No per-bot steering, and companion management is in-game only.** The launcher shows population, groups, the
-   live world map (with bot selection), goals and RvR records, reads one bot in detail in the **Bot Inspector**
+   live world map (show-on-map, follow, 1000% zoom), goals and RvR records, reads one bot in detail in the **Bot Inspector**
    (money, stats, gear, bag, specs and training - read only), and still offers "Teleport to" (GM only,
    `MainForm.cs:1215`) and "Delete" (`MainForm.cs:1204`), but there is no in-game command to tell one world bot to
    switch goal, hold or regroup. Hired companions are not listed by the launcher at all (`MainForm.cs:2845`), so

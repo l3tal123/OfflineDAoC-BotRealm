@@ -97,7 +97,7 @@ internal sealed partial class MainForm
         bar.Controls.Add(_worldMapZoom);
         _worldMapHint = new Label
         {
-            Text = "wheel zooms  •  drag pans  •  hover a dot for details  •  double-click selects",
+            Text = "wheel zooms to 1000%  •  drag pans  •  hover for details  •  double-click a dot selects",
             AutoSize = true,
             ForeColor = DaocTheme.Muted,
             Font = new Font("Georgia", 8.5f, FontStyle.Italic),
@@ -194,6 +194,81 @@ internal sealed partial class MainForm
             if (row.DataBoundItem is BotRow bound && bound.BotId == botId)
                 return row;
         return null;
+    }
+
+    /// <summary>
+    /// Brings one bot up on the Live World Map (owner 2026-11-02): from the Active Population right-click menu and
+    /// double-click, the Server Stats leaderboards and the Bot Inspector. The tab switches, the bot's region is
+    /// selected, the view zooms in on its live position and follows it until the map is dragged. The position comes
+    /// from the same bot-world snapshot the population tab uses; a bot with no live position (offline, queued, or the
+    /// server stopped) is reported in the footer and, on the double-click path, falls back to the Bot Inspector.
+    /// </summary>
+    private async Task<bool> ShowBotOnWorldMapAsync(BotRow bot, bool allowInspectorFallback = false)
+    {
+        if (bot?.BotId is not long botId)
+            return false;
+
+        LiveBotStatus? live = FindLiveBotOnWorldMap(botId);
+        if (live == null && IsServerRunning())
+        {
+            // The map may not have been opened yet this session: one snapshot request, then decide.
+            LiveBotSnapshot? snapshot = await Task.Run(RequestLiveBotSnapshot);
+            if (snapshot != null)
+                _lastWorldMapSnapshot = snapshot;
+            live = FindLiveBotOnWorldMap(botId);
+        }
+        if (live == null)
+        {
+            _footer.Text = IsServerRunning()
+                ? $"World Map: {bot.Name} has no live position right now — it is offline, still in the login queue, or not on the map yet."
+                : $"World Map: the server is not running, so {bot.Name} has no live position to show.";
+            if (allowInspectorFallback)
+                await InspectBotAsync(bot);
+            return false;
+        }
+
+        return ShowLiveBotOnWorldMap(live, bot.Name);
+    }
+
+    private LiveBotStatus? FindLiveBotOnWorldMap(long botId) =>
+        _lastWorldMapSnapshot?.Bots?.FirstOrDefault(candidate => candidate.BotId == botId && candidate.RegionId > 0);
+
+    /// <summary>Selects the bot's region and asks the map control to centre and follow it. This changes no game state.</summary>
+    private bool ShowLiveBotOnWorldMap(LiveBotStatus live, string displayName)
+    {
+        if (_worldMap == null || _worldMapTab == null || _tabs == null)
+            return false;
+
+        if (_lastWorldMapSnapshot != null)
+            _worldMap.SetSnapshot(_lastWorldMapSnapshot);
+        UpdateWorldMapChoices();
+        SelectWorldMapRegion(live.RegionId);
+        if (!_worldMap.ShowBot(live.BotId))
+        {
+            _footer.Text = $"World Map: {displayName}'s region ({live.ZoneName}) is not on the map yet.";
+            return false;
+        }
+        _tabs.SelectedTab = _worldMapTab;
+        SyncWorldMapZoomLabel();
+        _footer.Text =
+            $"World Map: following {displayName} — level {live.Level}, {live.ZoneName}. Wheel zooms (up to 1000%); drag the map to stop following and pan.";
+        return true;
+    }
+
+    /// <summary>Moves the VIEW selector to a region; the combo's handler then resets the map view to fit.</summary>
+    private void SelectWorldMapRegion(int regionId)
+    {
+        if (_worldMapRegion != null)
+        {
+            for (int index = 0; index < _worldMapRegion.Items.Count; index++)
+            {
+                if (_worldMapRegion.Items[index] is not WorldMapChoice choice || choice.RegionId != regionId)
+                    continue;
+                _worldMapRegion.SelectedIndex = index;
+                return;
+            }
+        }
+        _worldMap!.SelectedRegionId = regionId;
     }
 
     private async Task RefreshWorldMapAsync()
@@ -297,11 +372,18 @@ internal sealed partial class MainForm
         private LiveBotStatus? _hoverBot;
         private int _selectedRegionId;
 
+        // One bot can be singled out by "Show on map" (owner 2026-11-02): a gold ring and a name tag mark it, and
+        // until the map is dragged the view keeps it centred as new snapshots arrive.
+        private long? _focusedBotId;
+        private long? _followBotId;
+        private bool _focusPending;
+
         // View state: the map content is laid out once at 100% inside _mapArea, and this zoom/pan pair maps those
         // content coordinates onto the control. Zooming never re-lays-out the map, so painted zone maps stay sharp
         // (the source PNGs are larger than their on-screen rectangles at 100%).
         private const float MinZoom = 1f;
-        private const float MaxZoom = 8f;
+        private const float MaxZoom = 10f;          // 1000%: enough to read a single camp on a painted zone map
+        private const float FocusZoom = 3f;         // where a "show on map" jump lands, in the bot's zone
         private const float ZoomStep = 1.25f;
         private Rectangle _mapArea;
         private float _zoom = 1f;
@@ -343,6 +425,9 @@ internal sealed partial class MainForm
         /// <summary>Returns to the whole map at 100%.</summary>
         public void ResetView()
         {
+            _focusedBotId = null;
+            _followBotId = null;
+            _focusPending = false;
             bool changed = Math.Abs(_zoom - MinZoom) > 0.0001f || _pan != PointF.Empty;
             _zoom = MinZoom;
             _pan = PointF.Empty;
@@ -351,6 +436,30 @@ internal sealed partial class MainForm
                 return;
             ZoomChanged?.Invoke();
             Invalidate();
+        }
+
+        /// <summary>
+        /// Centres the view on one bot and follows it while its snapshots arrive (owner 2026-11-02). The bot must be
+        /// in a region this map knows; the host switches the tab and selects the region first. Dragging the map,
+        /// resetting the view or choosing another region ends the follow; the gold ring stays on the bot until then.
+        /// </summary>
+        public bool ShowBot(long botId)
+        {
+            LiveBotStatus? bot = _snapshot?.Bots?.FirstOrDefault(candidate =>
+                candidate.BotId == botId && candidate.RegionId > 0 && _regions.ContainsKey(candidate.RegionId));
+            if (bot == null)
+                return false;
+
+            SelectedRegionId = bot.RegionId;   // fits the region and drops any earlier focus
+            _focusedBotId = bot.BotId;
+            _followBotId = bot.BotId;
+            _zoom = FocusZoom;
+            _pan = PointF.Empty;
+            _focusPending = true;
+            ClampPan();
+            ZoomChanged?.Invoke();
+            Invalidate();
+            return true;
         }
 
         private Point MapCentre() => _mapArea.Width > 0
@@ -367,7 +476,11 @@ internal sealed partial class MainForm
                 if (_selectedRegionId == value)
                     return;
                 _selectedRegionId = value;
-                // A different view starts fitted: a zoom meant for one region is not meaningful in another.
+                // A different view starts fitted: a zoom meant for one region is not meaningful in another, and a
+                // bot singled out in the old region must not stay "followed" in this one.
+                _focusedBotId = null;
+                _followBotId = null;
+                _focusPending = false;
                 _zoom = MinZoom;
                 _pan = PointF.Empty;
                 ClampPan();
@@ -452,6 +565,8 @@ internal sealed partial class MainForm
             if (!canPan)
                 return;
             _panning = true;
+            // A drag is the user taking the camera back from "show on map": stop following, keep the ring.
+            _followBotId = null;
             _panAnchorScreen = e.Location;
             _panAnchorOffset = _pan;
             Cursor = Cursors.SizeAll;
@@ -560,7 +675,7 @@ internal sealed partial class MainForm
             Invalidate();
         }
 
-        /// <summary>Keeps the content covering the map area: no gap beyond an edge, and centred when it is smaller.</summary>
+        /// <summary>Keeps the map area covering its content: no gap beyond an edge, and centred when it is smaller.</summary>
         private void ClampPan()
         {
             if (_mapArea.Width <= 0 || _mapArea.Height <= 0)
@@ -573,6 +688,33 @@ internal sealed partial class MainForm
             _pan.Y = scaledHeight <= _mapArea.Height
                 ? (_mapArea.Height - scaledHeight) / 2f
                 : Math.Min(0f, Math.Max(_mapArea.Height - scaledHeight, _pan.Y));
+        }
+
+        /// <summary>
+        /// Keeps the followed bot under the middle of the map as new snapshots arrive (owner 2026-11-02). The same
+        /// content layout the detailed region view paints with is used, so the dot and the camera cannot disagree.
+        /// </summary>
+        private void FollowFocusedBot()
+        {
+            if (_followBotId is not long botId || _mapArea.Width <= 0 || _mapArea.Height <= 0)
+                return;
+            if (!_regions.TryGetValue(_selectedRegionId, out MapRegion? region))
+                return;
+            LiveBotStatus? bot = _snapshot?.Bots?.FirstOrDefault(candidate =>
+                candidate.BotId == botId && candidate.RegionId == _selectedRegionId);
+            if (bot == null)
+                return;
+
+            var contentArea = new RectangleF(0, 0, _mapArea.Width, _mapArea.Height);
+            var mapRect = new RectangleF(contentArea.X, contentArea.Y + 6, contentArea.Width, contentArea.Height - 6);
+            RectangleF bounds = RegionFitBounds(region, mapRect);
+            if (bounds.Width <= 0 || bounds.Height <= 0)
+                return;
+            float scale = bounds.Width / Math.Max(1, region.WorldWidth);
+            float contentX = bounds.X + (bot.X - region.MinX) * scale;
+            float contentY = bounds.Y + (bot.Y - region.MinY) * scale;
+            _pan = new PointF(_mapArea.Width / 2f - contentX * _zoom, _mapArea.Height / 2f - contentY * _zoom);
+            ClampPan();
         }
 
         // ------------------------------------------------------------------ paint
@@ -608,6 +750,13 @@ internal sealed partial class MainForm
                 return;
 
             _mapArea = mapArea;
+            if (_focusPending)
+            {
+                // The first paint after a jump: land at a readable zoom, then centre.
+                _focusPending = false;
+                _zoom = FocusZoom;
+            }
+            FollowFocusedBot();
             ClampPan();
 
             _dots.Clear();
@@ -631,12 +780,14 @@ internal sealed partial class MainForm
             }
             if (_zoom > MinZoom)
                 DrawZoomBadge(graphics, mapArea);
+            DrawRealmLegend(graphics, mapArea);
             DrawTooltip(graphics);
         }
 
         private void DrawZoomBadge(Graphics graphics, Rectangle mapArea)
         {
-            string text = $"ZOOM {ZoomPercent}%   •   drag to pan   •   RESET to fit";
+            string following = _followBotId is long followedId ? $"   •   FOLLOWING {FocusedName(followedId)}" : string.Empty;
+            string text = $"ZOOM {ZoomPercent}%{following}   •   drag to pan   •   RESET to fit";
             SizeF size = graphics.MeasureString(text, _zoneFont);
             var box = new RectangleF(mapArea.Right - size.Width - 20, mapArea.Bottom - size.Height - 12,
                 size.Width + 12, size.Height + 4);
@@ -644,8 +795,68 @@ internal sealed partial class MainForm
                 graphics.FillRectangle(fill, box);
             using (var border = new Pen(Color.FromArgb(150, DaocTheme.StoneLight)))
                 graphics.DrawRectangle(border, box.X, box.Y, box.Width, box.Height);
-            using var brush = new SolidBrush(DaocTheme.Muted);
+            using var brush = new SolidBrush(_followBotId.HasValue ? DaocTheme.GoldLight : DaocTheme.Muted);
             graphics.DrawString(text, _zoneFont, brush, box.X + 6, box.Y + 2);
+        }
+
+        private string FocusedName(long botId)
+        {
+            string? name = _snapshot?.Bots?.FirstOrDefault(bot => bot.BotId == botId)?.Name;
+            if (string.IsNullOrWhiteSpace(name))
+                return "BOT";
+            name = name.ToUpperInvariant();
+            return name.Length <= 22 ? name : name[..21] + "…";
+        }
+
+        /// <summary>The realm colour key, with the live count of bots each realm has on the map (owner 2026-11-02).</summary>
+        private void DrawRealmLegend(Graphics graphics, Rectangle mapArea)
+        {
+            if (_snapshot?.Bots == null)
+                return;
+            int albion = 0, midgard = 0, hibernia = 0;
+            foreach (LiveBotStatus bot in _snapshot.Bots)
+            {
+                if (bot.RegionId <= 0 || !_regions.ContainsKey(bot.RegionId))
+                    continue;
+                switch (bot.Realm)
+                {
+                    case 1: albion++; break;
+                    case 2: midgard++; break;
+                    case 3: hibernia++; break;
+                }
+            }
+            if (albion + midgard + hibernia == 0)
+                return;
+            (string Text, int Count, Color Color)[] entries =
+            [
+                ("Albion", albion, DaocTheme.Albion),
+                ("Midgard", midgard, DaocTheme.Midgard),
+                ("Hibernia", hibernia, DaocTheme.Hibernia),
+            ];
+            var sizes = new SizeF[entries.Length];
+            float width = 12;
+            for (int index = 0; index < entries.Length; index++)
+            {
+                sizes[index] = graphics.MeasureString($"{entries[index].Text} {entries[index].Count:N0}", _zoneFont);
+                width += 10 + sizes[index].Width + 10;
+            }
+            const float height = 22;
+            // Top-right, clear of the region caption (top-left) and the zoom/follow badge (bottom-right).
+            var box = new RectangleF(mapArea.Right - width - 8, mapArea.Y + 8, width, height);
+            using (var fill = new SolidBrush(Color.FromArgb(190, DaocTheme.StoneDark)))
+                graphics.FillRectangle(fill, box);
+            using (var border = new Pen(Color.FromArgb(140, DaocTheme.StoneLight)))
+                graphics.DrawRectangle(border, box.X, box.Y, box.Width, box.Height);
+            float x = box.X + 8;
+            for (int index = 0; index < entries.Length; index++)
+            {
+                using (var dot = new SolidBrush(entries[index].Color))
+                    graphics.FillEllipse(dot, x, box.Y + height / 2f - 3f, 6f, 6f);
+                x += 10;
+                using var text = new SolidBrush(DaocTheme.Parchment);
+                graphics.DrawString($"{entries[index].Text} {entries[index].Count:N0}", _zoneFont, text, x, box.Y + 4f);
+                x += sizes[index].Width + 10;
+            }
         }
 
         private double SnapshotAgeSeconds()
@@ -811,11 +1022,21 @@ internal sealed partial class MainForm
                 }
                 using var zonePen = new Pen(Color.FromArgb(detailed ? 70 : 35, DaocTheme.Iron), 1f);
                 graphics.DrawRectangle(zonePen, zoneRect.X, zoneRect.Y, zoneRect.Width, zoneRect.Height);
-                if (detailed && image == null && zoneRect.Width > 58 && zoneRect.Height > 22)
+                // Zone names: at high zoom the name of the zone you are inside is the only orientation left, so it is
+                // drawn over the painted map too once the view is close enough (owner 2026-11-02).
+                bool readable = zoneRect.Width > 150 && zoneRect.Height > 48;
+                if (detailed && (image == null && zoneRect.Width > 58 && zoneRect.Height > 22 ||
+                                 image != null && _zoom >= 2f && readable))
                 {
-                    using var label = new SolidBrush(Color.FromArgb(220, DaocTheme.Parchment));
-                    var textRect = new RectangleF(zoneRect.X + 3, zoneRect.Y + 2, zoneRect.Width - 6, zoneRect.Height - 4);
-                    graphics.DrawString(zone.Name, _zoneFont, label, textRect);
+                    SizeF nameSize = graphics.MeasureString(zone.Name, _zoneFont);
+                    var chip = new RectangleF(zoneRect.X + 3, zoneRect.Y + 2, nameSize.Width + 8, nameSize.Height + 2);
+                    if (image != null && chip.Width < zoneRect.Width)
+                    {
+                        using var chipFill = new SolidBrush(Color.FromArgb(150, DaocTheme.StoneDark));
+                        graphics.FillRectangle(chipFill, chip);
+                    }
+                    using var label = new SolidBrush(Color.FromArgb(225, DaocTheme.Parchment));
+                    graphics.DrawString(zone.Name, _zoneFont, label, chip.X + 4, chip.Y + 1);
                 }
             }
 
@@ -841,24 +1062,51 @@ internal sealed partial class MainForm
         private void DrawDot(Graphics graphics, LiveBotStatus bot, float x, float y, Color color)
         {
             bool hovered = ReferenceEquals(bot, _hoverBot);
-            // Dots grow a little with the zoom so they stay findable on a large map, but only up to a point.
-            float zoomScale = Math.Min(1.9f, Math.Max(1f, (float)Math.Sqrt(_zoom)));
-            float radius = (hovered ? 6f : 4.2f) * zoomScale;
-            using (var outline = new SolidBrush(Color.FromArgb(Math.Max(60, (int)color.A), 8, 8, 10)))
-                graphics.FillEllipse(outline, x - radius - 1.6f, y - radius - 1.6f, 2 * radius + 3.2f, 2 * radius + 3.2f);
+            bool focused = _focusedBotId == bot.BotId;
+            // Small dots (owner 2026-11-02: the map is a picture of the world, not a bag of pebbles). They grow a
+            // little with the zoom and on hover, so a single bot still stays findable and easy to click.
+            float zoomScale = Math.Min(1.5f, Math.Max(1f, (float)Math.Sqrt(_zoom)));
+            float radius = (hovered ? 4f : 2.5f) * zoomScale;
+            using (var outline = new SolidBrush(Color.FromArgb(Math.Max(55, (int)color.A), 8, 8, 10)))
+                graphics.FillEllipse(outline, x - radius - 1.1f, y - radius - 1.1f, 2 * radius + 2.2f, 2 * radius + 2.2f);
             if (!bot.IsAlive)
             {
-                using var deadPen = new Pen(Color.FromArgb(Math.Max(70, (int)color.A), 190, 190, 190), 1.6f);
+                using var deadPen = new Pen(Color.FromArgb(Math.Max(70, (int)color.A), 190, 190, 190), 1.4f);
                 graphics.DrawEllipse(deadPen, x - radius, y - radius, 2 * radius, 2 * radius);
-                return;
             }
-            using (var fill = new SolidBrush(color))
-                graphics.FillEllipse(fill, x - radius, y - radius, 2 * radius, 2 * radius);
+            else
+            {
+                using (var fill = new SolidBrush(color))
+                    graphics.FillEllipse(fill, x - radius, y - radius, 2 * radius, 2 * radius);
+            }
+            if (focused)
+            {
+                // The bot singled out by "Show on map": a gold ring and its name, readable at any zoom.
+                using var focusRing = new Pen(Color.FromArgb(235, DaocTheme.GoldLight), 1.8f);
+                graphics.DrawEllipse(focusRing, x - radius - 3.6f, y - radius - 3.6f, 2 * radius + 7.2f, 2 * radius + 7.2f);
+                DrawDotNameTag(graphics, bot.Name, x, y + radius + 5f);
+            }
             if (hovered)
             {
-                using var ring = new Pen(Color.FromArgb(235, DaocTheme.GoldLight), 1.6f);
-                graphics.DrawEllipse(ring, x - radius - 2.5f, y - radius - 2.5f, 2 * radius + 5f, 2 * radius + 5f);
+                using var ring = new Pen(Color.FromArgb(235, DaocTheme.GoldLight), 1.4f);
+                graphics.DrawEllipse(ring, x - radius - 2f, y - radius - 2f, 2 * radius + 4f, 2 * radius + 4f);
             }
+        }
+
+        /// <summary>The focused bot's name, drawn as a small chip under its dot.</summary>
+        private void DrawDotNameTag(Graphics graphics, string name, float x, float y)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return;
+            SizeF size = graphics.MeasureString(name, _zoneFont);
+            float left = x - size.Width / 2f - 4f;
+            var box = new RectangleF(left, y, size.Width + 8f, size.Height + 2f);
+            using (var fill = new SolidBrush(Color.FromArgb(215, DaocTheme.StoneDark)))
+                graphics.FillRectangle(fill, box);
+            using (var border = new Pen(Color.FromArgb(180, DaocTheme.Gold)))
+                graphics.DrawRectangle(border, box.X, box.Y, box.Width, box.Height);
+            using var text = new SolidBrush(DaocTheme.GoldLight);
+            graphics.DrawString(name, _zoneFont, text, left + 4f, y + 1f);
         }
 
         private void DrawTooltip(Graphics graphics)

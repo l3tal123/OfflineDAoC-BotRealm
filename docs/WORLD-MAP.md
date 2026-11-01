@@ -8,8 +8,11 @@ already uses and never changes game state.
 
 ## What it shows
 
-- **Dots** – one per online autonomous world bot, coloured by realm (Albion red, Midgard blue, Hibernia green,
-  neutral gold/dim for other regions).
+- **Dots** – one small dot per online autonomous world bot, coloured by realm (Albion red, Midgard blue, Hibernia
+  green, neutral gold/dim for other regions). They stay small on purpose (2026-11-02) so a crowded camp still reads as
+  separate bots, and grow only a little with the zoom and on hover.
+- **Realm legend** – a small plate in the bottom-left corner counts the bots currently on the map per realm, so the dot
+  colours need no guessing.
 - **Fade** – a dot is solid while its snapshot is at most 4 s old and fades to a faint mark over the next 20 s. Old
   data therefore stays visible but never looks current. The header shows `updated N s ago` in green/gold/red.
 - **Tooltip** (hover a dot) – name; level and class and realm; the bot's current task (`Activity`, the same text
@@ -19,12 +22,20 @@ already uses and never changes game state.
   `Zones`/`Regions` rows, so old frontiers (Forest Sauvage, Hadrian's Wall, ...), dungeons, battlegrounds, capitals
   and Darkness Falls all have their proper place. When the new client's converted content is installed, its painted
   zone maps (`new-client/godot/content/maps/{original,x4plus}/z###.png`) are drawn as the panel background; without
-  that content the same zones are drawn as realm-coloured rectangles.
-- **Zoom and pan** – the wheel zooms about the cursor (100%–800%, 25% a step), `+` / `−` zoom about the middle,
+  that content the same zones are drawn as realm-coloured rectangles. At 200% and closer the zone names are drawn over
+  the painted map too, so a fully zoomed view still says which zone it shows.
+- **Zoom and pan** – the wheel zooms about the cursor (100%–1000%, 25% a step), `+` / `−` zoom about the middle,
   `RESET` returns to the fitted view, and dragging pans a zoomed map (any mouse button; middle-drag works at any
-  zoom). The map is laid out once at 100% and scaled, so the painted zone maps stay sharp; dots grow slightly with the
-  zoom and the region caption, tooltip and `ZOOM n%` badge stay at screen size. Changing the `VIEW` region resets the
-  zoom, so one region's zoom never carries into another.
+  zoom). The map is laid out once at 100% and scaled, so the painted zone maps stay sharp; the region caption, legend,
+  tooltip and `ZOOM n%` badge stay at screen size. Changing the `VIEW` region resets the zoom, so one region's zoom
+  never carries into another.
+- **Show on map** (2026-11-02) – right-click a bot in **Active Population** and choose **Show on map**, double-click
+  its row, double-click a bot in a **Server Stats** top list (that opens the **Bot Inspector** instead, where **SHOW ON
+  MAP** jumps to the map), or press **SHOW ON MAP** in the **Bot Inspector**. The tab switches, the bot's region is
+  selected at 300%, the bot gets a gold ring with its name, and the camera follows it as new 2 s snapshots arrive.
+  Dragging the map, pressing `RESET` or choosing another region ends the follow; the ring stays until then. A bot
+  with no live position (offline, queued, or the server stopped) is reported in the launcher footer; the population
+  double-click then falls back to the **Bot Inspector**.
 - **Double-click a dot** – selects that bot in the **Active Population** tab: the tab comes to the front and the row is
   selected and scrolled into view. If an Active Population filter (realm, search text, online-only) would hide the
   row, the filter is relaxed first; nothing else about the selection changes.
@@ -88,6 +99,25 @@ uses the painted maps. The client does not need to be running; only the server m
 - **Not verified here:** a live in-game run with a running server, the hover tooltip and a real mouse double-click
   (the offscreen probes cannot move a real mouse or click a real window). Test those when the playable install is
   ready.
+
+## Verification done (2026-11-02: show on map, smaller dots, 1000% zoom)
+
+- Launcher build: 0 errors.
+- The headless launcher probe was extended and run against the **deployed** `runtime/OfflineDAoC.dll` (same harness
+  as above; it constructs the real `MainForm` from the playable install and never shows a window):
+  - the Active Population right-click menu lists **Show on map** (before "Inspect bot");
+  - Show on map switches to the World Map tab, selects the bot's region, sets 300%, updates the `ZOOM` label and the
+    footer, and the control reports following bot 42;
+  - a Middle-drag clears the follow; `RESET` returns to 100%;
+  - the zoom buttons reach **1000%** and `RESET` after that returns to 100%;
+  - a **Bot** row in the Server Stats leaderboards switches to the Bot Inspector with that bot selected, while a
+    **Player** row is reported in the status line instead;
+  - the Bot Inspector's **SHOW ON MAP** button opens the map at 300% for the selected bot;
+  - a bot with no live position reports it in the footer and the population double-click falls back to the Bot
+    Inspector.
+- **Not verified here:** a real mouse wheel and a real double-click (the offscreen probe cannot synthesize window
+  input), and the 1000% rendering with the installed painted maps (the probe never shows the form). Test those in the
+  playable install.
 
 ## Known limits
 

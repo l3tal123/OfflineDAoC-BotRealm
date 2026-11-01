@@ -116,6 +116,7 @@ internal sealed partial class MainForm : Form
     private readonly DataGridView _grid = new();
     private DaocTabControl? _tabs;
     private TabPage? _populationTab;
+    private TabPage? _worldMapTab;
     private readonly BindingSource _rvrSource = new();
     private readonly DataGridView _rvrGrid = new();
     private readonly DataGridView _rvrObjectivesGrid = new();
@@ -502,6 +503,7 @@ internal sealed partial class MainForm : Form
         population.Controls.Add(populationLayout);
 
         var worldMap = new TabPage("World Map") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
+        _worldMapTab = worldMap;
         worldMap.Controls.Add(BuildWorldMapPanel());
         worldMap.Enter += async (_, _) =>
         {
@@ -1178,6 +1180,13 @@ internal sealed partial class MainForm : Form
             _grid.CurrentCell = row.Cells[eventArgs.ColumnIndex >= 0 ? eventArgs.ColumnIndex : 0];
         };
         var menu = new ContextMenuStrip();
+        var showOnMapItem = new ToolStripMenuItem("Show on map");
+        showOnMapItem.Click += async (_, _) =>
+        {
+            if (SelectedBot() is BotRow selected)
+                await ShowBotOnWorldMapAsync(selected);
+        };
+        menu.Items.Add(showOnMapItem);
         var inspectItem = new ToolStripMenuItem("Inspect bot");
         inspectItem.Click += async (_, _) =>
         {
@@ -1198,9 +1207,14 @@ internal sealed partial class MainForm : Form
             BotRow? bot = SelectedBot();
             // True 1.65: teleporting is a GM tool, like /tele (owner 2026-11-01); it shows only with "Make Me a GM" on.
             teleportItem.Visible = _makeMeGm.Checked;
+            bool canShowOnMap = bot?.BotId is > 0;
             bool canInspect = bot?.BotId is > 0;
             bool canTeleport = _makeMeGm.Checked && bot is { BotId: not null, IsOnline: true, DeletionQueued: false } && IsServerRunning();
             bool canDelete = bot?.CanDelete == true;
+            showOnMapItem.Enabled = canShowOnMap;
+            showOnMapItem.ToolTipText = canShowOnMap
+                ? $"Centre the Live World Map on {bot!.Name}, zoom in on its zone and follow it until you drag the map."
+                : "Only world bots saved by the server have a live position to show.";
             inspectItem.Enabled = canInspect;
             inspectItem.ToolTipText = canInspect
                 ? $"Open the Bot Inspector on {bot!.Name}: money, stats, gear, bag, specs and training."
@@ -1208,14 +1222,17 @@ internal sealed partial class MainForm : Form
             teleportItem.Enabled = canTeleport;
             teleportItem.ToolTipText = canTeleport ? $"Teleport your logged-in character to {bot!.Name}." : "The server and selected playerbot must both be online.";
             deleteItem.Enabled = canDelete;
-            args.Cancel = bot == null || !canInspect && !canTeleport && !canDelete;
+            args.Cancel = bot == null || (!canShowOnMap && !canInspect && !canTeleport && !canDelete);
         };
         _grid.ContextMenuStrip = menu;
         _grid.CellDoubleClick += async (_, eventArgs) =>
         {
             if (eventArgs.RowIndex < 0 || _grid.Rows[eventArgs.RowIndex].DataBoundItem is not BotRow bot || bot.BotId is not > 0)
                 return;
-            await InspectBotAsync(bot);
+            // Double-click now shows where the bot is (owner 2026-11-02): the World Map tab, centred on its dot and
+            // following it. "Inspect bot" is the right-click entry; a bot with no live position falls back to it so
+            // the double-click is never wasted.
+            await ShowBotOnWorldMapAsync(bot, allowInspectorFallback: true);
         };
         return _grid;
     }

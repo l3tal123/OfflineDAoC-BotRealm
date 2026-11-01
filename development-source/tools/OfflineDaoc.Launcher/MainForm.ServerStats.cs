@@ -125,13 +125,27 @@ internal sealed partial class MainForm
         ConfigureServerStatsGrid(_serverStatsDeathsGrid, _serverStatsDeathsSource);
         ConfigureServerStatsGrid(_serverStatsPvpKillsGrid, _serverStatsPvpKillsSource);
         ConfigureServerStatsGrid(_serverStatsKeepsCapturedGrid, _serverStatsKeepsCapturedSource);
+        // A top list ranks players and bots together; double-clicking a bot row opens the Bot Inspector on it (owner
+        // 2026-11-02). A player row is reported in the status line, since only world bots can be inspected.
+        foreach (DataGridView board in new[]
+                 {
+                     _serverStatsMobsKilledGrid, _serverStatsDeathsGrid, _serverStatsPvpKillsGrid, _serverStatsKeepsCapturedGrid,
+                 })
+        {
+            board.CellDoubleClick += async (_, eventArgs) =>
+            {
+                if (eventArgs.RowIndex < 0 || board.Rows[eventArgs.RowIndex].DataBoundItem is not ServerStatsRow row)
+                    return;
+                await InspectServerStatsEntryAsync(row);
+            };
+        }
         boards.Controls.Add(ServerStatsLeaderboard("Top 10 — Mobs killed", _serverStatsMobsKilledGrid), 0, 0);
         boards.Controls.Add(ServerStatsLeaderboard("Top 10 — Deaths", _serverStatsDeathsGrid), 1, 0);
         boards.Controls.Add(ServerStatsLeaderboard("Top 10 — PvP kills", _serverStatsPvpKillsGrid), 0, 1);
         boards.Controls.Add(ServerStatsLeaderboard("Top 10 — Keeps captured", _serverStatsKeepsCapturedGrid), 1, 1);
         layout.Controls.Add(boards, 0, 3);
 
-        _serverStatsStatus.Text = "Open this tab or press REFRESH SERVER STATS to ask the server for its stats.";
+        _serverStatsStatus.Text = "Open this tab or press REFRESH SERVER STATS to ask the server for its stats. Double-click a bot in a top list to open its Bot Inspector.";
         layout.Controls.Add(_serverStatsStatus, 0, 4);
         return layout;
     }
@@ -248,6 +262,32 @@ internal sealed partial class MainForm
         BindServerStatsRows(_serverStatsDeathsSource, ToServerStatsRows(snapshot?.TopDeaths));
         BindServerStatsRows(_serverStatsPvpKillsSource, ToServerStatsRows(snapshot?.TopPvpKills));
         BindServerStatsRows(_serverStatsKeepsCapturedSource, ToServerStatsRows(snapshot?.TopKeepsCaptured));
+    }
+
+    /// <summary>
+    /// Double-clicking a top-list row opens the Bot Inspector on that bot (owner 2026-11-02). The boards rank players
+    /// and bots together, so a player-character row is reported in the status line rather than opened; a bot row is
+    /// matched by name against the current roster, because the server's stat snapshot carries no bot id.
+    /// </summary>
+    private async Task InspectServerStatsEntryAsync(ServerStatsRow row)
+    {
+        if (!string.Equals(row.Kind, "Bot", StringComparison.OrdinalIgnoreCase))
+        {
+            _serverStatsStatus.Text =
+                $"{row.Name} is a player character, not a world bot: only bots can be opened in the Bot Inspector.";
+            return;
+        }
+
+        BotRow? bot = _bots.FirstOrDefault(candidate => candidate.BotId is > 0 &&
+            string.Equals(candidate.Name, row.Name, StringComparison.OrdinalIgnoreCase));
+        if (bot == null)
+        {
+            _serverStatsStatus.Text =
+                $"{row.Name} is not in the current world bot roster (it may have been deleted, or the roster is stale). Refresh the dashboard, then try again.";
+            return;
+        }
+
+        await InspectBotAsync(bot);
     }
 
     private static void BindServerStatsRows(BindingSource source, List<ServerStatsRow> rows)

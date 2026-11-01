@@ -78,7 +78,7 @@ The world fills with gamebots that level, group, craft, trade and fight on their
   it is a player or a bot, its realm and its count. It reads the counters the server keeps from this build on (realm
   points include all earlier play), asks the server once when you open the tab or press **REFRESH SERVER STATS**, and
   never polls. Open it while the server is running for fresh numbers; with the server stopped it shows the last
-  numbers it published.
+  numbers it published. Double-click a **bot** in any top list to open its **Bot Inspector**.
 - **Realm Exchange** (launcher tab) lists every item on the exchange — the item, who listed it and its price — for
   all realms or one, and its **Purchase history** view shows the trades the server has recorded: item, seller,
   buyer, price and time. Open the tab or press **REFRESH REALM EXCHANGE** to read the world database; it never
@@ -87,8 +87,14 @@ The world fills with gamebots that level, group, craft, trade and fight on their
   the item and buff parts, equipped gear with condition and durability, backpack and vault contents, specializations
   and spec points spent and available, realm abilities, abilities, spells and styles, its Realm Exchange listings
   and active buffs, plus where it is and what it is doing. Right-click a bot in **Active Population** and choose
-  **Inspect bot** (or double-click it) to open the tab on that bot; the **BOT** selector works too. It reads one bot
-  when you ask — opening the tab, changing the selector or pressing **REFRESH** — and never polls.
+  **Inspect bot**, double-click a bot in a **Server Stats** top list, or use the **BOT** selector; **SHOW ON MAP**
+  jumps to that bot on the **World Map**. It reads one bot when you ask — opening the tab, changing the selector or
+  pressing **REFRESH** — and never polls.
+- **World Map** (launcher tab) draws every online world bot as a dot, live, coloured by realm. Right-click a bot in
+  **Active Population** and choose **Show on map**, or simply double-click its row: the map opens on that bot's zone
+  at 300%, rings it in gold with its name and follows it until you drag the map. The wheel zooms to **1000%**, the
+  region selector opens a single region large, a corner legend counts the bots per realm, and hovering a dot shows
+  its name, level, class, task and zone.
 - **Options** (launcher tab) sets the **XP rate**: one number from 1 to 5000 that multiplies experience from every
   source — kills, quests, tasks, missions, praying — for you and for every kind of gamebot. 1 is normal, 2.5 is two
   and a half times. It saves with the server stopped and applies at the next start. The same tab has **Make Me a GM**
