@@ -79,11 +79,12 @@ namespace DOL.GS
         // player account is refused with a message; a GM account ("Make Me a GM") still has them, and the real GM commands
         // are untouched. Bot-system commands that play by the rules (hiring, companion stances, /pull) stay. /spawn conjures
         // a helper out of nowhere (1.65 companions are hired at the inns), so it is off too (owner 2026-10-30: "/spawn
-        // commands are still working in true 1.65 mode").
+        // commands are still working in true 1.65 mode"). /autoloot is not on this list (owner 2026-11-01): it is an
+        // ordinary player setting, and the loot it takes goes to the same owners it always did (AutoLoot165).
         private static readonly string[] GmOnlyCommands =
         [
             "&tele", "&tc", "&grind",                                           // travel and auto-play
-            "&freelevel", "&level", "&vault", "&autoloot",                      // free levels, vault anywhere, autoloot
+            "&freelevel", "&level", "&vault",                                   // free levels, vault anywhere (/autoloot stays: it is a player choice, owner 2026-11-01)
             "&mobs", "&bountylocation", "&bountyrent", "&classrog", "&buff",    // monster finder, bounties, ROGs, buffs
             "&hardcore", "&xp", "&rp", "&dropmr", "&api",                       // freeshard toggles and the web API
             "&raid",                                                            // /raid 40 and /raid 80 (plan section 17)

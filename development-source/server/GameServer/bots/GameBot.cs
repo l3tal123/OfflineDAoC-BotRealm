@@ -1820,6 +1820,13 @@ namespace DOL.GS
 
         public object GameStaticItemOwnerComparand => DatabaseID > 0 ? $"offlinebot:{DatabaseID}" : this;
 
+        /// <summary>
+        /// True 1.65 Mode: a gamebot takes a kill's coin and drops straight into its bags instead of walking to the
+        /// bags on the ground (owner 2026-11-01: autoloot for every player and bot). A bot led by a player leaves the
+        /// party's loot to that player, whose own /autoloot setting decides (AutoLoot165.WantsLoot).
+        /// </summary>
+        public bool Autoloot { get; set; } = true;
+
         public TryPickUpResult TryAutoPickUpMoney(GameMoney money)
         {
             money.AssertLockAcquisition();

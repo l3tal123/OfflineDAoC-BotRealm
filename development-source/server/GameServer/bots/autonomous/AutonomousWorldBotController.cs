@@ -465,10 +465,11 @@ namespace DOL.GS
                     return false;
                 }
 
-                // True 1.65 Mode: no autoloot. After the fight the bot walks to its bags and picks them up.
+                // True 1.65 Mode: autoloot pays a kill straight into the bot's bag (GameBot.Autoloot), so a bag is only
+                // left for a reason (autoloot off, a full backpack, someone else's kill). The bot walks to those.
                 if (BotLootWalk165.Handle(bot, out string lootName))
                 {
-                    SetStatus(bot, $"Looting {lootName}", GoalText(), $"Picking up {lootName} (no autoloot in True 1.65 Mode)");
+                    SetStatus(bot, $"Looting {lootName}", GoalText(), $"Picking up {lootName} left on the ground");
                     return true;
                 }
 

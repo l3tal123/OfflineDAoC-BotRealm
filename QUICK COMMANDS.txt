@@ -52,6 +52,12 @@ TASKS AND QUESTS
 /quest
   Lists your ongoing and finished quests.
 
+/autoloot <on/off>
+  Pays the coin and drops that are yours (your kills and your party's) straight
+  into your bags instead of leaving them on the ground. Off by default; it saves
+  one right-click per drop. Gamebots always use it, so their kills never become
+  bags to walk to.
+
 At level 5 a courier brings the quest "The Traveler's Inn": turn it in at the
 innkeeper. At level 50 a messenger brings "The Horn of Rallying": turn it in at
 the inn's Horn Handler.
@@ -84,7 +90,7 @@ Right-click the broker, then click a choice (or /whisper it):
   [Browse the exchange]   [Manage my listings]   [Claim sale proceeds]
 
 GM ONLY IN TRUE 1.65
-/tele, /tc, /grind, /mobs, /spawn, /raid, /freelevel, /vault, /autoloot,
+/tele, /tc, /grind, /mobs, /spawn, /raid, /freelevel, /vault,
 /buff, /xp, /rp, /hardcore, /classrog, /bountylocation, /bountyrent, /dropmr, /api,
 /switch, /sell, /craftmacro, /faction, and the launcher's "Teleport to" on a bot
   A normal player gets "That command does not exist in True 1.65 Mode."

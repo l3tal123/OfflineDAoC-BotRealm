@@ -112,8 +112,9 @@ Pain, Second Wind, First Aid are used).
 
 ### 1.8 Loot, rest, economy
 
-- Loot: `BotLootWalk165` (no autoloot; walk to your bags), `AutonomousLootFlow` tests, `AutonomousRealmRaid`
-  loot ledger for raids.
+- Loot: `AutoLoot165` (a kill's coin and drops paid straight to their owner: `/autoloot` for players, always on for
+  bots; a player-led party follows its leader), `BotLootWalk165` (walk to any bag autoloot left behind),
+  `AutonomousLootFlow` tests, `AutonomousRealmRaid` loot ledger for raids.
 - Rest: `BotRestRecovery` + `AutonomousRestPolicy` (health 70 / power 45 / endurance 35 thresholds; recovery
   to full once seated).
 - Economy: `AutonomousBotEconomy` (coin from `offline_world_bots`, vendoring, equipment upgrades, Realm
@@ -137,7 +138,7 @@ Galladoria), 3 Summoner's Hall and 3 Darkness Falls (Legion) expeditions.
 |---|---|
 | `Classic165Mode.cs` | `IsOn`, XP locked 1x, `state-165` paths, travel time x1.5, GM-only commands, inn regions, `CLICK_165` |
 | `PlayerRules165.cs` | `IsPlayerLike` / `IsPlayerRulesBot` - bots get player combat rules |
-| `DeathPenalty165.cs`, `Supplies165.cs`, `ItemWear165.cs`, `TownErrands165.cs`, `BotLootWalk165.cs` | con loss/sickness/healer errand; real arrows/bolts/poisons and `EnsurePullWeapon`; gear wear + paid repair; town-trip reasons (one per 30 min); no autoloot, companions never loot |
+| `DeathPenalty165.cs`, `Supplies165.cs`, `ItemWear165.cs`, `TownErrands165.cs`, `BotLootWalk165.cs`, `AutoLoot165.cs` | con loss/sickness/healer errand; real arrows/bolts/poisons and `EnsurePullWeapon`; gear wear + paid repair; town-trip reasons (one per 30 min); autoloot (players choose with `/autoloot`, bots always on) and the bags it leaves for `BotLootWalk165`; companions never loot |
 | `SoloRangedPull165.cs`, `BaseClassBots165.cs`, `Charm165.cs`, `Coin165.cs`, `CrafterBots165.cs` | solo ranged pull; base class -> promotion at 5 (`PlannedClassId`); charm only with a learned spell; per-monster coin chance; ~1 bot in 5 crafts and lists real recipes, siegecrafters build kits |
 | `Hire165.cs`, `HiredCompanions165.cs`, `CompanionWindows165.cs`, `CompanionGearVault165.cs`, `CompanionUiCommand.cs`, `CompanionChat165.cs` | companion hiring, windows (DebugMode 0x21 'H'), gear, persistence |
 | `Innkeeper165.cs`, `HornHandler165.cs`, `Adventurer165.cs`, `Courier165.cs`, `InnQuestMarkers165.cs` | inns, Horn of Rallying, road patrols, courier quests |

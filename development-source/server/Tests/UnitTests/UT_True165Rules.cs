@@ -34,7 +34,6 @@ namespace DOL.UnitTests
         [TestCase("&spawn")]
         [TestCase("&tele")]
         [TestCase("&raid")]
-        [TestCase("&AUTOLOOT")]
         public void CheatCommandsAreGmOnlyIn165Mode(string command)
         {
             Properties.CLASSIC165_MODE = true;
@@ -43,6 +42,7 @@ namespace DOL.UnitTests
             Assert.That(Classic165Mode.IsGmOnlyCommand(command), Is.False, "normal mode keeps every command");
         }
 
+        [TestCase("&autoloot")]
         [TestCase("&say")]
         [TestCase("&stuck")]
         [TestCase("&summon")]

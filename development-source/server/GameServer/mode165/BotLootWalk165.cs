@@ -6,10 +6,12 @@ using System.Runtime.CompilerServices;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode looting (owner 2026-10-30, plan section 21). There is no autoloot in 1.65, for players or bots: a
-    /// kill's loot and coin stay on the ground (AbstractServerRules.DropLoot). After the fight a gamebot walks to each
-    /// bag it may take and picks it up, as a player with autoloot off would. Its loot rules are the usual owners: its
-    /// own kills, its bot group's (a random member gets it, as before) and its realm expedition's.
+    /// True 1.65 Mode looting (owner 2026-10-30, plan section 21; autoloot added 2026-11-01). A kill's loot and coin are
+    /// paid straight to their owner when that owner has autoloot on (AutoLoot165: every player may turn it on with
+    /// /autoloot, every gamebot has it on). A bag still reaches the ground when nobody who may take it has autoloot on,
+    /// when the owner's backpack is full, or when the owner is offline; after the fight a gamebot walks to each such bag
+    /// it may take and picks it up, as a player with autoloot off would. Its loot rules are the usual owners: its own
+    /// kills, its bot group's (a random member gets it, as before) and its realm expedition's.
     /// Companions never loot: the player's group owns their kills, and a companion keeps only what the player trades it.
     /// </summary>
     public static class BotLootWalk165

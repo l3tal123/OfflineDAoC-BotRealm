@@ -323,14 +323,15 @@ Reference outputs that only the tools copy has (not applied): `drops165-missing.
 
 | File | What |
 |---|---|
-| `Classic165Mode.cs` | `IsOn` (server property `classic165_mode`), XP locked to 1x, `state-165` paths, the freeshard start-up scripts that are off, GM-only commands (`/tele /tc /grind /freelevel /level /vault /autoloot /mobs /bounty* /classrog /buff /hardcore /xp /rp /dropmr /api /raid /spawn`), base-class career check, inn regions (1, 100, 200) as Realm Exchange regions, travel-time × 1.5. |
+| `Classic165Mode.cs` | `IsOn` (server property `classic165_mode`), XP locked to 1x, `state-165` paths, the freeshard start-up scripts that are off, GM-only commands (`/tele /tc /grind /freelevel /level /vault /mobs /bounty* /classrog /buff /hardcore /xp /rp /dropmr /api /raid /spawn`; `/autoloot` is a normal player setting), base-class career check, inn regions (1, 100, 200) as Realm Exchange regions, travel-time × 1.5. |
 | `PlayerRules165.cs` | `IsPlayerLike`: bots get the player combat rules. |
 | `DeathPenalty165.cs` | Bots lose Constitution on PvE release and get resurrection sickness. Gamebots pay a healer or wait it out. |
 | `Supplies165.cs` | Real arrows/bolts from the bag, restock on town errands; companions get theirs from their player. |
 | `ItemWear165.cs` | Bot weapons and armour lose condition like a player's; smith repairs. |
 | `SoloRangedPull165.cs` | Solo bots pull aggressive monsters from range (spell, bow, thrown weapon) and wait for them. |
 | `TownErrands165.cs` | Town trips for repairs, ammo and crafting (one per 30 min). |
-| `BotLootWalk165.cs` | No autoloot: bots walk to the bags they may take; companions never loot. |
+| `AutoLoot165.cs` | Who takes a kill's coin and drops straight into its bags (owner 2026-11-01): every player may turn it on with `/autoloot`; every gamebot has it on; a player-led party follows its leader, a bot group its members, a battlegroup its treasurer. Loot nobody wants (autoloot off, full backpack) still drops. |
+| `BotLootWalk165.cs` | The bags autoloot did not take: bots walk to the ones they may take; companions never loot. |
 | `BaseClassBots165.cs` | Gamebots start as a base class and are promoted at level 5 (`PlannedClassId`). |
 | `CrafterBots165.cs` | About 1 in 5 gamebots craft real recipes and list the products on the Realm Exchange; siegecrafters build siege kits. |
 | `Charm165.cs` | Bots charm real monsters with learned charm spells only. |

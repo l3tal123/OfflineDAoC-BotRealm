@@ -73,6 +73,12 @@ NORMAL PLAYER COMMANDS
   /assist [playerName]
   Handler: DOL.GS.Commands.AssistCommandHandler
 
+/autoloot
+  Take the coin and drops that are yours straight into your bags, instead of
+  leaving them on the ground. Off by default. Gamebots always use it.
+  /autoloot <on/off>
+  Handler: DOL.GS.Commands.AutolootCommandHandler
+
 /autosplit
   Choose how the loot and money are split between members of group
   /autosplit on/off (Leader only: Toggles both coins and loot for entire group)
@@ -1024,11 +1030,6 @@ The launcher's right-click "Teleport to" on a bot is GM only too (it shows with 
   Toggles API options
   /api specs - toggle showing the specs of the player
   Handler: DOL.GS.Commands.APICommandHandler
-
-/autoloot
-  automaticly pick up any loot that drops in your area
-  /autoloot <on/off>
-  Handler: DOL.GS.Commands.AutolootCommandHandler
 
 /bountylocation
   Show the location of your active bounty target.
