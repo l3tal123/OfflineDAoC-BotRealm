@@ -1,0 +1,77 @@
+# Launcher dashboard: live world map
+
+The launcher's **World Map** tab is a fork addition (2026-11-01) that shows every online autonomous gamebot in the
+world as a dot, live, with a tooltip. It is read-only: it reads the same live snapshot the Active Population tab
+already uses and never changes game state.
+
+![World map overview (probe render)](images/world-map-overview.png)
+
+## What it shows
+
+- **Dots** – one per online autonomous world bot, coloured by realm (Albion red, Midgard blue, Hibernia green,
+  neutral gold/dim for other regions).
+- **Fade** – a dot is solid while its snapshot is at most 4 s old and fades to a faint mark over the next 20 s. Old
+  data therefore stays visible but never looks current. The header shows `updated N s ago` in green/gold/red.
+- **Tooltip** (hover a dot) – name; level and class and realm; the bot's current task (`Activity`, the same text
+  as the Active Population grid); zone and region; snapshot age.
+- **Two views** – *World overview* draws one panel per region that has bots (the three realms and their Shires when
+  empty); the `VIEW` dropdown opens a single region large. A region panel is built from the world database's own
+  `Zones`/`Regions` rows, so old frontiers (Forest Sauvage, Hadrian's Wall, ...), dungeons, battlegrounds, capitals
+  and Darkness Falls all have their proper place. When the new client's converted content is installed, its painted
+  zone maps (`new-client/godot/content/maps/{original,x4plus}/z###.png`) are drawn as the panel background; without
+  that content the same zones are drawn as realm-coloured rectangles.
+
+Positions come from the server, never from the launcher: the launcher only shows what the live snapshot says.
+
+## How the data flows
+
+| Step | Where | What |
+|---|---|---|
+| 1 | launcher, every 2 s (only while the World Map tab is visible) | writes `runtime/server/bot-world.request` (a GUID) |
+| 2 | server, `bots/autonomous/AutonomousBotDashboard.cs` | polls that request every 500 ms and publishes `runtime/server/state-165/bot-world.json` |
+| 3 | launcher, `MainForm.WorldMap.cs` | reads the snapshot, matches each bot's `RegionId`/`ZoneId` to the `Zones` table, places X/Y on the panel and repaints |
+| 4 | launcher, 1 s display clock | repaints the fade and the `updated N s ago` header even between snapshots |
+
+The server snapshot gained these read-only fields (defaults keep old snapshots readable):
+
+`Name`, `ClassName`, `Realm`, `RegionId`, `ZoneId`, `X`, `Y`, `Z`
+
+## Build and deploy
+
+Both sides changed, so deploy both (only while the game server and launcher are stopped, and keep a backup of what
+you replace — AGENTS.md rules 10 and 11):
+
+1. **Server** – build `development-source/server` Release and copy `Release/lib/GameServer.dll` and
+   `Release/lib/CoreDatabase.dll` into the playable `runtime/server/`, `runtime/server/lib/` and
+   `runtime/server/win-x64/`.
+2. **Launcher** – build `development-source/tools/OfflineDaoc.Launcher` Release and copy `OfflineDAoC.exe` and
+   `OfflineDAoC.dll` from `bin/Release/net10.0-windows/` into the playable `runtime/`.
+3. Start the server, then the launcher: the **World Map** tab appears between **Active Population** and
+   **Active Groups**.
+
+The map itself needs no content: without the new-client content it draws the zone rectangles. With the content it
+uses the painted maps. The client does not need to be running; only the server must be running for live positions.
+
+## Verification done (2026-11-01)
+
+- Server build: 0 errors.
+- NUnit: `UT_AutonomousBotDashboard` (now includes a world-map round-trip and old-snapshot compatibility test) and the
+  full suite: **3007 tests, 2938 passed, 0 failed, 69 skipped** (in-process NUnit engine because VSTest's testhost
+  cannot start in this environment).
+- Launcher build: 0 errors.
+- The map control was rendered offscreen with synthetic snapshots against the real world database and the installed
+  new-client content (Albion, Midgard, Hibernia and Darkness Falls; overview and single-region views) to check zone
+  placement, dot placement and the painted background. The probe lives under
+  `development-source/server/build/map-probe/` (git-ignored) and is not part of the shipped launcher.
+- **Not verified here:** a live in-game run with a running server, and the hover tooltip in a real window (the
+  offscreen probe cannot move the mouse). Test those when the playable install is ready.
+
+## Known limits / next steps
+
+- Autonomous world bots only (what the Active Population tab lists); hired companions and the player's own character
+  are not on the map yet.
+- No zoom or pan; the map fits the panel. The dropdown switches region.
+- Bots without a reported region (an older server build) are counted in the header but not drawn — deploying the new
+  server build fixes that.
+- Possible follow-ups: companions/player dots, click a dot to select the bot in the Active Population grid, group
+  markers, RvR objective markers.

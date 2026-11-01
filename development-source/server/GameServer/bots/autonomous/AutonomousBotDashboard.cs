@@ -21,7 +21,11 @@ public static class AutonomousBotDashboard
     public sealed record BotStatus(long BotId, int Level, string ZoneName, string Activity,
         string CurrentGoal, string TargetName, string TravelDestination, string ObjectiveProgress,
         bool IsAlive, string ItineraryJson, string ObjectiveKind, string ObjectiveAssignmentId,
-        string ObjectiveAssignedUtc, string ObjectivePhase, string ObjectiveExpiresUtc);
+        string ObjectiveAssignedUtc, string ObjectivePhase, string ObjectiveExpiresUtc,
+        // Live world-map data for the launcher dashboard. Appended with defaults so an older
+        // launcher/snapshot still deserializes and a bot without a region stays off the map.
+        string Name = "", string ClassName = "", int Realm = 0, int RegionId = 0, int ZoneId = 0,
+        int X = 0, int Y = 0, int Z = 0);
     public sealed record Snapshot(DateTime UpdatedUtc, bool Running, string RequestId, BotStatus[] Bots);
 
     private static readonly Logger Log = LoggerManager.Create(typeof(AutonomousBotDashboard));
@@ -51,10 +55,11 @@ public static class AutonomousBotDashboard
     internal static BotStatus Capture(GameBot bot)
     {
         OfflineWorldBotRecord record = bot.PersistentRecord;
+        Zone zone = bot.CurrentZone;
         return new BotStatus(
             bot.DatabaseID,
             bot.Level,
-            bot.CurrentZone?.Description ?? record?.ZoneName ?? "—",
+            zone?.Description ?? record?.ZoneName ?? "—",
             record?.Activity ?? string.Empty,
             record?.CurrentGoal ?? string.Empty,
             record?.TargetName ?? string.Empty,
@@ -66,7 +71,15 @@ public static class AutonomousBotDashboard
             record?.ObjectiveAssignmentId ?? string.Empty,
             record?.ObjectiveAssignedUtc ?? string.Empty,
             record?.ObjectivePhase ?? string.Empty,
-            record?.ObjectiveExpiresUtc ?? string.Empty);
+            record?.ObjectiveExpiresUtc ?? string.Empty,
+            bot.Name ?? string.Empty,
+            record?.ClassName ?? bot.CharacterClass?.Name ?? string.Empty,
+            (int)bot.Realm,
+            bot.CurrentRegionID,
+            zone?.ID ?? (ushort)0,
+            bot.X,
+            bot.Y,
+            bot.Z);
     }
 
     private static void PollForRequest()

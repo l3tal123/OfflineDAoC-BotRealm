@@ -82,3 +82,6 @@ runtime/server/bot-ai-delay.json
 # Keep them outside the repository tree when possible; these cover the in-repo defaults.
 release/.downloads/
 release-assets/
+
+# Fork-local reference repositories/downloads (never project source)
+references/

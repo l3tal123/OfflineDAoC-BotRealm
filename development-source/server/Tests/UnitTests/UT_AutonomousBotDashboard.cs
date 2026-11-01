@@ -39,6 +39,45 @@ namespace DOL.UnitTests
         }
 
         [Test]
+        public void WorldMapFieldsRoundTripAndStayOptional()
+        {
+            var bot = new AutonomousBotDashboard.BotStatus(7, 23, "Camelot Hills", "Fighting a monster", "",
+                "", "", "", true, "", "SoloPve", "assignment", "2026-11-01T00:00:00Z", "Roaming", "",
+                "Alba", "Cabalist", 1, 1, 0, 412345, 512345, 3000);
+            var snapshot = new AutonomousBotDashboard.Snapshot(DateTime.UtcNow, true, "map-request", [bot]);
+            byte[] json = JsonSerializer.SerializeToUtf8Bytes(snapshot);
+
+            AutonomousBotDashboard.Snapshot decoded =
+                JsonSerializer.Deserialize<AutonomousBotDashboard.Snapshot>(json);
+            Assert.That(decoded, Is.Not.Null);
+            AutonomousBotDashboard.BotStatus status = decoded!.Bots[0];
+            Assert.That(status.Name, Is.EqualTo("Alba"));
+            Assert.That(status.ClassName, Is.EqualTo("Cabalist"));
+            Assert.That(status.Realm, Is.EqualTo(1));
+            Assert.That(status.RegionId, Is.EqualTo(1));
+            Assert.That(status.ZoneId, Is.EqualTo(0));
+            Assert.That(status.X, Is.EqualTo(412345));
+            Assert.That(status.Y, Is.EqualTo(512345));
+            Assert.That(status.Z, Is.EqualTo(3000));
+
+            // An older snapshot (before the map fields existed) must still deserialize.
+            const string legacy = """
+                {"UpdatedUtc":"2026-11-01T00:00:00Z","Running":true,"RequestId":"old",
+                 "Bots":[{"BotId":1,"Level":10,"ZoneName":"Camelot Hills","Activity":"Resting",
+                 "CurrentGoal":"","TargetName":"","TravelDestination":"","ObjectiveProgress":"",
+                 "IsAlive":true,"ItineraryJson":"","ObjectiveKind":"SoloPve",
+                 "ObjectiveAssignmentId":"","ObjectiveAssignedUtc":"","ObjectivePhase":"",
+                 "ObjectiveExpiresUtc":""}]}
+                """;
+            AutonomousBotDashboard.Snapshot old =
+                JsonSerializer.Deserialize<AutonomousBotDashboard.Snapshot>(legacy);
+            Assert.That(old, Is.Not.Null);
+            Assert.That(old!.Bots[0].Name, Is.Empty);
+            Assert.That(old.Bots[0].RegionId, Is.EqualTo(0));
+            Assert.That(old.Bots[0].X, Is.EqualTo(0));
+        }
+
+        [Test]
         [NonParallelizable]
         public void RequestProducesOneMatchingRollingSnapshot()
         {

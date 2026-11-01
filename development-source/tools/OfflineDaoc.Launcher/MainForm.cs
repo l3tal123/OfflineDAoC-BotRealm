@@ -213,6 +213,17 @@ internal sealed partial class MainForm : Form
         };
 
         _displayClock.Tick += (_, _) => RefreshVisibleCountdowns();
+        // The world map is a live view: refresh its own snapshot every two seconds and repaint the dot fade each second.
+        _displayClock.Tick += (_, _) =>
+        {
+            if (_worldMap?.Visible == true)
+                _worldMap.Invalidate();
+        };
+        _worldMapRefresh.Tick += async (_, _) =>
+        {
+            if (_worldMap?.Visible == true)
+                await RefreshWorldMapAsync();
+        };
         _autoRefresh.Tick += async (_, _) =>
         {
             ScheduleNextAutoRefresh();
@@ -226,10 +237,12 @@ internal sealed partial class MainForm : Form
             ScheduleNextAutoRefresh();
             UpdateAutoRefreshCountdown();
             _autoRefresh.Start();
+            _worldMapRefresh.Start();
         };
         FormClosing += (_, _) =>
         {
             _serverReadinessPoll.Stop();
+            _worldMapRefresh.Stop();
             _serverLog?.Dispose();
         };
         UiScale.Apply(this);
@@ -242,6 +255,7 @@ internal sealed partial class MainForm : Form
             _displayClock.Dispose();
             _autoRefresh.Dispose();
             _serverReadinessPoll.Dispose();
+            _worldMapRefresh.Dispose();
             _helpTip.Dispose();
         }
         base.Dispose(disposing);
@@ -481,6 +495,14 @@ internal sealed partial class MainForm : Form
         populationLayout.Controls.Add(BuildGrid(), 0, 1);
         population.Controls.Add(populationLayout);
 
+        var worldMap = new TabPage("World Map") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
+        worldMap.Controls.Add(BuildWorldMapPanel());
+        worldMap.Enter += async (_, _) =>
+        {
+            UpdateWorldMapChoices();
+            await RefreshWorldMapAsync();
+        };
+
         var groups = new TabPage("Active Groups") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
         groups.Controls.Add(BuildActiveGroupsPanel());
         var rvr = new TabPage("Active RvR") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
@@ -488,6 +510,7 @@ internal sealed partial class MainForm : Form
         var options = new TabPage("Options") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
         options.Controls.Add(BuildOptionsPanel());
         tabs.TabPages.Add(population);
+        tabs.TabPages.Add(worldMap);
         tabs.TabPages.Add(groups);
         tabs.TabPages.Add(rvr);
         var battlegrounds = new TabPage("Battlegrounds") { BackColor = DaocTheme.Panel, ForeColor = DaocTheme.Text };
@@ -1251,6 +1274,8 @@ internal sealed partial class MainForm : Form
             _rvrWorld = snapshot.RvrWorld;
             _rvrServerRunning = snapshot.ServerState.Equals("Running", StringComparison.OrdinalIgnoreCase);
             _battlegroundsPanel.Show(_rvrWorld?.Battlegrounds, _rvrServerRunning);
+            _worldMap?.SetSnapshot(snapshot.Live);
+            UpdateWorldMapChoices();
             bool snapshotStarting = snapshot.ServerState.Equals("Starting", StringComparison.OrdinalIgnoreCase);
             string displayedServerState = _stoppingServer
                 ? "Stopping…"
@@ -1758,7 +1783,7 @@ internal sealed partial class MainForm : Form
         bool rvrAnnouncements = ReadSwitch(connection, "rvr_battleground_announcements");
         bool pveAnnouncements = ReadSwitch(connection, "pve_realm_event_announcements");
         return new DashboardSnapshot(serverState, bots, groups, active, memoryMb, botAiDelay, makeMeGm, ReadRvrWorld(),
-            rvrAnnouncements, pveAnnouncements);
+            rvrAnnouncements, pveAnnouncements, liveSnapshotIsAuthoritative ? liveSnapshot : null);
     }
 
     // Anything but an explicit "false" (including a missing row) reads as on.
@@ -3120,12 +3145,15 @@ internal sealed partial class MainForm : Form
     }
     private sealed record DashboardSnapshot(string ServerState, List<BotRow> Bots, List<GroupRow> Groups,
         int Active, double ServerMemoryMb, BotAiDelayReport? BotAiDelay, bool MakeMeGm = false, RvrWorldSnapshot? RvrWorld = null,
-        bool RvrAnnouncements = true, bool PveAnnouncements = true);
+        bool RvrAnnouncements = true, bool PveAnnouncements = true, LiveBotSnapshot? Live = null);
 
     private sealed record LiveBotStatus(long BotId, int Level, string ZoneName, string Activity,
         string CurrentGoal, string TargetName, string TravelDestination, string ObjectiveProgress,
         bool IsAlive, string ItineraryJson, string ObjectiveKind, string ObjectiveAssignmentId,
-        string ObjectiveAssignedUtc, string ObjectivePhase, string ObjectiveExpiresUtc);
+        string ObjectiveAssignedUtc, string ObjectivePhase, string ObjectiveExpiresUtc,
+        // Live world-map fields (server AutonomousBotDashboard.BotStatus); defaults keep older snapshots readable.
+        string Name = "", string ClassName = "", int Realm = 0, int RegionId = 0, int ZoneId = 0,
+        int X = 0, int Y = 0, int Z = 0);
     private sealed record LiveBotSnapshot(DateTime UpdatedUtc, bool Running, string RequestId, List<LiveBotStatus> Bots);
 
     private sealed record RvrObjective(string Kind, string Name, string Owner, string State, string Location, string Carrier, string Forces, string Id = "", long CooldownMilliseconds = 0, bool IsCatalogOnly = false, long PhaseRemainingMilliseconds = 0, string Phase = "")

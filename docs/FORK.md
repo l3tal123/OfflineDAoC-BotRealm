@@ -180,8 +180,10 @@ Setup only added tooling; no gameplay code or content was changed, and **no auto
 - `scripts/bootstrap-fork.ps1` + `scripts/setup-fork.cmd` - attach/repair this checkout (remotes, config, fetches,
   creates the git-ignored `CoreServer/config/serverconfig.xml` the build needs);
 - `scripts/sync-upstream.ps1` + `scripts/sync-fork.cmd` - on-demand sync: merge upstream into the fork and push;
-- `docs/FORK.md` (this page), `docs/BOT-DEVELOPMENT.md`, `docs/DEV-ENVIRONMENT.md`;
-- a fork note appended to `AGENTS.md`, and the ignored `release/.downloads/` cache added to `.gitignore`.
+- `docs/FORK.md` (this page), `docs/BOT-DEVELOPMENT.md`, `docs/DEV-ENVIRONMENT.md`, `docs/WORLD-MAP.md` (the
+  launcher dashboard's live world map, a fork feature);
+- a fork note appended to `AGENTS.md`; git-ignored local material: the release downloader cache (`release/.downloads/`)
+  and reference repositories (`references/`).
 
 ## 5. Troubleshooting
 
