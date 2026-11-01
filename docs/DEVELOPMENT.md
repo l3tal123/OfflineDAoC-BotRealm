@@ -331,6 +331,7 @@ Reference outputs that only the tools copy has (not applied): `drops165-missing.
 | `SoloRangedPull165.cs` | Solo bots pull aggressive monsters from range (spell, bow, thrown weapon) and wait for them. |
 | `TownErrands165.cs` | Town trips for repairs, ammo and crafting (one per 30 min). |
 | `AutoLoot165.cs` | Who takes a kill's coin and drops straight into its bags (owner 2026-11-01): every player may turn it on with `/autoloot`; every gamebot has it on; a player-led party follows its leader, a bot group its members, a battlegroup its treasurer. Loot nobody wants (autoloot off, full backpack) still drops. |
+| `XpRateMultiplier165.cs` | The launcher's Options XP rate (`ServerProperty` `xp_rate_multiplier`, 1 to 5000, default 1): one multiplier for every experience gain, players and every kind of gamebot; losses are never scaled. Applied in `GamePlayer.GainExperience`/`ForceGainExperience` and `GameBot.GainExperience`. |
 | `BotLootWalk165.cs` | The bags autoloot did not take: bots walk to the ones they may take; companions never loot. |
 | `BaseClassBots165.cs` | Gamebots start as a base class and are promoted at level 5 (`PlannedClassId`). |
 | `CrafterBots165.cs` | About 1 in 5 gamebots craft real recipes and list the products on the Realm Exchange; siegecrafters build siege kits. |

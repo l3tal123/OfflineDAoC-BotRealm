@@ -1,5 +1,6 @@
 using System.Data.SQLite;
 using System.Diagnostics;
+using System.Globalization;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -85,6 +86,17 @@ internal sealed partial class MainForm : Form
     private readonly CheckBox _makeMeGm = new() { Text = "Make Me a GM", AutoSize = true, ForeColor = DaocTheme.Parchment, Font = new Font("Georgia", 9f, FontStyle.Bold) };
     private readonly CheckBox _rvrAnnouncements = new() { Text = "RvR and battleground announcements", AutoSize = true, Checked = true, ForeColor = DaocTheme.Parchment, Font = new Font("Georgia", 9f, FontStyle.Bold) };
     private readonly CheckBox _pveAnnouncements = new() { Text = "PvE realm event announcements", AutoSize = true, Checked = true, ForeColor = DaocTheme.Parchment, Font = new Font("Georgia", 9f, FontStyle.Bold) };
+    // XP rate (owner 2026-11-01): one multiplier for experience from every source, for players and every kind of bot.
+    private const string XpRatePropertyKey = "xp_rate_multiplier";
+    private const double XpRateMinimum = 1.0;
+    private const double XpRateMaximum = 5000.0;
+    private readonly TextBox _xpRate = new()
+    {
+        Width = 130,
+        Text = "1",
+        AccessibleName = "XP rate",
+        AccessibleDescription = "Experience multiplier for players and every kind of gamebot. A number from 1 to 5000; 1 is normal.",
+    };
     private readonly Label _optionsStatus = new()
     {
         AutoSize = true,
@@ -138,6 +150,7 @@ internal sealed partial class MainForm : Form
     private bool _refreshingExchange;
     private bool _loadingOptions;
     private bool _savingOptions;
+    private double _loadedXpRate = XpRateMinimum;
     private bool _generatingBot;
     private DateTime _nextAutoRefreshUtc;
     private DateTime _nextRvrSnapshotRefreshUtc;
@@ -554,7 +567,7 @@ internal sealed partial class MainForm : Form
         var surface = new InsetPanel
         {
             Dock = DockStyle.Top,
-            Height = 330,
+            Height = 380,
             Margin = new Padding(18),
             Padding = new Padding(20),
             Accent = DaocTheme.Gold,
@@ -563,13 +576,14 @@ internal sealed partial class MainForm : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 3,
-            RowCount = 6,
+            RowCount = 7,
             BackColor = Color.Transparent,
         };
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 210));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 135));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
@@ -590,22 +604,48 @@ internal sealed partial class MainForm : Form
         _optionsStatus.Dock = DockStyle.Fill;
         _optionsStatus.TextAlign = ContentAlignment.MiddleLeft;
         _optionsStatus.Font = new Font("Georgia", 9f, FontStyle.Bold | FontStyle.Italic);
-        layout.Controls.Add(_makeMeGm, 0, 1);
+        StyleInput(_xpRate);
+        _xpRate.Margin = new Padding(0, 5, 8, 5);
+        _helpTip.SetToolTip(_xpRate, "Experience multiplier for you and every gamebot.\n" +
+            "A number from 1 to 5000: 1 is normal, 2.5 is two and a half times.\n" +
+            "Saved for the next server start; applies to every XP source.");
+        _xpRate.TextChanged += (_, _) =>
+        {
+            if (_loadingOptions || _savingOptions)
+                return;
+            bool valid = TryParseXpRate(_xpRate.Text, out _);
+            _optionsStatus.Text = valid
+                ? "XP rate ready — press Enter or click elsewhere to save it."
+                : "XP rate must be a number between 1 and 5000.";
+            _optionsStatus.ForeColor = valid ? DaocTheme.Success : Color.Salmon;
+        };
+        _xpRate.Leave += async (_, _) => await SaveXpRateAsync();
+        _xpRate.KeyDown += async (_, key) =>
+        {
+            if (key.KeyCode != Keys.Enter)
+                return;
+            key.SuppressKeyPress = true;
+            await SaveXpRateAsync();
+        };
+        layout.Controls.Add(OptionLabel("XP rate (players and bots)"), 0, 1);
+        layout.Controls.Add(_xpRate, 1, 1);
+        layout.Controls.Add(OptionDescription("Multiplies experience from every source for you and every kind of gamebot: PvE and RvR kills, quests, tasks, missions and praying. Minimum 1 (normal), maximum 5000."), 2, 1);
+        layout.Controls.Add(_makeMeGm, 0, 2);
         layout.SetColumnSpan(_makeMeGm, 2);
-        layout.Controls.Add(OptionDescription("Applies to your account at the next server startup. (Mobs will not attack you with /gmstealth on. Type /gmstealth off in game to turn it off.)"), 2, 1);
+        layout.Controls.Add(OptionDescription("Applies to your account at the next server startup. (Mobs will not attack you with /gmstealth on. Type /gmstealth off in game to turn it off.)"), 2, 2);
         _makeMeGm.CheckedChanged += async (_, _) => await SaveGmSettingAsync();
-        layout.Controls.Add(_rvrAnnouncements, 0, 2);
+        layout.Controls.Add(_rvrAnnouncements, 0, 3);
         layout.SetColumnSpan(_rvrAnnouncements, 2);
-        layout.Controls.Add(OptionDescription("Screen and chat announcements to every realm when frontier or battleground keeps and relics fall, or sieges start."), 2, 2);
+        layout.Controls.Add(OptionDescription("Screen and chat announcements to every realm when frontier or battleground keeps and relics fall, or sieges start."), 2, 3);
         _rvrAnnouncements.CheckedChanged += async (_, _) => await SaveAnnouncementSettingAsync();
-        layout.Controls.Add(_pveAnnouncements, 0, 3);
+        layout.Controls.Add(_pveAnnouncements, 0, 4);
         layout.SetColumnSpan(_pveAnnouncements, 2);
-        layout.Controls.Add(OptionDescription("Screen announcements when realm raids form, and to every realm when a final boss (epic dungeons, Summoner's Hall, Darkness Falls) is defeated."), 2, 3);
+        layout.Controls.Add(OptionDescription("Screen announcements when realm raids form, and to every realm when a final boss (epic dungeons, Summoner's Hall, Darkness Falls) is defeated."), 2, 4);
         _pveAnnouncements.CheckedChanged += async (_, _) => await SaveAnnouncementSettingAsync();
         Label about = OptionDescription(TrueMode.Summary);
-        layout.Controls.Add(about, 0, 4);
+        layout.Controls.Add(about, 0, 5);
         layout.SetColumnSpan(about, 3);
-        layout.Controls.Add(_optionsStatus, 0, 5);
+        layout.Controls.Add(_optionsStatus, 0, 6);
         layout.SetColumnSpan(_optionsStatus, 3);
         surface.Controls.Add(layout);
         return surface;
@@ -1461,6 +1501,11 @@ internal sealed partial class MainForm : Form
             _rvrAnnouncements.Enabled = editable;
             _pveAnnouncements.Checked = snapshot.PveAnnouncements;
             _pveAnnouncements.Enabled = editable;
+            _xpRate.Enabled = editable;
+            _loadedXpRate = snapshot.XpRate;
+            // Never overwrite what is being typed: the snapshot is only the saved value.
+            if (!_xpRate.Focused)
+                _xpRate.Text = FormatXpRate(snapshot.XpRate);
             if (_savingOptions)
             {
                 _optionsStatus.ForeColor = DaocTheme.Success;
@@ -1787,7 +1832,118 @@ internal sealed partial class MainForm : Form
         bool rvrAnnouncements = ReadSwitch(connection, "rvr_battleground_announcements");
         bool pveAnnouncements = ReadSwitch(connection, "pve_realm_event_announcements");
         return new DashboardSnapshot(serverState, bots, groups, active, memoryMb, botAiDelay, makeMeGm, ReadRvrWorld(),
-            rvrAnnouncements, pveAnnouncements, liveSnapshotIsAuthoritative ? liveSnapshot : null);
+            rvrAnnouncements, pveAnnouncements, liveSnapshotIsAuthoritative ? liveSnapshot : null, ReadXpRate(connection));
+    }
+
+    // The saved XP rate, 1 (normal) when the row is missing or unusable.
+    private static double ReadXpRate(SQLiteConnection connection)
+    {
+        if (!TableExists(connection, "ServerProperty"))
+            return XpRateMinimum;
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT Value FROM ServerProperty WHERE lower(`Key`)=@key LIMIT 1";
+        command.Parameters.AddWithValue("@key", XpRatePropertyKey);
+        return TryParseXpRate(command.ExecuteScalar()?.ToString(), out double rate) ? rate : XpRateMinimum;
+    }
+
+    // "Check if the input is a number and make it maximum value of 5000 and minimum of 1" (owner 2026-11-01): anything
+    // that is not a finite number is refused (the field then shows the saved value again); a number outside the range
+    // is clamped to it. A comma is accepted as the decimal separator, as the dashboard may run on a comma locale.
+    private static bool TryParseXpRate(string? text, out double rate)
+    {
+        rate = XpRateMinimum;
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+        string normalized = text.Trim().Replace(',', '.');
+        if (!double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed) ||
+            !double.IsFinite(parsed))
+            return false;
+        rate = Math.Clamp(parsed, XpRateMinimum, XpRateMaximum);
+        return true;
+    }
+
+    private static string FormatXpRate(double rate) => rate.ToString("0.####", CultureInfo.InvariantCulture);
+
+    private async Task SaveXpRateAsync()
+    {
+        if (_loadingOptions || _savingOptions)
+            return;
+        if (!TryParseXpRate(_xpRate.Text, out double rate))
+        {
+            _xpRate.Text = FormatXpRate(_loadedXpRate);
+            _optionsStatus.Text = "XP rate must be a number between 1 and 5000. Nothing was saved.";
+            _optionsStatus.ForeColor = Color.Salmon;
+            return;
+        }
+        string formatted = FormatXpRate(rate);
+        if (!string.Equals(_xpRate.Text.Trim(), formatted, StringComparison.Ordinal))
+            _xpRate.Text = formatted;   // show the clamped value the server will use
+        if (Math.Abs(rate - _loadedXpRate) < 0.00005)
+        {
+            _optionsStatus.Text = $"XP rate is already x{formatted}. Server stopped — changes are saved for the next startup.";
+            _optionsStatus.ForeColor = DaocTheme.Success;
+            return;
+        }
+        if (IsServerRunning() || FindExactServerProcess() is not null)
+        {
+            MessageBox.Show(this, "Stop the server before changing the XP rate.", "Server is running");
+            _xpRate.Text = FormatXpRate(_loadedXpRate);
+            await RefreshDashboardAsync();
+            return;
+        }
+        _savingOptions = true;
+        _xpRate.Enabled = _startButton.Enabled = false;
+        _optionsStatus.Text = "APPLYING XP RATE…";
+        _optionsStatus.ForeColor = DaocTheme.Success;
+        bool saved = false;
+        try
+        {
+            await Task.Run(() => PersistXpRate(rate));
+            _loadedXpRate = rate;
+            saved = true;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Unable to save XP rate");
+            _xpRate.Text = FormatXpRate(_loadedXpRate);
+        }
+        finally
+        {
+            _savingOptions = false;
+            await RefreshDashboardAsync();
+            if (saved)
+            {
+                _optionsStatus.Text = $"XP rate saved: x{formatted}. It applies to players and every gamebot at the next server start.";
+                _optionsStatus.ForeColor = DaocTheme.Success;
+            }
+        }
+    }
+
+    private void PersistXpRate(double rate)
+    {
+        if (IsServerRunning() || FindExactServerProcess() is not null)
+            throw new InvalidOperationException("The server must be fully stopped.");
+        if (!File.Exists(_database))
+            throw new InvalidOperationException("The prepared world database is missing.");
+        using var connection = new SQLiteConnection($"Data Source={_database};Version=3;Pooling=False;Default Timeout=10");
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = """
+            INSERT INTO ServerProperty (Category, `Key`, Description, DefaultValue, Value, LastTimeRowUpdated, ServerProperty_ID)
+            VALUES ('rates', @key, @description, '1', @value, @updated, '')
+            ON CONFLICT(`Key`) DO UPDATE SET
+                Value=excluded.Value,
+                LastTimeRowUpdated=excluded.LastTimeRowUpdated
+            """;
+        command.Parameters.AddWithValue("@key", XpRatePropertyKey);
+        command.Parameters.AddWithValue("@description",
+            "Multiplies experience earned from every source (players and every kind of gamebot) by this rate. 1 is normal. Set in the Offline DAoC launcher.");
+        command.Parameters.AddWithValue("@value", FormatXpRate(rate));
+        command.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("O"));
+        command.ExecuteNonQuery();
+        transaction.Commit();
     }
 
     // Anything but an explicit "false" (including a missing row) reads as on.
@@ -3149,7 +3305,7 @@ internal sealed partial class MainForm : Form
     }
     private sealed record DashboardSnapshot(string ServerState, List<BotRow> Bots, List<GroupRow> Groups,
         int Active, double ServerMemoryMb, BotAiDelayReport? BotAiDelay, bool MakeMeGm = false, RvrWorldSnapshot? RvrWorld = null,
-        bool RvrAnnouncements = true, bool PveAnnouncements = true, LiveBotSnapshot? Live = null);
+        bool RvrAnnouncements = true, bool PveAnnouncements = true, LiveBotSnapshot? Live = null, double XpRate = 1.0);
 
     private sealed record LiveBotStatus(long BotId, int Level, string ZoneName, string Activity,
         string CurrentGoal, string TargetName, string TravelDestination, string ObjectiveProgress,

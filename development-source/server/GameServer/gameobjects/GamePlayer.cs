@@ -4276,6 +4276,11 @@ namespace DOL.GS
 
         public void ForceGainExperience(long expTotal)
         {
+            // The dashboard's XP rate multiplies every source for this player (owner 2026-11-01), including the quest,
+            // bounty and battleground rewards that pay through here instead of GainExperience.
+            if (expTotal > 0)
+                expTotal = XpRateMultiplier165.Apply(expTotal);
+
             if (IsLevelSecondStage)
             {
                 if (Experience + expTotal < ExperienceForCurrentLevelSecondStage)
@@ -4369,6 +4374,10 @@ namespace DOL.GS
 
                 expTotal += baseXp;
             }
+
+            // The dashboard's XP rate multiplies every source for this player (owner 2026-11-01).
+            if (expTotal > 0)
+                expTotal = XpRateMultiplier165.Apply(expTotal);
 
             // Get Champion Experience too
             // GainChampionExperience(expTotal);

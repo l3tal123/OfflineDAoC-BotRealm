@@ -1966,6 +1966,10 @@ namespace DOL.GS
                 experienceGained += baseExperience;
             }
 
+            // The dashboard's XP rate multiplies every source for every kind of gamebot (owner 2026-11-01).
+            if (experienceGained > 0)
+                experienceGained = XpRateMultiplier165.Apply(experienceGained);
+
             // True 1.65 Mode: a hired companion never passes its player's level (owner 2026-10-31). At the player's level
             // it fills its bar and waits there; once the player levels, its next experience levels it too.
             if (HiredCompanions165.IsHired(this) && HiredCompanionLevelCap() is byte capLevel && Level >= capLevel)

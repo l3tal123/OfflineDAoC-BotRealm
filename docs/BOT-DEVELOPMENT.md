@@ -287,6 +287,9 @@ folder instead. Paths come from `Classic165Mode.StatePath`/`StateDirectory`.
 **Settings**
 - `ServerProperty` / `runtime/true165/true165-rules.json`: `classic165_mode`, `population_enabled`,
   `active_target`, `startup_ramp_minutes`, `ai_budget_ms`, `bot_use_town_teleporters`.
+- `ServerProperty` `xp_rate_multiplier` (`XpRateMultiplier165`): the launcher's Options tab writes one rate (1 to 5000);
+  it multiplies every experience gain for players and for every kind of gamebot (PvE, RvR, quests, tasks, missions,
+  praying). Experience losses are never scaled. Not in `true165-rules.json`, so a content refresh keeps the setting.
 - `offline_population_settings` (`PopulationEnabled`, `ActiveTarget`, `HardActiveCap`) and
   `offline_local_options` (`MakeMeGM`): written by the launcher, polled live by the server.
 - `AutonomousPopulationProperties` and `AutonomousDiagnosticsProperties` document every bot property;

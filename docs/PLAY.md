@@ -66,6 +66,10 @@ The world fills with gamebots that level, group, craft, trade and fight on their
 - **Start small** and add more as your PC allows. Every bot is simulated by the server on your PC.
 - The launcher's tabs show the active population, groups, RvR, battlegrounds, realm events and realm records.
   **Bot Goals Setting** sets what the bots aim for.
+- **Options** (launcher tab) sets the **XP rate**: one number from 1 to 5000 that multiplies experience from every
+  source — kills, quests, tasks, missions, praying — for you and for every kind of gamebot. 1 is normal, 2.5 is two
+  and a half times. It saves with the server stopped and applies at the next start. The same tab has **Make Me a GM**
+  and the announcement switches.
 
 ### Companions
 
