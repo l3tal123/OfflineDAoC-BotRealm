@@ -1,73 +1,70 @@
-# Offline DAoC BotRealm — web dashboard (preview)
+# Offline DAoC BotRealm — launcher and live dashboard
 
-A separate, removable web front-end for the live world: the **Active Population** roster (50 per page, searchable,
-sortable) and the **live World Map** (bot dots drawn over the new client's painted zone maps). It is a preview: it
-replaces nothing yet, and the WinForms launcher is untouched.
-
-## Why it is its own folder
-
-Everything is in this folder, so removing the feature is one delete:
-
-- **In the repository:** delete `development-source/tools/OfflineDaoc.Dashboard/`.
-- **In a playable folder:** delete `runtime/dashboard/`.
-
-Nothing else references it: no launcher code, no server code, no client code, no build step in the solution.
+This folder is the launcher. It replaces the WinForms launcher
+(`development-source/tools/OfflineDaoc.Launcher`, kept in the repository for parity checks only) with a small
+.NET host plus a web UI that opens in your browser.
 
 ## Running it
 
-Deployed, it sits in `<playable>\runtime\dashboard\`:
+Double-click `runtime\OfflineDAoC.exe` in a playable folder (or use a shortcut). A console window appears and the
+browser opens `http://127.0.0.1:10310/`:
 
-```
-START DASHBOARD.cmd
-```
+- **START SERVER** — runs the True 1.65 pre-flight (mode check, content refresh with a database backup) and starts
+  `CoreServer.exe`, the same command the old launcher used.
+- **ENTER REALM** — starts the new Godot client logged in as the local account, as soon as port 10300 is ready.
+- **STOP SERVER** — asks the server to shut down and waits for it (the world saves first).
+- **Server tab** — live state, pid, memory, uptime, game-client detection and the server console log.
+- **Active Population / World Map** — the live roster and the live map that the previous dashboard had.
 
-That opens `http://127.0.0.1:10310/` in the default browser. Other options:
+Keep the console window open while you play: it is the launcher, and closing it stops the server. A second
+double-click does not start a second launcher; it brings the existing dashboard back up.
 
-```
-OfflineDaoc.Dashboard.exe --port 10310 --root <playable>\runtime --maps <playable>\new-client\godot\content\maps --no-open
-```
-
-`--root` and `--maps` are detected automatically when the exe sits in `<playable>\runtime\dashboard`.
-
-Building it from source:
-
-```
-dotnet build development-source/tools/OfflineDaoc.Dashboard/OfflineDaoc.Dashboard.csproj -c Release
-```
-
-The build output (with `wwwroot/` and the SQLite runtime files) is what gets copied into `runtime/dashboard/`.
+Options: `OfflineDAoC.exe --port 10310 --root <playable>\runtime --no-open`. `--root` is detected automatically
+when the exe sits in `<playable>\runtime`.
 
 ## What it is, technically
 
-- **Read-only.** It opens `runtime/data/opendaoc-165.sqlite3.db` read-only for the roster and the zone geometry, and
-  reads the live snapshot from the server through the **existing** state-165 file broker (`bot-world.request` →
-  `state-165/bot-world.json`). It writes nothing except that one request file, exactly like the launcher does. There
-  is no POST endpoint: no game state can be changed from the web UI.
-- **Loopback only.** A plain `TcpListener` on `127.0.0.1`, no URL reservations and no admin rights, no ASP.NET
-  runtime, nothing on the LAN. The `Host` header is checked so a web page cannot reach it (DNS rebinding guard).
-- **No build step / no npm.** Vue 3's browser build is vendored in `wwwroot/vendor/vue.global.prod.js` (MIT, see
-  `VUE-LICENSE.txt`); the UI is plain `index.html` + `styles.css` + `app.js`.
-- **Endpoints:** `GET /api/overview`, `GET /api/population`, `GET /api/world`, `GET /api/health`, and
-  `GET /zone-map/<zoneId>` for the painted zone maps.
+- **The host** (this program, ~1,500 lines of C#): process control for the server and the game client, the True 1.65
+  mode marker and content refresh (the launcher's own `TrueMode` code is recompiled in, not copied), the rolling
+  server console (`RollingServerLog`), the local login file, SQLite reads and writes, and the state-165 file broker
+  that the server publishes its live snapshots to.
+- **The web UI** (`dashboard\wwwroot`): plain HTML/CSS/JS with Vue 3's browser build vendored, so there is no build
+  step, no npm at run time and nothing to install. It is served by a plain `TcpListener` on `127.0.0.1` — no
+  admin rights, no URL reservations, no ASP.NET runtime, no open firewall port.
+- **Read endpoints** are same-origin only (a web page cannot read another origin's responses) and the `Host` header
+  is checked against DNS rebinding. **Launcher actions** (start/stop server, enter realm) additionally require the
+  per-run token that `/api/status` hands only to the page the launcher itself served.
 
 ## Files
 
 | Path | What it is |
 |---|---|
-| `Program.cs` | Entry point: options, banner, lifecycle. |
-| `DashboardOptions.cs` | Command line, install/database/server/maps detection. |
-| `DashboardHost.cs` | The loopback HTTP host: static files, JSON endpoints, zone images, Host check. |
-| `DashboardData.cs` | Builds the JSON: roster + live overlay, counts, zone geometry, region suggestion. |
-| `WorldReader.cs` | Read-only SQLite queries: roster and zones/regions. |
+| `Program.cs` | Entry point: single instance, browser, lifecycle, clean shutdown. |
+| `LauncherHost.cs` | Server and client process control, content refresh, console buffer, status. |
+| `DashboardHost.cs` | The loopback HTTP host: static files, JSON data endpoints, launcher actions. |
+| `DashboardData.cs` | Roster + live overlay, counts, zone geometry, painted maps, region suggestion. |
+| `WorldReader.cs` | Read-only SQLite queries: bot roster and zones/regions. |
 | `LiveBots.cs` | The state-165 file-broker client for the live snapshot. |
-| `wwwroot/` | The UI. `app.js` holds both screens; `vendor/` holds Vue. |
+| `DashboardOptions.cs` | Command line and install/database/server/maps detection. |
+| `wwwroot/` | The UI: `index.html`, `styles.css`, `app.js`, vendored Vue. |
+| `../OfflineDaoc.Launcher/` | The old WinForms launcher, recompiled in part and kept for parity checks. |
 
-## Known limits (preview)
+## Parity with the old launcher
 
-- Read-only: no start/stop, no options, no Bot Inspector detail view, no Realm Exchange yet. Those stay in the
-  launcher until this front-end is proven.
-- Hired companions are not listed (they live in their own table; the launcher shows them).
-- The map draws the zone rectangles the database describes, with painted maps where the client content has them
-  (`z<zoneId>.png`); the launcher's zoom-to-bot and follow behaviours are not ported.
-- The server's bot snapshot is refreshed at most every couple of seconds; when the server is stopped the saved
-  roster is shown and the map has no dots.
+Ported: start server (mode check + content refresh + log), stop server, server state/readiness, ENTER REALM,
+single instance, the live roster and the live world map.
+
+Not ported yet — these still exist only in the WinForms launcher, and are the next steps:
+
+- Options: XP rate, Make Me a GM, announcements, "open folder" helpers.
+- Bots: generate, delete/queue delete, delete all, teleport to bot, bulk generation.
+- Bot Goals Setting (percentages, save/undo/defaults, server-stopped gate).
+- Keep and relic reset.
+- Realm Exchange, Server Stats, Bot Inspector detail, Active Groups, Active RvR, Battlegrounds, Realm Events,
+  Realm Records screens (the server-side data for all of them is already published or readable).
+
+## Removing the launcher
+
+Revert to the WinForms launcher by restoring the files backed up in
+`<playable>\deployment-backups\web-launcher-<timestamp>\` (the old `OfflineDAoC.*` files and the old
+`runtime\dashboard` folder), or delete this folder and rebuild the old project.

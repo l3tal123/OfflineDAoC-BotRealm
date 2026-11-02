@@ -47,6 +47,23 @@
       const zoneImages = new Map();
       const now = ref(Date.now());
 
+      // ------------------------------------------------------------------ launcher state
+      const launcher = reactive({
+        state: "Stopped", ready: false, listening: false, pid: null, memoryMb: 0, uptimeSeconds: 0,
+        clientAvailable: false, serverPackagePresent: true, modeOk: true, modeProblem: "", notice: "",
+        version: "", refreshRunning: false,
+      });
+      const launcherToken = ref("");
+      const notice = ref("");
+      const noticeOk = ref(true);
+      const busy = ref(false);
+      const logLines = ref([]);
+      const logBody = ref(null);
+      const autoScroll = ref(true);
+      let logNext = 0;
+      let statusTimer = 0;
+      let logTimer = 0;
+
       // ------------------------------------------------------------------ population state
       const search = ref("");
       const searchInput = ref(null);
@@ -72,6 +89,95 @@
       let fittedFor = 0;
 
       const realms = REALMS;
+
+      // ------------------------------------------------------------------ launcher derived state
+      const serverUp = computed(() =>
+        launcher.listening || launcher.state === "Running" || (launcher.state === "Starting" && launcher.listening));
+      const starting = computed(() => launcher.state === "Starting" || launcher.refreshRunning);
+      const ready = computed(() => launcher.ready === true);
+      const canEnterRealm = computed(() => serverUp.value && ready.value && launcher.clientAvailable && !busy.value);
+      const enterRealmHint = computed(() => {
+        if (!serverUp.value) return "Start the server first.";
+        if (!ready.value) return "The server is still starting: ENTER REALM unlocks when port 10300 is ready.";
+        if (!launcher.clientAvailable) return "The new client is not installed (new-client\\ next to runtime).";
+        return "Start the new client logged in to this server.";
+      });
+      const stateClass = computed(() => ({
+        "state-up": launcher.state === "Running",
+        "state-wait": launcher.state === "Starting" || launcher.state === "Stopping",
+        "state-down": launcher.state === "Stopped",
+      }));
+
+      // ------------------------------------------------------------------ launcher calls
+      async function refreshStatus() {
+        try {
+          const data = await getJson("api/status");
+          if (data.token) launcherToken.value = data.token;
+          if (data.launcher) {
+            Object.assign(launcher, data.launcher);
+            if (data.launcher.install) installName.value = data.launcher.install;
+          }
+        } catch (exception) {
+          // A status hiccup must not spam the UI; actions report their own failures.
+        }
+      }
+
+      async function postAction(path, confirmation) {
+        if (confirmation && !window.confirm(confirmation)) return;
+        if (!launcherToken.value) await refreshStatus();
+        busy.value = true;
+        notice.value = "";
+        try {
+          const response = await fetch(path, { method: "POST", headers: { "X-Launcher-Token": launcherToken.value } });
+          const data = await response.json().catch(() => ({}));
+          notice.value = data.message || (data.ok ? "Done." : "The action failed.");
+          noticeOk.value = !!data.ok;
+          if (data.launcher) Object.assign(launcher, data.launcher);
+        } catch (exception) {
+          notice.value = "The launcher could not be reached: " + exception.message;
+          noticeOk.value = false;
+        } finally {
+          busy.value = false;
+          await refreshStatus();
+          await refreshLog();
+        }
+      }
+
+      const startServer = () => postAction("api/server/start");
+      const stopServer = () => postAction("api/server/stop", "Stop the server? The world is saved first, then the process shuts down.");
+      const enterRealm = () => postAction("api/client/start");
+
+      async function refreshLog() {
+        try {
+          const data = await getJson(`api/log?after=${logNext}`);
+          if (data.lines && data.lines.length > 0) {
+            const merged = logLines.value.concat(data.lines);
+            logLines.value = merged.length > 3000 ? merged.slice(-3000) : merged;
+            if (autoScroll.value) nextTick(scrollLogToEnd);
+          }
+          if (typeof data.next === "number") logNext = data.next;
+        } catch (exception) {
+          // The console is best-effort while the launcher is busy.
+        }
+      }
+
+      function clearLog() {
+        logLines.value = [];
+      }
+
+      function scrollLogToEnd() {
+        const element = logBody.value;
+        if (element) element.scrollTop = element.scrollHeight;
+      }
+
+      function formatUptime(seconds) {
+        const total = Math.max(0, Math.round(seconds));
+        const hours = Math.floor(total / 3600);
+        const minutes = Math.floor((total % 3600) / 60);
+        if (hours > 0) return `${hours} h ${minutes} min`;
+        if (minutes > 0) return `${minutes} min`;
+        return `${total} s`;
+      }
 
       // ------------------------------------------------------------------ derived population data
       const filteredBots = computed(() => {
@@ -504,6 +610,11 @@
         return `${source} · last read ${when} · refreshing every ${POLL_POPULATION_MS / 1000} s`;
       });
 
+      const footerText = computed(() => {
+        const state = serverUp.value ? (ready.value ? "Server running" : "Server starting") : "Server stopped";
+        return `${state} · ${refreshNote.value}`;
+      });
+
       // ------------------------------------------------------------------ lifecycle
       let populationTimer = 0;
       let mapTimer = 0;
@@ -521,12 +632,22 @@
       onMounted(() => {
         refreshPopulation();
         refreshMap();
-        // Deep links: #map opens the world map, #population the roster (so both screens can be bookmarked).
-        if (location.hash === "#map") openMap();
+        refreshStatus();
+        refreshLog();
+        // Deep links: #map, #server or #population, so every screen can be bookmarked.
+        const initial = (location.hash || "").replace("#", "");
+        if (initial === "map") openMap();
+        else if (initial === "server") tab.value = "server";
         watch(tab, (value) => {
-          const hash = value === "map" ? "#map" : "#population";
+          const hash = "#" + value;
           if (location.hash !== hash) history.replaceState(null, "", hash);
         });
+        statusTimer = window.setInterval(() => {
+          if (!document.hidden) refreshStatus();
+        }, 1000);
+        logTimer = window.setInterval(() => {
+          if (!document.hidden) refreshLog();
+        }, 1000);
         populationTimer = window.setInterval(() => {
           if (!document.hidden) refreshPopulation();
         }, POLL_POPULATION_MS);
@@ -551,6 +672,8 @@
         window.clearInterval(populationTimer);
         window.clearInterval(mapTimer);
         window.clearInterval(clockTimer);
+        window.clearInterval(statusTimer);
+        window.clearInterval(logTimer);
         document.removeEventListener("keydown", keydown);
         observer?.disconnect();
       });
@@ -558,7 +681,10 @@
       return {
         // shared
         tab, loading, error, databaseError, serverRunning, live, updatedText, refreshNote, installName,
-        counts, realms, refreshNow,
+        counts, realms, refreshNow, footerText,
+        // launcher
+        launcher, notice, noticeOk, busy, serverUp, starting, ready, canEnterRealm, enterRealmHint, stateClass,
+        startServer, stopServer, enterRealm, logLines, logBody, autoScroll, clearLog, formatUptime,
         // population
         search, searchInput, realmFilter, onlineOnly, sortBy, arrow, page, pageSize,
         pageBots, pageCount, pageWindow, goPage, filteredBots, selectedBot, selectedBotId,
@@ -571,4 +697,5 @@
     },
   }).mount("#app");
 })();
+
 

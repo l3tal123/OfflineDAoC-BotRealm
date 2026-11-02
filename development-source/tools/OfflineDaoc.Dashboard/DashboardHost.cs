@@ -7,9 +7,14 @@ using System.Text.Json;
 namespace OfflineDaoc.Dashboard;
 
 /// <summary>
-/// A deliberately small HTTP server on the loopback interface. It serves the files in <c>wwwroot</c> and three
-/// read-only JSON endpoints. It is a plain TCP listener so the dashboard needs no privileges (no URL reservations),
-/// no ASP.NET runtime and no open firewall port; nothing outside this machine can reach it.
+/// A deliberately small HTTP server on the loopback interface. It serves the files in <c>dashboard\wwwroot</c>, the
+/// read-only data endpoints and a handful of launcher actions. It is a plain TCP listener so the launcher needs no
+/// privileges (no URL reservations), no ASP.NET runtime and no open firewall port; nothing outside this machine can
+/// reach it.
+///
+/// Read endpoints are open to the local page (a web page cannot read another origin's responses). The launcher
+/// actions - starting the server, starting the game client, stopping the server - additionally require the per-run
+/// token that <c>/api/status</c> hands to the page, so no other origin can drive them.
 /// </summary>
 internal sealed class DashboardHost : IDisposable
 {
@@ -35,14 +40,17 @@ internal sealed class DashboardHost : IDisposable
 
     private readonly DashboardOptions _options;
     private readonly DashboardData _data;
+    private readonly LauncherHost _launcher;
     private readonly TcpListener _listener;
     private readonly CancellationTokenSource _stop = new();
     private readonly string _wwwRoot;
+    private readonly string _token = Guid.NewGuid().ToString("N");
     private int _listening;
 
-    internal DashboardHost(DashboardOptions options)
+    internal DashboardHost(DashboardOptions options, LauncherHost launcher)
     {
         _options = options;
+        _launcher = launcher;
         _wwwRoot = Path.GetFullPath(options.WwwRoot);
         _data = new DashboardData(options.RuntimeDirectory, options.DatabasePath, options.ServerDirectory,
             options.MapsDirectory);
@@ -106,29 +114,51 @@ internal sealed class DashboardHost : IDisposable
                 Request? request = await ReadRequestAsync(stream).ConfigureAwait(false);
                 if (request == null)
                 {
-                    await WriteResponseAsync(stream, 400, "text/plain; charset=utf-8", Encoding.UTF8.GetBytes("Bad request"), null)
+                    await WriteResponseAsync(stream, 400, "text/plain; charset=utf-8", Encoding.UTF8.GetBytes("Bad request"), false)
                         .ConfigureAwait(false);
                     return;
                 }
 
                 if (!IsAllowedHost(request.Headers.GetValueOrDefault("host")))
                 {
-                    // DNS rebinding guard: a page on the web must not be able to read the local dashboard.
-                    await WriteResponseAsync(stream, 403, "text/plain; charset=utf-8", Encoding.UTF8.GetBytes("Forbidden"), null)
+                    // DNS rebinding guard: a page on the web must not be able to read or drive the local launcher.
+                    await WriteResponseAsync(stream, 403, "text/plain; charset=utf-8", Encoding.UTF8.GetBytes("Forbidden"), false)
                         .ConfigureAwait(false);
                     return;
                 }
 
-                if (!string.Equals(request.Method, "GET", StringComparison.OrdinalIgnoreCase) &&
-                    !string.Equals(request.Method, "HEAD", StringComparison.OrdinalIgnoreCase))
+                bool head = string.Equals(request.Method, "HEAD", StringComparison.OrdinalIgnoreCase);
+                bool get = string.Equals(request.Method, "GET", StringComparison.OrdinalIgnoreCase) || head;
+                bool post = string.Equals(request.Method, "POST", StringComparison.OrdinalIgnoreCase);
+                if (!get && !post)
                 {
                     await WriteResponseAsync(stream, 405, "text/plain; charset=utf-8",
-                        Encoding.UTF8.GetBytes("Only GET is allowed: the dashboard is read-only."), null).ConfigureAwait(false);
+                        Encoding.UTF8.GetBytes("Use GET for data and POST for launcher actions."), false).ConfigureAwait(false);
                     return;
                 }
 
-                bool head = string.Equals(request.Method, "HEAD", StringComparison.OrdinalIgnoreCase);
+                if (post)
+                {
+                    await HandleActionAsync(stream, request).ConfigureAwait(false);
+                    return;
+                }
+
                 string path = request.Path;
+                if (path == "/api/status")
+                {
+                    // The token travels only to the page that the local launcher itself served (same origin).
+                    await WriteJsonAsync(stream, new { token = _token, launcher = _launcher.Status(), server = _options.RuntimeDirectory },
+                        head).ConfigureAwait(false);
+                    return;
+                }
+
+                if (path == "/api/log")
+                {
+                    long.TryParse(request.Query.GetValueOrDefault("after"), out long after);
+                    IReadOnlyList<string> lines = _launcher.LogSince(after, out long next);
+                    await WriteJsonAsync(stream, new { next, lines }, head).ConfigureAwait(false);
+                    return;
+                }
 
                 object? payload = path switch
                 {
@@ -140,9 +170,7 @@ internal sealed class DashboardHost : IDisposable
                 };
                 if (payload != null)
                 {
-                    byte[] json = JsonSerializer.SerializeToUtf8Bytes(payload, JsonOptions);
-                    await WriteResponseAsync(stream, 200, "application/json; charset=utf-8", json, head ? 0 : null)
-                        .ConfigureAwait(false);
+                    await WriteJsonAsync(stream, payload, head).ConfigureAwait(false);
                     return;
                 }
 
@@ -155,18 +183,18 @@ internal sealed class DashboardHost : IDisposable
                     if (image == null)
                     {
                         await WriteResponseAsync(stream, 404, "text/plain; charset=utf-8",
-                            Encoding.UTF8.GetBytes("No painted map for that zone"), null).ConfigureAwait(false);
+                            Encoding.UTF8.GetBytes("No painted map for that zone"), head).ConfigureAwait(false);
                         return;
                     }
 
-                    await WriteResponseAsync(stream, 200, "image/png", image, head ? 0 : null).ConfigureAwait(false);
+                    await WriteResponseAsync(stream, 200, "image/png", image, head).ConfigureAwait(false);
                     return;
                 }
 
                 if (path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase))
                 {
                     await WriteResponseAsync(stream, 404, "text/plain; charset=utf-8",
-                        Encoding.UTF8.GetBytes("Unknown endpoint"), null).ConfigureAwait(false);
+                        Encoding.UTF8.GetBytes("Unknown endpoint"), head).ConfigureAwait(false);
                     return;
                 }
 
@@ -178,9 +206,42 @@ internal sealed class DashboardHost : IDisposable
             }
             catch (Exception exception)
             {
-                Console.Error.WriteLine($"dashboard: {exception.GetType().Name}: {exception.Message}");
+                Console.Error.WriteLine($"launcher: {exception.GetType().Name}: {exception.Message}");
             }
         }
+    }
+
+    private async Task HandleActionAsync(NetworkStream stream, Request request)
+    {
+        if (!request.Headers.TryGetValue("x-launcher-token", out string? token) ||
+            !string.Equals(token, _token, StringComparison.Ordinal))
+        {
+            await WriteJsonAsync(stream, new { ok = false, message = "This action needs the launcher page's token. Reload the page." },
+                false, 403).ConfigureAwait(false);
+            return;
+        }
+
+        (bool Ok, string Message) result = request.Path switch
+        {
+            "/api/server/start" => Unwrap(_launcher.StartServer()),
+            "/api/server/stop" => await _launcher.StopServerAsync().ConfigureAwait(false) is ActionOutcome stop
+                ? (stop.Ok, stop.Message)
+                : (false, "Unexpected result."),
+            "/api/client/start" => Unwrap(_launcher.StartClient()),
+            _ => (false, "Unknown action."),
+        };
+
+        Console.WriteLine($"launcher: {request.Path} -> {(result.Ok ? "ok" : "failed")}: {result.Message}");
+        await WriteJsonAsync(stream, new { ok = result.Ok, message = result.Message, launcher = _launcher.Status() }, false)
+            .ConfigureAwait(false);
+    }
+
+    private static (bool Ok, string Message) Unwrap(ActionOutcome outcome) => (outcome.Ok, outcome.Message);
+
+    private async Task WriteJsonAsync(NetworkStream stream, object payload, bool head, int status = 200)
+    {
+        byte[] json = JsonSerializer.SerializeToUtf8Bytes(payload, JsonOptions);
+        await WriteResponseAsync(stream, status, "application/json; charset=utf-8", json, head).ConfigureAwait(false);
     }
 
     private async Task ServeStaticAsync(NetworkStream stream, string path, bool head)
@@ -193,25 +254,24 @@ internal sealed class DashboardHost : IDisposable
         }
         catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
         {
-            await WriteResponseAsync(stream, 400, "text/plain; charset=utf-8", Encoding.UTF8.GetBytes("Bad path"), null)
+            await WriteResponseAsync(stream, 400, "text/plain; charset=utf-8", Encoding.UTF8.GetBytes("Bad path"), false)
                 .ConfigureAwait(false);
             return;
         }
 
         if (!candidate.StartsWith(_wwwRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) || !File.Exists(candidate))
         {
-            await WriteResponseAsync(stream, 404, "text/plain; charset=utf-8", Encoding.UTF8.GetBytes("Not found"), null)
+            await WriteResponseAsync(stream, 404, "text/plain; charset=utf-8", Encoding.UTF8.GetBytes("Not found"), false)
                 .ConfigureAwait(false);
             return;
         }
 
         byte[] content = await File.ReadAllBytesAsync(candidate).ConfigureAwait(false);
         string contentType = ContentTypes.GetValueOrDefault(Path.GetExtension(candidate), "application/octet-stream");
-        await WriteResponseAsync(stream, 200, contentType, content, head ? 0 : null).ConfigureAwait(false);
+        await WriteResponseAsync(stream, 200, contentType, content, head).ConfigureAwait(false);
     }
 
-    private static async Task WriteResponseAsync(NetworkStream stream, int status, string contentType, byte[] body,
-        int? overrideLength)
+    private static async Task WriteResponseAsync(NetworkStream stream, int status, string contentType, byte[] body, bool head)
     {
         string reason = status switch
         {
@@ -226,14 +286,14 @@ internal sealed class DashboardHost : IDisposable
         var headers = new StringBuilder(256);
         headers.Append(CultureInfo.InvariantCulture, $"HTTP/1.1 {status} {reason}\r\n");
         headers.Append(CultureInfo.InvariantCulture, $"Content-Type: {contentType}\r\n");
-        headers.Append(CultureInfo.InvariantCulture, $"Content-Length: {overrideLength ?? body.Length}\r\n");
-        // The UI is rebuilt during development and must never be served stale; the payload is tiny.
+        headers.Append(CultureInfo.InvariantCulture, $"Content-Length: {body.Length}\r\n");
+        // The UI is rebuilt during development and must never be served stale; the payloads are tiny.
         headers.Append("Cache-Control: no-store\r\n");
         headers.Append("X-Content-Type-Options: nosniff\r\n");
         headers.Append("Connection: close\r\n\r\n");
-        byte[] head = Encoding.ASCII.GetBytes(headers.ToString());
-        await stream.WriteAsync(head).ConfigureAwait(false);
-        if (overrideLength != 0 && body.Length > 0)
+        byte[] headBytes = Encoding.ASCII.GetBytes(headers.ToString());
+        await stream.WriteAsync(headBytes).ConfigureAwait(false);
+        if (!head && body.Length > 0)
             await stream.WriteAsync(body).ConfigureAwait(false);
         await stream.FlushAsync().ConfigureAwait(false);
     }
@@ -285,9 +345,21 @@ internal sealed class DashboardHost : IDisposable
         if (parts.Length < 2)
             return null;
         string target = parts[1];
-        int query = target.IndexOf('?');
-        if (query >= 0)
-            target = target[..query];
+        string path = target;
+        var query = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        int question = target.IndexOf('?');
+        if (question >= 0)
+        {
+            path = target[..question];
+            foreach (string pair in target[(question + 1)..].Split('&', StringSplitOptions.RemoveEmptyEntries))
+            {
+                int equals = pair.IndexOf('=');
+                if (equals <= 0)
+                    continue;
+                query[Uri.UnescapeDataString(pair[..equals])] = Uri.UnescapeDataString(pair[(equals + 1)..]);
+            }
+        }
+
         var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         for (int index = 1; index < lines.Length; index++)
         {
@@ -297,7 +369,7 @@ internal sealed class DashboardHost : IDisposable
             headers[lines[index][..colon].Trim()] = lines[index][(colon + 1)..].Trim();
         }
 
-        return new Request(parts[0], target, headers);
+        return new Request(parts[0], path, query, headers);
     }
 
     private static int FindHeaderEnd(List<byte> bytes)
@@ -311,6 +383,6 @@ internal sealed class DashboardHost : IDisposable
         return -1;
     }
 
-    private sealed record Request(string Method, string Path, Dictionary<string, string> Headers);
+    private sealed record Request(string Method, string Path, Dictionary<string, string> Query,
+        Dictionary<string, string> Headers);
 }
-

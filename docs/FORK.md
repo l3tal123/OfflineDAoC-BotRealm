@@ -266,6 +266,13 @@ the commands in section 2.
 
 - `docs/FORK.md` (this page), `docs/BOT-DEVELOPMENT.md`, `docs/DEV-ENVIRONMENT.md`, `docs/WORLD-MAP.md` (the
   launcher dashboard's live world map);
+- `development-source/tools/OfflineDaoc.Dashboard/`: **the launcher** (2026-11-02). A .NET host (`OfflineDAoC.exe`)
+  plus a web UI in `dashboard\wwwroot` that it serves on `http://127.0.0.1:10310/`. It replaces the WinForms
+  launcher for daily use: start/stop server, True 1.65 pre-flight and content refresh, ENTER REALM (Godot client),
+  server console, live population and world map. The WinForms launcher
+  (`development-source/tools/OfflineDaoc.Launcher`) stays in the repository as the parity reference and is not
+  deployed; its UI-free files (`TrueMode.cs`, `RollingServerLog.cs`, `NewClient.cs`) are compiled into the new host
+  rather than copied, so they cannot drift. Features still to port are listed in the project README;
 - `release/Get-OfflineDAoC-True165.ps1`: the `-ClientOnly` and `-AllowLocalChanges` switches for updating a fork
   install (3.2), and `release/UPDATE-CLIENT-ONLY.cmd`, the double-click helper for a client-only update;
 - a fork note appended to `AGENTS.md`;

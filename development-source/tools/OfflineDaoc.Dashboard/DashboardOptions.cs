@@ -96,7 +96,7 @@ internal sealed class DashboardOptions
             }
         }
 
-        string wwwRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        string wwwRoot = ResolveWwwRoot();
         if (!Directory.Exists(wwwRoot))
             throw new DashboardUsageException($"The web files are missing: {wwwRoot} was not found next to the exe.");
 
@@ -120,6 +120,26 @@ internal sealed class DashboardOptions
             OpenBrowser = open,
             MapsDirectory = mapsDirectory,
         };
+    }
+
+    /// <summary>
+    /// The UI files. In a playable folder they live in <c>runtime\dashboard\wwwroot</c> next to the launcher exe, so
+    /// everything the launcher ships in that folder can be updated or removed together; a development build keeps
+    /// <c>wwwroot</c> next to the exe.
+    /// </summary>
+    private static string ResolveWwwRoot()
+    {
+        foreach (string candidate in new[]
+                 {
+                     Path.Combine(AppContext.BaseDirectory, "dashboard", "wwwroot"),
+                     Path.Combine(AppContext.BaseDirectory, "wwwroot"),
+                 })
+        {
+            if (Directory.Exists(candidate))
+                return candidate;
+        }
+
+        return Path.Combine(AppContext.BaseDirectory, "dashboard", "wwwroot");
     }
 
     /// <summary>The new client's painted zone maps, if the playable folder carries them.</summary>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Offline DAoC · BotRealm Dashboard</title>
+  <title>Offline DAoC · Launcher</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 5 7v9c0 7 5 12 11 14 6-2 11-7 11-14V7z' fill='%23c9a86a'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -15,19 +15,34 @@
       <span class="shield" aria-hidden="true"></span>
       <div>
         <h1>Offline <span class="brand-gold">DAoC</span></h1>
-        <p>BotRealm · live dashboard <span class="preview">preview</span></p>
+        <p>True 1.65 · BotRealm launcher <span class="badge-version">v{{ launcher.version || '—' }}</span></p>
       </div>
     </div>
-    <div class="status-cluster">
-      <span class="chip" :class="serverRunning ? 'chip-on' : 'chip-off'">
-        <span class="dot"></span>{{ serverRunning ? 'Server running' : 'Server stopped' }}
+
+    <div class="launcher-bar">
+      <button class="action-button start" v-if="!serverUp" @click="startServer()" :disabled="busy">
+        START SERVER
+      </button>
+      <button class="action-button stop" v-else @click="stopServer()" :disabled="busy">
+        STOP SERVER
+      </button>
+      <button class="action-button play" @click="enterRealm()" :disabled="busy || !canEnterRealm" :title="enterRealmHint">
+        ENTER REALM
+      </button>
+
+      <span class="chip" :class="serverUp ? 'chip-on' : 'chip-off'">
+        <span class="dot"></span>{{ serverUp ? 'Server running' : 'Server stopped' }}
       </span>
-      <span class="chip chip-quiet" :title="live ? 'Positions and tasks come from the live server snapshot.' : 'The server is not publishing a live snapshot; the saved roster is shown.'">
-        {{ live ? 'live snapshot' : 'saved roster' }}
+      <span class="chip chip-quiet" v-if="serverUp" :title="live ? 'Positions and tasks come from the live server snapshot.' : 'The server is not publishing a live snapshot yet.'">
+        {{ live ? 'live snapshot' : 'waiting for snapshot' }}
       </span>
-      <span class="updated" :title="updatedText">{{ updatedText }}</span>
     </div>
   </header>
+
+  <div v-if="notice" class="notice" :class="noticeOk ? 'notice-ok' : 'notice-fail'">
+    <span>{{ notice }}</span>
+    <button class="notice-close" @click="notice = ''" aria-label="Dismiss">×</button>
+  </div>
 
   <nav class="tabs" role="tablist">
     <button role="tab" class="tab" :class="{ active: tab === 'population' }" @click="tab = 'population'">
@@ -37,6 +52,10 @@
     <button role="tab" class="tab" :class="{ active: tab === 'map' }" @click="openMap()">
       World Map
       <span class="badge" v-if="mapRegionsOnline > 0">{{ mapRegionsOnline }} regions</span>
+    </button>
+    <button role="tab" class="tab" :class="{ active: tab === 'server' }" @click="tab = 'server'">
+      Server
+      <span class="badge" :class="serverUp ? 'badge-on' : ''">{{ launcher.state || '—' }}</span>
     </button>
     <span class="tabs-spacer"></span>
     <button class="ghost-button" @click="refreshNow()" :disabled="loading">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
@@ -163,11 +182,56 @@
     </div>
   </main>
 
+  <!-- ------------------------------------------------------------------ server console -->
+  <main v-show="tab === 'server'" class="panel server-panel">
+    <div class="server-grid">
+      <div class="server-card">
+        <span class="server-label">State</span>
+        <strong :class="stateClass">{{ launcher.state || '—' }}</strong>
+        <span class="server-note">{{ ready ? 'Ready — ENTER REALM is available.' : starting ? 'Starting: the world loads and the content refreshes.' : 'Stopped.' }}</span>
+      </div>
+      <div class="server-card">
+        <span class="server-label">Process</span>
+        <strong>{{ launcher.pid || '—' }}</strong>
+        <span class="server-note">{{ launcher.pid ? 'pid ' + launcher.pid : 'no server process' }}</span>
+      </div>
+      <div class="server-card">
+        <span class="server-label">Memory</span>
+        <strong>{{ launcher.memoryMb ? launcher.memoryMb.toLocaleString() + ' MB' : '—' }}</strong>
+        <span class="server-note">{{ launcher.uptimeSeconds ? 'up ' + formatUptime(launcher.uptimeSeconds) : 'not running' }}</span>
+      </div>
+      <div class="server-card">
+        <span class="server-label">Game client</span>
+        <strong>{{ launcher.clientAvailable ? 'Installed' : 'Not found' }}</strong>
+        <span class="server-note">{{ launcher.clientAvailable ? 'ENTER REALM starts it for this account.' : 'new-client\\ is missing next to runtime.' }}</span>
+      </div>
+    </div>
+
+    <div v-if="launcher.modeProblem" class="server-warning">{{ launcher.modeProblem }}</div>
+    <div v-if="launcher.serverPackagePresent === false" class="server-warning">
+      The server package is missing: server\CoreServer.exe was not found.
+    </div>
+
+    <div class="console">
+      <div class="console-bar">
+        <span class="console-title">Server console</span>
+        <label class="toggle"><input type="checkbox" v-model="autoScroll" /> <span>Follow</span></label>
+        <button class="ghost-button" @click="clearLog()" :disabled="logLines.length === 0">Clear view</button>
+        <span class="console-count">{{ logLines.length.toLocaleString() }} lines</span>
+      </div>
+      <div class="console-body" ref="logBody">
+        <div v-for="(line, index) in logLines" :key="index" class="console-line"
+             :class="{ 'console-error': line.startsWith('ERROR') }">{{ line }}</div>
+        <div v-if="logLines.length === 0" class="console-empty">No console output yet. Start the server to see its log here.</div>
+      </div>
+    </div>
+  </main>
+
   <footer class="statusbar">
     <span v-if="error" class="error">{{ error }}</span>
     <span v-else-if="databaseError" class="error">{{ databaseError }}</span>
-    <span v-else>{{ refreshNote }}</span>
-    <span class="status-right">{{ installName }} · read-only · http://127.0.0.1</span>
+    <span v-else>{{ footerText }}</span>
+    <span class="status-right">{{ installName }} · launcher {{ launcher.version || '—' }} · http://127.0.0.1</span>
   </footer>
 </div>
 
@@ -175,5 +239,3 @@
 <script src="app.js"></script>
 </body>
 </html>
-
-

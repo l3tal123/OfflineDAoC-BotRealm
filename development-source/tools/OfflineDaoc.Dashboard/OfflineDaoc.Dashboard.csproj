@@ -1,25 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    Offline DAoC BotRealm: the web dashboard (preview). It is a separate, self-contained tool so the whole
-    feature can be removed by deleting this folder and the deployed runtime\dashboard folder. It reads the
-    world database read-only and the server's state-165 files, and serves a small local web UI on 127.0.0.1.
+    Offline DAoC BotRealm: the launcher and live dashboard. One program, two halves:
+      - this host: process control (server and game client), the True 1.65 pre-flight, SQLite reads/writes and the
+        state-165 file broker, all served as a small loopback HTTP API;
+      - wwwroot/: the UI, plain HTML/CSS/JS with Vue 3 vendored, opened in the browser.
+    It replaces the WinForms launcher (development-source/tools/OfflineDaoc.Launcher, kept for parity checks).
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>OfflineDaoc.Dashboard</AssemblyName>
+    <AssemblyName>OfflineDAoC</AssemblyName>
     <RootNamespace>OfflineDaoc.Dashboard</RootNamespace>
-    <Product>Offline DAoC: BotRealm Dashboard</Product>
-    <AssemblyTitle>Offline DAoC BotRealm live dashboard</AssemblyTitle>
+    <Product>Offline DAoC: Classic + Shrouded Isles</Product>
+    <AssemblyTitle>Offline DAoC Launcher and Dashboard</AssemblyTitle>
+    <Version>0.3.0</Version>
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
   </ItemGroup>
   <ItemGroup>
-    <!-- The front-end travels with the exe: one folder, no build step, nothing to install. -->
+    <!--
+      The launcher-only logic is reused as-is from the WinForms launcher instead of being copied: the True 1.65 mode
+      and content refresh, the rolling server console log and the Godot client launcher. Those files carry no UI.
+    -->
+    <Compile Include="../OfflineDaoc.Launcher/TrueMode.cs" Link="Launcher/TrueMode.cs" />
+    <Compile Include="../OfflineDaoc.Launcher/RollingServerLog.cs" Link="Launcher/RollingServerLog.cs" />
+    <Compile Include="../OfflineDaoc.Launcher/NewClient.cs" Link="Launcher/NewClient.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The front-end travels next to the exe in dashboard\wwwroot: one folder, no build step, nothing to install. -->
     <None Update="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

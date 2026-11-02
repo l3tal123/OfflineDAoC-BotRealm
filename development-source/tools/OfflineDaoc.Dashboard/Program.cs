@@ -1,7 +1,13 @@
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Text.Json;
+
 namespace OfflineDaoc.Dashboard;
 
 internal static class Program
 {
+    private const string InstanceName = @"Local\OfflineDAoC.Launcher";
+
     private static int Main(string[] arguments)
     {
         DashboardOptions options;
@@ -18,32 +24,54 @@ internal static class Program
             return exception.Message.Length > 0 ? 2 : 0;
         }
 
-        using var host = new DashboardHost(options);
+        using var instance = new Mutex(true, InstanceName, out bool isFirstInstance);
+        if (!isFirstInstance)
+        {
+            // One launcher per install: a second double-click just brings the dashboard back up.
+            string? url = ReadRunningUrl(options.RuntimeDirectory);
+            if (url != null)
+            {
+                Console.WriteLine($"The launcher is already running: {url}");
+                if (options.OpenBrowser)
+                    OpenBrowser(url);
+            }
+            else
+            {
+                Console.WriteLine("The launcher is already running in another window.");
+            }
+
+            return 0;
+        }
+
+        using var launcher = new LauncherHost(options);
+        using var host = new DashboardHost(options, launcher);
         try
         {
             host.Start();
         }
-        catch (Exception exception) when (exception is System.Net.Sockets.SocketException)
+        catch (Exception exception) when (exception is SocketException)
         {
             Console.Error.WriteLine($"Cannot listen on 127.0.0.1:{options.Port}: {exception.Message}");
-            Console.Error.WriteLine("Is the dashboard already running? Close the other window, or pass --port <number>.");
+            Console.Error.WriteLine("Is another launcher already using the port? Close that window, or pass --port <number>.");
             return 1;
         }
 
+        WriteLockFile(options, host.Url);
+
         Console.WriteLine();
-        Console.WriteLine("  Offline DAoC BotRealm — web dashboard (preview)");
+        Console.WriteLine($"  Offline DAoC BotRealm launcher {LauncherHost.DisplayVersion}");
         Console.WriteLine();
         Console.WriteLine($"    Playable folder : {options.RuntimeDirectory}");
         Console.WriteLine($"    World database  : {options.DatabasePath}");
-        Console.WriteLine($"    Server folder   : {options.ServerDirectory}");
-        Console.WriteLine($"    Listening on    : {host.Url}");
+        Console.WriteLine($"    Server          : {options.ServerDirectory}");
+        Console.WriteLine($"    Dashboard       : {host.Url}");
         Console.WriteLine();
-        Console.WriteLine("    Read-only. Close this window, press Ctrl+C, or type 'exit' to stop.");
-        Console.WriteLine("    If the game server is not running, the saved roster is shown and the map has no live bots.");
+        Console.WriteLine("    The launcher is the dashboard: start the server, enter the realm and follow the world in the browser.");
+        Console.WriteLine("    Closing this window stops the server. Leave it open while you play.");
         Console.WriteLine();
 
         if (options.OpenBrowser)
-            TryOpenBrowser(host.Url);
+            OpenBrowser(host.Url);
 
         var stop = new ManualResetEventSlim();
         Console.CancelKeyPress += (_, eventArguments) =>
@@ -75,23 +103,75 @@ internal static class Program
         })
         {
             IsBackground = true,
-            Name = "dashboard console",
+            Name = "launcher console",
         };
-        // A console window can be typed into; a redirected stdout/stderr (a script, a background job) cannot, and
-        // its stdin reaches end-of-file immediately - that must not stop the dashboard.
+        // A console window can be typed into; a redirected stdin (a script, a background job) reaches end-of-file at
+        // once and must not stop the launcher.
         if (!Console.IsInputRedirected)
             reader.Start();
 
         stop.Wait();
-        Console.WriteLine("  Dashboard stopped.");
+        Console.WriteLine("  Stopping the launcher…");
+        host.Dispose();
+        launcher.Dispose();
+        DeleteLockFile(options);
+        Console.WriteLine("  Launcher stopped.");
         return 0;
     }
 
-    private static void TryOpenBrowser(string url)
+    private static string LockFilePath(DashboardOptions options) =>
+        Path.Combine(options.RuntimeDirectory, "launcher-session.json");
+
+    private static void WriteLockFile(DashboardOptions options, string url)
     {
         try
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+            File.WriteAllText(LockFilePath(options), JsonSerializer.Serialize(new
+            {
+                url,
+                port = options.Port,
+                pid = Environment.ProcessId,
+                startedUtc = DateTime.UtcNow,
+            }));
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // A read-only install still works: it only costs the "already running" shortcut.
+        }
+    }
+
+    private static void DeleteLockFile(DashboardOptions options)
+    {
+        try
+        {
+            File.Delete(LockFilePath(options));
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+        }
+    }
+
+    private static string? ReadRunningUrl(string runtimeDirectory)
+    {
+        try
+        {
+            string path = Path.Combine(runtimeDirectory, "launcher-session.json");
+            if (!File.Exists(path))
+                return null;
+            using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+            return document.RootElement.TryGetProperty("url", out JsonElement url) ? url.GetString() : null;
+        }
+        catch (Exception exception) when (exception is IOException or JsonException)
+        {
+            return null;
+        }
+    }
+
+    private static void OpenBrowser(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }
         catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or InvalidOperationException)
         {
