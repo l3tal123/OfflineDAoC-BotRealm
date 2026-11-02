@@ -247,6 +247,12 @@
     "key": "Mob_ID",
     "where": "Mob_ID IN ('1a62100d-071c-4528-9da8-57ce90c5eb2d','aredhel_channeler_blaine_effect','aredhel_eallara_effect','aredhel_stor_gothi_norl_effect')",
     "reason": "True 1.65 housing: entrance effects: the medallion-teleport glow (model 1923, post-1.64; housing medallions came later) and an invisible \"housing\" placeholder NPC"
+   },
+   {
+    "table": "WorldObject",
+    "key": "WorldObject_ID",
+    "where": "WorldObject_ID IN ('cd5009bf-43e9-4782-9712-753fb38f329c','f2affdc0-092f-4919-a7ad-f620b47a4a27')",
+    "reason": "True 1.65: floating Camelot Hills banners (owner 2026-11-02): two Albion banners (model 464) on New Frontiers-era towers the 1.64 client never had, hanging 29-39 m over nothing"
    }
   ]
  },

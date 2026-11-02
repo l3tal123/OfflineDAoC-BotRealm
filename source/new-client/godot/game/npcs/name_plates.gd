@@ -23,6 +23,8 @@ const GUILD_SCALE := 0.8
 const FRIENDLY := Color8(175, 223, 208)
 const OUTLINE := Color(0.02, 0.04, 0.02, 0.9)
 
+## Toggle Names / /hidenames: every overhead name hidden but your target's (the 1.64 client's key and commands).
+static var hidden := false
 var manager: NpcManager
 var _font: Font
 var _size := -1                             # font px the labels were built for
@@ -69,6 +71,8 @@ func _process_inner(_delta: float) -> void:
 				and not int(n.spawn.flags) & (Npc.FLAG_DONTSHOWNAME | Npc.FLAG_CANTTARGET)))
 		# Options > COMPANION NAMES in the server's game: your companions are your group's other members (owner
 		# 2026-10-15 UI audit - the toggle only reached the offline bots)
+		if show and not targeted and hidden:
+			show = false
 		if show and not targeted and not _companion_names and _group_oids.has(int(n.spawn.get("oid", 0))):
 			show = false
 		if show and _behind_wall(n, cam):

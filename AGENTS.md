@@ -20,7 +20,7 @@ The only additions to the period game are the bot and companion systems and the 
   (server) and `Server.world_mode` (client). Nothing new goes into them.
 - **One client.** The new client is the only one. The original DAoC client is not supported, and there is no DXVK.
 - **A fresh start.** Nothing transfers from Offline DAoC, and there is no progress importer.
-- **Version:** v0.1 (released 2026-11-01). The launcher's version is `MainForm.DisplayVersion`, and
+- **Version:** v0.2. The launcher's version is `MainForm.DisplayVersion`, and
   the client's window title is `LoginScreen.GAME_TITLE` in `godot/game/login_screen.gd`.
 
 ## Layout

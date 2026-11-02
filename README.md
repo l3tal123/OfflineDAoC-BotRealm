@@ -17,7 +17,7 @@
 > **This is an AI-made project.** All of its code was written by AI tools (Codex, then Claude). The project owner
 > has no game development or coding experience: they directed the work and play-tested it. Expect bugs.
 >
-> **v0.1 is out.** Large parts of the game haven't been played through by a person.
+> **v0.2 is out**, with an in-place update for v0.1 players. Large parts of the game haven't been played through by a person.
 > Expect bugs, and keep a backup of your save. Bug reports are welcome in [Issues](https://github.com/shadowofze/OfflineDAoC-True165/issues).
 
 # Offline DAoC True 1.65: single-player Dark Age of Camelot as of patch 1.65
@@ -32,23 +32,29 @@ project owner, who has no game development or coding experience, directed and pl
 
 ## Download and play
 
-**[Download v0.1](https://github.com/shadowofze/OfflineDAoC-True165/releases/latest)**, no Git or AI tools needed:
+**[Download v0.2](https://github.com/shadowofze/OfflineDAoC-True165/releases/latest)**, no Git or AI tools needed.
+**Already playing v0.1?** The same downloader updates your game in place with a much smaller download (about 2.5 GB). Your
+account, characters, companions and bots stay as they are.
 
-1. On the release page, under **Assets**, download **`Download-OfflineDAoC-True165-v0.1.zip`** (just the
+1. On the release page, under **Assets**, download **`Download-OfflineDAoC-True165-v0.2.zip`** (just the
    downloader, a few KB).
 2. Put it in a folder with a short path, such as `C:\Games\OfflineDAoC`. Right-click it, choose **Extract All…**,
    and open the extracted folder.
-3. Double-click **`GET-OFFLINE-DAOC-TRUE165.cmd`**. If Windows SmartScreen appears, click **More info → Run
-   anyway**. It checks your PC, shows the download size, and installs the game into a new folder. If it stops, run
-   it again; it continues where it stopped.
-4. In the new `OfflineDAoC-True165` folder, double-click **`START OFFLINE DAOC TRUE 1.65.cmd`**. Click **START
+3. Close the game and the launcher if they're running. Then double-click **`GET-OFFLINE-DAOC-TRUE165.cmd`**. If
+   Windows SmartScreen appears, click **More info → Run anyway**. It checks your PC and asks:
+   - **1 = Update my game:** it finds your `OfflineDAoC-True165` folder (or asks you to pick it), checks it, and
+     updates it in place (about 2.5 GB);
+   - **2 = New install:** the complete game, into a new folder (about 36 GB).
+
+   If it stops, run it again; it continues where it stopped.
+4. In the `OfflineDAoC-True165` folder, double-click **`START OFFLINE DAOC TRUE 1.65.cmd`**. Click **START
    SERVER**, wait for **RUNNING**, then click **ENTER REALM**. Your account is created the first time.
 
 What you need:
 - 64-bit Windows 10 or 11, with a CPU that supports **AVX2** (the bots' navigation needs it; most CPUs from 2014
   onward do).
 - A graphics card that supports **Vulkan**, with current drivers. It's developed and tested on an RTX 2060 (6 GB).
-- 16 GB RAM recommended, and about 45 GB of free disk space while it installs.
+- 16 GB RAM recommended, and about 48 GB of free disk space for a new install.
 - **Nothing to install or turn on in Windows:** .NET comes with the game. You don't need the Windows ".NET Framework
   3.5" feature, the Visual C++ Redistributable or an original DAoC client.
 
@@ -177,8 +183,10 @@ is the result: the world database and the content files built from it.
 - **Forking:** you don't need permission to fork this repository and make it your own. Keep the existing
   licenses and credits ([THIRD_PARTY.md](THIRD_PARTY.md)).
 
-## Known issues in v0.1
+## Known issues
 
+- Horse routes: crossing Prydwen Bridge, the horse can dip into the deck now and then.
+- Housing is new in v0.2: it is checked offline but not yet played through on a live server.
 - Low-level gamebots (levels 6-9) die a lot: they start with no armour and have to buy it.
 - Gear wears at the player rate, so bots rarely need repairs early on. This is expected.
 - About 2,100 monster names drop only coin, mostly in the Shrouded Isles, where no period source recorded their loot.

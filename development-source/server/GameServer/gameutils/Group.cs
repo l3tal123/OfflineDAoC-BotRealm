@@ -372,6 +372,18 @@ namespace DOL.GS
             // GameBot.Delete and could run cleanup multiple times.
             if (living is GameBot { IsTemporaryGroupHelper: true } temporaryHelper)
                 temporaryHelper.Delete();
+
+            // The last real player left a group of bots that followed them (a plain /disband removes only the player):
+            // the bots stayed grouped and kept following, and the player could neither disband nor re-invite them
+            // (player report 2026-11-02). Disband it, as an empty group: the bots go back to their own lives and hired
+            // companions to their inn. A bot-led autonomous group a player had joined is left alone.
+            if (living is GamePlayer leaver)
+            {
+                List<GameLiving> rest = GetMembersInTheGroup();
+                if (rest.Count > 0 && !rest.Any(member => member is GamePlayer) &&
+                    rest.OfType<GameBot>().Any(bot => bot.PlayerGroupLeader == leaver))
+                    DisbandGroup();
+            }
             return true;
         }
 

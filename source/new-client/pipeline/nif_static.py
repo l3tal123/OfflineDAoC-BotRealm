@@ -121,6 +121,39 @@ def props_of(b):
     return out
 
 
+UV_LIMIT = 1.0e4
+
+
+def clean_uvs(uv, tri=None):
+    """(uv, how many vertices were fixed). Some original NIFs hold junk texture coordinates on a few vertices
+    (+-1.7e38, NaN: Camelot's cam15 room above the necromancer trainer, Tir na Nog's elftavern2, ...). Godot packs a
+    mesh's UVs into that mesh's UV range, so one junk value flattens the whole surface to one texel (owner
+    2026-11-02: a flat purple floor and pillars). A junk vertex takes the average UV of the good vertices it shares
+    a triangle with, else the set's average, else 0."""
+    uv = np.array(uv, dtype=np.float64)
+    bad = ~np.isfinite(uv).all(axis=1) | (np.abs(np.nan_to_num(uv, nan=0.0)) > UV_LIMIT).any(axis=1)
+    n = int(bad.sum())
+    if not n:
+        return uv, 0
+    good_all = uv[~bad].mean(axis=0) if (~bad).any() else np.zeros(2)
+    fill = np.tile(good_all, (len(uv), 1))
+    if tri is not None and len(tri):
+        tri = np.asarray(tri, dtype=np.int64)
+        acc = np.zeros((len(uv), 2)); cnt = np.zeros(len(uv))
+        for a in range(3):
+            for b in range(3):
+                if a == b:
+                    continue
+                src, dst = tri[:, b], tri[:, a]
+                ok = ~bad[src] & bad[dst]
+                np.add.at(acc, dst[ok], uv[src[ok]])
+                np.add.at(cnt, dst[ok], 1)
+        has = cnt > 0
+        fill[has] = acc[has] / cnt[has, None]
+    uv[bad] = fill[bad]
+    return uv, n
+
+
 def triangles_of(data):
     if data.type == 'NiTriShapeData':
         tri = np.asarray(data.get('triangles'), dtype=np.int64).reshape(-1, 3) if data.get('has_triangles', True) \
@@ -815,6 +848,7 @@ def shape_arrays(data, m):
         col = np.clip(np.asarray(data['vertex_colors'], dtype=np.float64)[:, :4], 0, 1)
     tri = triangles_of(data)
     tri = tri[(tri < len(pos)).all(axis=1)]
+    uv = [clean_uvs(s, tri)[0] for s in uv]
     if nrm is None:
         nrm = vertex_normals(pos, tri)
     return pos, nrm, uv, col, tri

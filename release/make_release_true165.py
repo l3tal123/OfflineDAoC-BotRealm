@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sqlite3
 import zipfile
 from pathlib import Path
@@ -172,8 +173,8 @@ def pack(files: dict[str, Path], root: str, folder: Path, prefix: str, numbered:
 
 
 def old_groups(old: Path, kind: str, files: dict[str, Path], baseline: dict[str, str]):
-    """The previous release's grouping of these files: [(part entry, [rel...], unchanged)]. A file new since then goes
-    into the last group (or a new one when that would pass the budget)."""
+    """The previous release's grouping of these files: [(part entry, [rel...], unchanged)], and the files that are new
+    since then (they go into new parts of their own, so the previous parts can stay byte-identical)."""
     manifest = json.loads((old / "download-manifest.json").read_text(encoding="utf-8"))
     prefix = manifest["RootFolder"] + "/"
     groups, placed = [], set()
@@ -184,18 +185,31 @@ def old_groups(old: Path, kind: str, files: dict[str, Path], baseline: dict[str,
         same = len(kept) == len(members) and all(sha(files[r]) == baseline.get(r) for r in kept)
         groups.append([part, kept, same])
         placed.update(kept)
-    for rel in sorted(set(files) - placed):
-        groups[-1][1].append(rel)
-        groups[-1][2] = False
-    return manifest["RootFolder"], groups
+    return manifest["RootFolder"], groups, sorted(set(files) - placed)
 
 
 def pack_like(files: dict[str, Path], old: Path, kind: str, baseline: dict[str, str], folder: Path,
               budget: int) -> tuple[list[dict], int]:
     """Pack like the previous release: a part whose files are all unchanged is the previous zip itself (same bytes,
-    so it needn't be uploaded again); a changed part is repacked under its old name."""
-    root, groups = old_groups(old, kind, files, baseline)
+    so it needn't be uploaded again); a changed part is repacked under its old name; files new since then go into new
+    parts numbered after the last one, within the part budget."""
+    root, groups, added = old_groups(old, kind, files, baseline)
     parts, reused = [], 0
+    if added:
+        last = groups[-1][0]["Name"]
+        match = re.match(r"(.*)-part(\d+)\.zip$", last)
+        stem, number = (match.group(1), int(match.group(2))) if match else (last[:-len(".zip")], 1)
+        new_groups, current, size = [], [], 0
+        for rel in added:
+            length = files[rel].stat().st_size
+            if current and size + length > budget:
+                new_groups.append(current)
+                current, size = [], 0
+            current.append(rel)
+            size += length
+        new_groups.append(current)
+        for offset, members in enumerate(new_groups, start=1):
+            groups.append([{"Name": f"{stem}-part{number + offset:02d}.zip"}, members, False])
     for part, members, same in groups:
         if same:
             target = folder / part["Name"]

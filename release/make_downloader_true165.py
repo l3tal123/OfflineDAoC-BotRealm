@@ -25,18 +25,23 @@ def readme(version: str) -> str:
         "   (Not inside OneDrive, Program Files or a very deep folder.)",
         f"2. Double-click {CMD}.",
         "   If Windows SmartScreen says it protected your PC, click More info, then Run anyway.",
-        "3. It checks your PC, shows the download size and where the game will go, and asks",
-        "   before it starts. The game goes into a new folder, OfflineDAoC-True165, next to this",
-        "   downloader's folder (or C:\\Games\\OfflineDAoC-True165 if that path would be too long:",
-        "   the game needs a short path to keep its graphics cache).",
+        "3. It checks your PC and asks what to do:",
+        "   1 = Update my game: updates the game you already have, in the folder it is in, with a",
+        "       smaller download. Close the game and the launcher first. Your account, characters,",
+        "       companions, bots and settings stay; the files it replaces are backed up in",
+        "       patch-backups\\ in the game folder.",
+        "   2 = New install: the complete game, into a new folder, OfflineDAoC-True165, next to",
+        "       this downloader's folder (or C:\\Games\\OfflineDAoC-True165 if that path would be too",
+        "       long: the game needs a short path to keep its graphics cache).",
+        "   It shows the download size and asks before it starts.",
         "4. If the download stops or you close the window, double-click the same file again:",
-        "   it continues where it stopped. Finished parts are kept.",
-        "5. When it says the game is installed, open the OfflineDAoC-True165 folder and",
-        "   double-click START OFFLINE DAOC TRUE 1.65.cmd. Then click START SERVER, wait for",
-        "   RUNNING, and click ENTER REALM.",
+        "   it continues where it stopped.",
+        "5. When it's done, open the OfflineDAoC-True165 folder and double-click",
+        "   START OFFLINE DAOC TRUE 1.65.cmd. Then click START SERVER, wait for RUNNING, and click",
+        "   ENTER REALM.",
         "",
         "You need: 64-bit Windows 10 or 11, a CPU with AVX2, a graphics card with Vulkan",
-        "(a current driver), 16 GB RAM recommended, and about 45 GB of free space while it installs.",
+        "(a current driver), 16 GB RAM recommended, and about 48 GB of free space for a new install.",
         "Nothing else to install: .NET comes with the game, and no original DAoC client is needed.",
         "",
         "Full guide and troubleshooting:",
@@ -52,7 +57,7 @@ def sha(path: Path) -> str:
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--assets", type=Path, required=True)
-    parser.add_argument("--version", default="0.1")
+    parser.add_argument("--version", default="0.2")
     args = parser.parse_args()
     folder = args.assets.resolve() / f"v{args.version}"
     if not (folder / "download-manifest.json").is_file():

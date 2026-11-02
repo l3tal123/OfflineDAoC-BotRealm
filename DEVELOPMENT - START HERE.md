@@ -1,6 +1,6 @@
 # Developer start
 
-Offline DAoC True 1.65 **v0.1**. One mode (True 1.65), one client (the new client).
+Offline DAoC True 1.65 **v0.2**. One mode (True 1.65), one client (the new client).
 
 Read these first:
 - [AGENTS.md](AGENTS.md): the project rules and the layout.

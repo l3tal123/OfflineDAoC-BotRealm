@@ -5,41 +5,102 @@ The newest version is first.
 Offline DAoC True 1.65 grew out of [Offline DAoC](https://github.com/shadowofze/OfflineDAoC) (0.3 to 0.37c, now on
 hold). Its changelog has the history of everything this version inherits.
 
-## Coming in 0.2
+## Coming in 0.3
 
-- Gamebots: bots buy and wield weapons of the line they trained, and dual wielders hold the trained weapon in their
-  main hand.
-- Gamebots: a bot that keeps dying with poor gear goes shopping for an upgrade it can afford, and bots on a shopping
-  trip no longer stand at a merchant for 15 minutes.
-- Gamebots and companions: strength buffs go to fighters and acuity buffs to casters.
-- Gamebots and companions: a bot that levels shows its new level and con colour at once, and in the group window.
+- Combat: a monster on its last sliver of health no longer falls over before the hit that kills it.
+- World: two Albion banners floating in the air over Camelot Hills are gone.
+- Looting: you can no longer pick up loot while dead.
+- Groups: removing yourself from a group of bots that follow you releases them, instead of leaving them stuck following you where you could neither disband nor re-invite them.
+- Chat: %t or %T in a chat line is replaced by your target's name (or "<nothing>" with no target), as in the 1.64 client - for example /s Healing %t.
+- Interface: the status window gets its thin red border while you are in attack mode (melee), as in the 1.64 client.
+
+## 0.2 (2026-11-01)
+
+An update to v0.1: the downloader updates an installed v0.1 game in place (about 2.5 GB instead of the full 36 GB), and
+keeps your account, characters, companions, bots and settings. New players get the complete game, as before.
+
+### Gamebots and companions
+
+- Gamebots buy and wield weapons of the line they trained, and dual wielders hold the trained weapon in their main hand.
+- A gamebot that keeps dying with poor gear goes shopping for an upgrade it can afford, and bots on a shopping trip no
+  longer stand at a merchant for 15 minutes.
+- Strength buffs go to fighters and acuity buffs to casters, from gamebots and companions alike.
+- A bot that levels shows its new level and con colour at once, and in the group window.
+- Companions: a companion whose bow is taken away in the middle of a pull switches back to its melee weapons.
 - Companions: you can give your own companions quest and no-trade items.
 - Companions: a companion that dies shows as dead on your companion roster at once.
-- Horses: stable horses ride over the bridges on every horse route (Prydwen Bridge, the bridge into Camelot and the
-  rest) instead of through or under them ([#1](https://github.com/shadowofze/OfflineDAoC-True165/issues/1)). Still
-  slightly buggy: crossing Prydwen Bridge, the horse can dip into the deck a few times, and in the new client horse
-  rides rubber-band (the horse jumps back and forth along the route).
+- Companions: your hired companions come with you at once when you use a teleporter or release to your bind point.
+- Companions: reviving a companion at a healer after it died while casting no longer breaks its spell effects
+  (reported as a client crash when reviving at Epona in Mag Mell).
+
+### World and items
+
+- Stable horses ride over the bridges on every horse route (Prydwen Bridge, the bridge into Camelot and the rest)
+  instead of through or under them ([#1](https://github.com/shadowofze/OfflineDAoC-True165/issues/1)). Still a little buggy: crossing Prydwen Bridge, the horse can dip into
+  the deck now and then.
 - Horses: a lag spike no longer throws you off a stable horse in the middle of a route (both clients).
 - Horses: stable horses no longer rubber-band along their route.
 - Horses: gamebots ride horses sized for their race, as players do.
-- Companions: your hired companions come with you at once when you use a teleporter or release to your bind point.
-- Items: merchant caster staves have their focus levels again (lower spell power cost), and about 470 items regain
-  bonuses from their 1.65 descriptions (instrument and weapon skills, resists, staff focus).
-- Quests: you can still hand in quest items after outleveling a quest you already have (for example the Necromancer
-  quest Inconnu Poison).
-- Companions: a companion whose bow is taken away in the middle of a pull switches back to its melee weapons.
-- Controls: Mouse Look Toggle, as in the original client, can be switched on in Options > Controls (off by default).
-  Once on, right-click on open ground to turn mouse look on (the mouse turns you with no button held), and right-click
-  again or press Esc to turn it off. Right-clicking NPCs and objects still works as before, and the key can be rebound.
+- Merchant caster staves have their focus levels again (lower spell power cost), and about 470 items regain bonuses
+  from their 1.65 descriptions (instrument and weapon skills, resists, staff focus).
+- Items: about 340 loot items show an icon that matches their name (a boar tusk is a tusk, raw pork is meat), from the
+  1.64 client's own item art.
+- Camelot: the walls around the round table area no longer show up white, and the palace's closed double door by
+  Guard Eraedus is back ([#2](https://github.com/shadowofze/OfflineDAoC-True165/issues/2)).
+- Missing doors, doorways and doorsteps now show in Caer Sidi, Muspelheim, Yggdra Forest, Odin's Gate, Trollheim and
+  Tur Suil, and a Darkness Falls tunnel has its textures again.
+- Sharper textures on the new traveler's inns (Avalon Marsh, West Svealand, Shannon Estuary) and on some grass
+  (Iarnwood, Cothrom Gorge, World's End).
+- NPCs stored a little below their floor now stand on it, as the original client drew them: Gothwaite Harbor's dye
+  merchants were sunk to the neck ([#4](https://github.com/shadowofze/OfflineDAoC-True165/issues/4)), and three more
+  NPCs in the Vale of Mularn and the Black Mountains stood in their floor.
+- Half Ogre, Frostalf and Shar NPCs (about 150 of them, General Vaul among them) draw with their own classic figures
+  instead of broken.
+- World: floors, beams, pillars and furniture that drew in one flat colour have their textures again - the upstairs
+  room above Camelot's Necromancer and Reaver trainers and other Camelot buildings, Hibernia's taverns and housing
+  marketplaces, Norse huts, some Albion dungeon halls, keeps and buildings (47 models: a few broken texture
+  coordinates in the original models flattened the whole surface).
+
+### Housing (new)
+
+- Player housing, as in the 1.64 client and with its own models: the 12 period housing zones (Caerwent, Old Sarum,
+  Rilan, Dalton; Erikstaad, Arothi, Carlingford, Wyndham; Meath, Dunshire, Torrylin, Kilcullen) through the realms'
+  housing gates; buying a lot and building a house with a deed; the houses' roof, wall, door and wood materials,
+  porch, guild banner and shield; the garden; going inside; placing, rotating and taking back furniture; hookpoints
+  (vaults, bindstones, tools, house merchants); house vaults; friend permissions; paying rent by dropping coins on
+  your house; and the 1.64 housing windows (External / Internal Options, Garden Placement, Friend Level Permissions,
+  Permissions List, Rotate Object).
+- Lots, deeds and rent cost the period prices, the decorators carry their full stock, and stable routes run inside
+  the housing zones. Hanging a weapon on a wall no longer leaves a copy in your bag.
+- Housing is checked offline but not yet played through on a live server.
+
+### Quests
+
+- You can still hand in quest items after outleveling a quest you already have (for example the Necromancer quest
+  Inconnu Poison).
+- Quests: REMOVE QUEST in the quest journal asks "Do you really wish to remove this quest?" (YES / NO) before it
+  gives the quest up.
+
+### The new client
+
+- Mouse Look Toggle, as in the original client, can be switched on in Options > Controls (off by default). Once on,
+  right-click on open ground to turn mouse look on (the mouse turns you with no button held), and right-click again
+  or press Esc to turn it off. Right-clicking NPCs and objects still works as before, and the key can be rebound.
+- Controls: the 1.64 client's keys that did nothing now work - Follow, Stick and Face (on your target; press again
+  to stop), Camera Reset, Look Up / Look Down, Target Group #2-8, Target Friend, Target Object, Last Attacker,
+  Consider, Command Window (opens the chat line with "/"), Help (the server's command list), Chat Logging (to
+  CHAT.LOG beside the game), Toggle Names (/hidenames and /shownames too) and the Perf. Meter. The Realm War Map key
+  opens the war map too. Default keys the 1.65 key file gives an unknown modifier no longer fire on the bare key
+  (Nearest Friend took Tab from Target Enemy, Chat Logging took L from the combat window); bind those in Options.
 - Chat: Shift+Up and Shift+Down go through your last 10 sent lines, as in the original 1.64 client; Shift+Up with the
   chat line closed opens it with your last line. One minor convenience over the real 1.64 behavior: stepping past the
   newest line with Shift+Down brings back what you were typing (1.64 shows an empty line).
-- Controls: /qbar works as in the 1.64 client: /qbar # shows quickbar bank # (1-10).
-- Loading screens: the 1.64 client's classic loading bar and layout - the loading picture at its own size, the glass
-  bar in its bottom right corner and "Loading..." beside it.
+- `/qbar` works as in the 1.64 client: `/qbar #` shows quickbar bank # (1-10).
+- Loading screens: the 1.64 client's classic loading bar and layout, with the loading picture at its own size, the
+  glass bar in its bottom right corner and "Loading..." beside it.
 - Loot: dropped loot shows the 1.64 client's classic bag instead of the later Catacombs one.
 - Death: one death window with the release timer, its bar (the 1.64 client's green bar art) and /RELEASE, /RELEASE
-  CITY and /RELEASE HOUSE, all inside the window - the separate Release Timer window is gone, and /RELEASE BIND (the
+  CITY and /RELEASE HOUSE, all inside the window. The separate Release Timer window is gone, and /RELEASE BIND (the
   same as /RELEASE) was removed. Crafting, salvage and repair timer bars stay inside their window too.
 - Items: the Destroy Item key (Shift+D) now works, as in the 1.64 client - right-click an item to select it, press
   the key and answer "Do you really wish to destroy this item?" (indestructible items, relics and worn items stay).
@@ -48,28 +109,19 @@ hold). Its changelog has the history of everything this version inherits.
 - Spells: Shift+right-click one of your own buff icons to cancel it.
 - Items: a highlighted item in your backpack, vault or a merchant's list, and the right-click box, show the item's name
   in its con colour to you.
-- Player housing, as in the 1.64 client and with its own models: the 12 period housing zones (Caerwent, Old Sarum,
-  Rilan, Dalton; Erikstaad, Arothi, Carlingford, Wyndham; Meath, Dunshire, Torrylin, Kilcullen) through the realms'
-  housing gates; buying a lot and building a house with a deed; the houses' roof, wall, door and wood materials,
-  porch, guild banner and shield; the garden; going inside; placing, rotating and taking back furniture; hookpoints
-  (vaults, bindstones, tools, house merchants); house vaults; friend permissions; paying rent by dropping coins on
-  your house; and the 1.64 housing windows (External / Internal Options, Garden Placement, Friend Level Permissions,
-  Permissions List, Rotate Object). Lots, deeds and rent cost the period prices, the decorators carry their full
-  stock, stable routes run inside the housing zones, and hanging a weapon on a wall no longer leaves a copy in your
-  bag. Checked offline; not yet played through on a live server.
-- Launcher: the Stop button stops the server again (it could keep running).
-- NPCs: Half Ogre, Frostalf and Shar NPCs (about 150 of them, General Vaul among them) draw with their own classic
-  figures instead of broken.
-- Companions: reviving a companion at a healer after it died while casting no longer breaks its spell effects
-  (reported as a client crash when reviving at Epona in Mag Mell).
-- NPCs: NPCs stored a little below their floor now stand on it, as the original client drew them - Gothwaite Harbor's
-  dye merchants were sunk to the neck (GitHub issue #4).
-- Camelot: the walls around the round table area no longer show up white, and the palace's closed double door by
-  Guard Eraedus is back (GitHub issue #2).
-- World: missing doors, doorways and doorsteps now show in Caer Sidi, Muspelheim, Yggdra Forest, Odin's Gate,
-  Trollheim and Tur Suil, and a Darkness Falls tunnel has its textures again.
-- World: sharper textures on the new traveler's inns (Avalon Marsh, West Svealand, Shannon Estuary) and on some grass
-  (Iarnwood, Cothrom Gorge, World's End).
+- Trainers: a RESPEC button beside TRAIN in the training window respecs all your specializations; the server's own
+  "CAUTION: All respec changes are final" box asks you first. The 1.64 client had only /respec all - this is a
+  necessary and simple QoL addition.
+- The window title is "Offline DAoC True 1.65 v0.2", and the launcher shows VERSION 0.2.
+
+### The launcher and the downloader
+
+- The launcher's Stop button stops the server again (it could keep running).
+- One downloader for everyone: **1 = Update my game** updates an installed game in the folder it is in, and
+  **2 = New install** installs the complete game into a new folder.
+- An update checks every file it replaces first and changes nothing if one was changed on that PC (it can then make a
+  fresh install and bring your save over). It backs up what it replaces in `patch-backups\`, undoes a failed update,
+  and finishes an interrupted one on the next run. Your save, login and client settings are never touched.
 
 ## 0.1 (2026-11-01)
 
@@ -245,5 +297,5 @@ These were built during this work and are shared with Offline DAoC.
   - the Realm Exchange tab (the Exchange is in game only);
   - the Reset Keeps & Relics button.
 
-The known issues in v0.1 are listed in the [README](README.md#known-issues-in-v01), and the fixes taken from
+The known issues are listed in the [README](README.md#known-issues), and the fixes taken from
 community forks are credited in [THIRD_PARTY.md](THIRD_PARTY.md#fork-credits).

@@ -1,4 +1,4 @@
-OFFLINE DAOC TRUE 1.65 v0.1
+OFFLINE DAOC TRUE 1.65 v0.2
 
 This folder is the complete game: the new client, the server, the clean
 world and the launcher. It contains no one else's account, characters or
@@ -16,7 +16,7 @@ Vulkan (current drivers), and 16 GB RAM recommended.
 
 PLAY
 1. Keep this whole folder together. Don't run files from inside a ZIP.
-2. Double-click START OFFLINE DAOC TRUE 1.65.cmd. The launcher shows VERSION 0.1.
+2. Double-click START OFFLINE DAOC TRUE 1.65.cmd. The launcher shows VERSION 0.2.
 3. Click START SERVER and wait until the launcher shows RUNNING.
    The first start sets up the world and can take a few minutes.
 4. Click ENTER REALM. Your own local account is created the first time.
@@ -33,6 +33,12 @@ open at levels 5, 10, 15, 20, 30, 40 and 45.
 A FRESH START
 True 1.65 is its own game. Saves from Offline DAoC 0.37 and earlier can't be
 brought over.
+
+UPDATING
+A new version updates this folder in place: get the new downloader from the
+latest release on GitHub, run GET-OFFLINE-DAOC-TRUE165.cmd and choose
+1 = Update my game. Your save and settings stay; the files it replaces are
+backed up in patch-backups\.
 
 YOUR SAVE
 Your world, characters, companions and bots are in

@@ -62,6 +62,7 @@ const CAM_MIN := 50.0 * 0.025
 const CAM_MAX := 500.0 * 0.025
 const CAM_MAX_FREE := 40.0
 const CAM_PITCH := deg_to_rad(50.0)     # client: camera pitch clamped to -50..50 degrees (game.dll 0x4ac471)
+const LOOK_RATE := deg_to_rad(60.0)    # Look Up / Look Down held: degrees a second
 # The torch, from the client (game.dll 0x43e5a4 "torch on" -> 0x47d4f4): two white point lights on a node 128 units
 # (3.2 m) above the figure. Light 1: dimmer 200 x 0.01 = 2.0; light 2 (lights only scene group 0x2459dbc, not drawn
 # yet): 200 x 0.0025 = 0.5. Both fall off as 1 / (0.006 d + d^2 / 147456) (d in units): full at ~6.8 m, about 0.6 at
@@ -701,6 +702,13 @@ func stop_track(quiet := false) -> void:
 	track_target = null
 
 
+## Camera Reset (owner 2026-11-02: the key did nothing - no code read it): the camera swings back behind you at the
+## default pitch, as the client's Camera Reset key; the zoom stays.
+func reset_camera() -> void:
+	cam_yaw = char_yaw
+	cam_pitch = -0.22
+
+
 func face(yaw_radians: float) -> void:
 	char_yaw = yaw_radians
 	cam_yaw = yaw_radians
@@ -804,6 +812,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_mouse_look(not mouse_look)
 		elif Keybinds.pressed(event, "move_forward") or Keybinds.pressed(event, "move_back"):
 			autorun = false
+		elif Keybinds.pressed(event, "camera_reset"):
+			reset_camera()
 
 
 func _unshifted(event: InputEventKey) -> InputEventKey:
@@ -854,6 +864,10 @@ func _physics_step(delta: float) -> void:
 		get_viewport().warp_mouse(_cursor_at)
 	var rmb := input_enabled and _rmb_world and not dead       # a dead character doesn't move (both buttons either)
 	var lmb := input_enabled and _lmb_world and not dead
+	# Look Up / Look Down (the 1.64 client's keys; owner 2026-11-02: no code read them): the camera tilts while held
+	var look := (1.0 if _act("look_up") else 0.0) - (1.0 if _act("look_down") else 0.0)
+	if look != 0.0:
+		cam_pitch = clampf(cam_pitch + look * LOOK_RATE * delta, -CAM_PITCH, CAM_PITCH)
 	if riding:                                        # the horse carries you; the camera still orbits
 		velocity = Vector3.ZERO
 		if input_enabled and _act("jump"):

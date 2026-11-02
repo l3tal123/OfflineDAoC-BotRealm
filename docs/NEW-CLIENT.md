@@ -36,14 +36,21 @@ starts it; you never start it by hand.
 In your game folder:
 - `new-client\godot` holds the game;
 - `new-client\tools\godot_net` holds the engine;
-- `new-client\save` holds your settings, key bindings and logs. Delete it to go back to the defaults.
+- `new-client\save` holds your settings, key bindings and logs, in `new-client\save\Godot\app_userdata\MMOEngine`. Delete `new-client\save` to go
+  back to the defaults.
 
 ## Reporting problems
 
-Say what you were doing, and include the logs from `new-client\save`:
+Say what you were doing, and include the logs. They are in your game folder, in `new-client\save\Godot\app_userdata\MMOEngine`:
+- `logs\godot.log`: the latest run. If the client crashed, the error is at the end of this file. Each start
+  moves the previous run's log to `logs\godot<date and time>.log`, so after a crash grab `godot.log` (or the newest
+  dated one) before starting the game again;
 - `spell_log.txt`: spell casts and landings, model changes;
-- `death_log.txt`;
-- the files in `logs\`.
+- `death_log.txt`.
+
+If the server stopped or the game disconnected, also include the newest files in `runtime\logs` and
+`runtime\server\logs`. A crash that leaves nothing in `godot.log` is usually in Windows' Event Viewer, under
+Windows Logs > Application.
 
 ## For developers
 

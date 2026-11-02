@@ -198,8 +198,15 @@ func _parse(binding: String) -> Dictionary:
 	var main := binding
 	if parts.size() > 1 and binding != "Num+":
 		main = parts[parts.size() - 1] if not binding.ends_with("+") else "+"
-		for i in parts.size() - 1:
-			d[String(parts[i]).to_lower()] = true
+		var mods := parts.size() - (2 if binding.ends_with("Num+") else 1)
+		for i in mods:
+			var m := String(parts[i]).to_lower()
+			if m in ["shift", "ctrl", "alt"]:
+				d[m] = true
+			elif m != "":
+				# keyboard.dat's modifier 4 ("m4+", game.dll names it "unknown"): never a plain key - read as one, Nearest
+				# Friend took Tab from Target Enemy and Chat Logging took L from the combat window (owner 2026-11-02)
+				return d
 		if binding.ends_with("Num+"):
 			main = "Num+"
 	if MOUSE.has(main):

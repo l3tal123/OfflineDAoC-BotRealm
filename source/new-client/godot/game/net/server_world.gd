@@ -1328,6 +1328,8 @@ func _combat(d: Dictionary) -> void:
 		if int(d.get(k, 0)) > 0 and int(d[k]) != Server.me_oid and not by_oid.has(int(d[k])):
 			_note_unknown(int(d[k]), "combat", Vector3.INF)
 			_request_object(int(d[k]))
+	if int(d.defender) == Server.me_oid and int(d.attacker) > 0 and int(d.attacker) != Server.me_oid:
+		last_attacker = int(d.attacker)                    # (the Last Attacker key)
 	var a := _view_of(int(d.attacker))
 	# a bow drawn / loosed (AttackAction's ranged attack): the archer's bow clips, not a melee swing (owner 2026-10-15:
 	# the bone archers swung a sword at range); the arrow's hit (a bow as the weapon) swings nothing either
@@ -2040,6 +2042,79 @@ func target_nearest_loot() -> void:
 		PlayerData.message.emit("No lootable object in range.", "system")
 	else:
 		_target_ground(best)
+
+
+## The 1.64 client's targeting keys that had no code (owner 2026-11-02: "fix all of them if they are in the original
+## client" - each is in the 1.64 game.dll key list; its chat lines are game.dll's own strings).
+const KEY_TARGET_M := 60.0                       # (the Target Enemy key's reach, NpcManager.nearest_enemy)
+var last_attacker := 0                           # the object id that last hit you (combat packets)
+
+
+## Target Object: the nearest ground object, a gravestone too, else "No object target in range."
+func target_nearest_object() -> void:
+	var best := 0
+	var best_d := LOOT_RANGE
+	for oid in objects:
+		var h: Node3D = objects[oid]
+		if not is_instance_valid(h):
+			continue
+		var d := h.global_position.distance_to(player.global_position)
+		if d <= best_d:
+			best = int(oid)
+			best_d = d
+	if best == 0:
+		PlayerData.message.emit("No object target in range.", "system")
+	else:
+		_target_ground(best)
+
+
+## Target Friend: the nearest character of your realm (gamebots, companions, guards - a race figure, not a peaceful
+## merchant), else "No player target in range."
+func target_nearest_friend() -> void:
+	var best: Npc = null
+	var best_d := KEY_TARGET_M
+	for i in active:
+		var n: Npc = active[i]
+		if not is_instance_valid(n) or n == target or not n.state.alive or n.state.stealthed or not n.is_friendly():
+			continue
+		if int(n.spawn.flags) & (Npc.FLAG_CANTTARGET | Npc.FLAG_PEACE) or not n.state.info.has("race"):
+			continue
+		var d := n.global_position.distance_to(player.global_position)
+		if d < best_d:
+			best_d = d
+			best = n
+	if best == null:
+		PlayerData.message.emit("No player target in range.", "system")
+	else:
+		select(best)
+
+
+## Target Group #2-8: the group window's members after you (you are #1).
+func target_group_member(index: int) -> void:
+	var others := Server.group_members.filter(func(m): return int(m.get("oid", 0)) != Server.me_oid)
+	if index - 2 >= 0 and index - 2 < others.size():
+		target_oid(int(others[index - 2].get("oid", 0)))
+
+
+## Last Attacker: whoever last hit you, targeted - "Your last attacker is not visible." / "... is not in range."
+func target_last_attacker() -> void:
+	var st: NpcState = by_oid.get(last_attacker)
+	if last_attacker == 0 or st == null or st.view == null or not is_instance_valid(st.view) or not st.view.visible:
+		PlayerData.message.emit("Your last attacker is not visible.", "system")
+	elif st.view.global_position.distance_to(player.global_position) > KEY_TARGET_M:
+		PlayerData.message.emit("Your last attacker is not in range.", "system")
+	else:
+		select(st.view as Npc)
+
+
+## Consider: your target examined again (the Target packet's examine bit: the server's "You examine ..." lines).
+func consider_target() -> void:
+	if Server.client == null:
+		return
+	if target and is_instance_valid(target):
+		Server.client.call("Target", int(target.spawn.get("oid", 0)), 0x8000 | 0x6000)
+	elif target_object != 0:
+		Server.client.call("Target", target_object, 0x8000 | 0x6000)
 
 
 ## The Get Item key: the targeted ground object picked up - the server picks up what you have targeted

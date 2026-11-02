@@ -38,6 +38,16 @@ var _tab_lit: Array = []
 var _tab_hover: Array = []
 var _status_bars := {}
 var _status_name: Label
+var _status: ClassicWindow
+
+
+## The status panel's thin red border (the 1.64 client's rightbotcomb.bmp; owner 2026-11-02 from a player report):
+## game.dll draws it while its attack-mode flag is on - set only by the server's AttackMode packet (0x74, handler
+## 0x412479 -> 0x453df8 -> 0x4a6dd0 state 2 -> 0x4b5645: the window's +0xa8 flag, its draw at 0x4b5051 then takes
+## rightbotcomb instead of rightbot) and cleared by it or by the client's own reset (0x4122f4).
+func set_combat_border(on: bool) -> void:
+	if _status and _status.frame is TextureRect:
+		(_status.frame as TextureRect).texture = UiArt.tex("rightbotcomb" if on else "rightbot")
 var _target_name: Label
 var _target_bar: TextureRect
 var _target_pct: Label
@@ -159,6 +169,7 @@ func _build() -> void:
 	# (percent box x 3-19, bar y 82-89). Bar order health / power / endurance: to check against a 1.65 screenshot.
 	var st := _window("status", "rightbot", Rect2(), Vector2(a.x - 128, a.y - 96), true)
 	st.closable = false
+	_status = st
 	_status_name = UiArt.label(PlayerData.display_name(), 7, UiArt.GOLD_HI)
 	_status_name.position = Vector2(14, 3)                 # the name bar's dark inside: x 14-116, y 3-11
 	_status_name.size = Vector2(102, 8)
@@ -1183,6 +1194,59 @@ func message(text: String, kind := "system") -> void:
 	for c in [chat_combat, chat]:
 		if c:
 			c.add_line(text, kind)
+	if _chat_log:
+		_chat_log.store_line("[%s] %s" % [Time.get_time_string_from_system(), text])
+		_chat_log.flush()
+
+
+## Chat Logging (the 1.64 client's key; owner 2026-11-02: no code read it): every chat line to CHAT.LOG beside the
+## game, as game.dll writes it - "*** Chat Log Opened: <date>", "[hh:mm:ss] line", "*** Chat Log Closed: <date>".
+var _chat_log: FileAccess
+
+
+static func chat_log_path() -> String:
+	return ProjectSettings.globalize_path("res://").trim_suffix("/").get_base_dir().path_join("CHAT.LOG")
+
+
+func toggle_chat_log() -> void:
+	var stamp := Time.get_datetime_string_from_system(false, true)
+	if _chat_log:
+		_chat_log.store_line("*** Chat Log Closed: %s" % stamp)
+		_chat_log.close()
+		_chat_log = null
+		message("Chat Logging Disabled")
+		return
+	var path := chat_log_path()
+	_chat_log = FileAccess.open(path, FileAccess.READ_WRITE if FileAccess.file_exists(path) else FileAccess.WRITE)
+	if _chat_log == null:
+		message("Chat Logging Disabled")
+		return
+	_chat_log.seek_end()
+	_chat_log.store_line("*** Chat Log Opened: %s" % stamp)
+	message("Chat Logging Enabled to file: CHAT.LOG")
+
+
+## Perf. Meter (the 1.64 client's key): the frame rate and frame time in the top left corner while on.
+var _perf: Label
+
+
+func toggle_perf_meter() -> void:
+	if _perf == null:
+		_perf = UiArt.label("", 10, UiArt.CREAM)
+		_perf.position = Vector2(8, 8)
+		_perf.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(_perf)
+		var t := Timer.new()
+		t.wait_time = 0.5
+		t.autostart = true
+		_perf.add_child(t)
+		t.timeout.connect(func():
+			_perf.text = "Framerate: %d\nTotal Time: %.1f ms" % [Engine.get_frames_per_second(),
+					Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0])
+		_perf.visible = false
+	_perf.visible = not _perf.visible
+	if _perf.visible:
+		_perf.text = "Framerate: %d" % Engine.get_frames_per_second()
 
 
 ## The information window for an item (shift-click on it).
@@ -2004,6 +2068,29 @@ func handle_input(event: InputEvent) -> bool:
 		return true
 	if Keybinds.pressed(event, "reply"):
 		chat.start_typing("/r ")
+		return true
+	# the 1.64 client's keys that had no code (owner 2026-11-02): Command Window (the chat line with its "/"), Help,
+	# Chat Logging, Perf. Meter, Toggle Names, and the Realm War Map key (owner exception: 1.65's, our classic map)
+	if Keybinds.pressed(event, "show_commands"):
+		chat.start_typing("/")
+		return true
+	if Keybinds.pressed(event, "show_help"):
+		if Server.active:
+			Server.command("/cmdhelp")                   # the server's command list
+		else:
+			chat.run_line("/help")
+		return true
+	if Keybinds.pressed(event, "chat_log"):
+		toggle_chat_log()
+		return true
+	if Keybinds.pressed(event, "perf_meter"):
+		toggle_perf_meter()
+		return true
+	if Keybinds.pressed(event, "toggle_names"):
+		NamePlates.hidden = not NamePlates.hidden          # (/hidenames and /shownames too)
+		return true
+	if Keybinds.pressed(event, "show_war_map"):
+		PlayerData.window_toggle.emit("warmap")
 		return true
 	# Shift+Up with the chat line closed: it opens with your last line, as the 1.64 client (ChatWindow history)
 	if event is InputEventKey and event.pressed and event.shift_pressed and event.keycode == KEY_UP and chat \

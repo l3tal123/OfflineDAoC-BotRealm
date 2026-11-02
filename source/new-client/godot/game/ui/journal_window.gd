@@ -52,18 +52,11 @@ func build() -> void:
 	_remove = UiArt.button("REMOVE QUEST", Vector2(96, 16), 9)
 	_remove.position = Vector2(398, 226)
 	_remove.pressed.connect(func():
-		if Server.active:                                  # the server's quest list: QuestRemoveRequest
-			if selected.begins_with("srv"):
-				Server.client.call("RemoveQuest", int(selected.substr(3)) - 1)
+		if selected == "":
 			return
-		if selected == "task":                           # /task abort (TaskSystem): a given-up task fails
-			PlayerData.task_command.emit("abort")
-		elif selected == "emissary":                     # FactionReputationQuest.AbortQuest: the hunt is dropped
-			PlayerData.character.erase(Emissaries.SAVE_KEY)
-			PlayerData.save_character()
-			PlayerData.quests_changed.emit()
-		elif selected != "":
-			remove_requested.emit(selected))
+		# owner 2026-11-02: it gave the quest up on the click - now the client's YES / NO box asks first
+		var host: Control = get_parent() if get_parent() is Control else self
+		UiArt.confirm(host, "", "Do you really wish to\nremove this quest?", "YES", "NO", _remove_selected))
 	add_child(_remove)
 	PlayerData.quests_changed.connect(refresh)
 
@@ -168,3 +161,19 @@ func _show_selected() -> void:
 			"[color=#9a9184]Level %d - %d   from %s   step %d of %d[/color]" % [int(q.min), int(q.max), String(q.giver), n, steps.size()],
 			"", String(st.get("text", ""))]
 	_body.text = "\n".join(lines)
+
+
+## REMOVE QUEST after its YES: the server's QuestRemoveRequest, or the offline quest given up.
+func _remove_selected() -> void:
+	if Server.active:                                      # the server's quest list: QuestRemoveRequest
+		if selected.begins_with("srv"):
+			Server.client.call("RemoveQuest", int(selected.substr(3)) - 1)
+		return
+	if selected == "task":                           # /task abort (TaskSystem): a given-up task fails
+		PlayerData.task_command.emit("abort")
+	elif selected == "emissary":                     # FactionReputationQuest.AbortQuest: the hunt is dropped
+		PlayerData.character.erase(Emissaries.SAVE_KEY)
+		PlayerData.save_character()
+		PlayerData.quests_changed.emit()
+	elif selected != "":
+		remove_requested.emit(selected)

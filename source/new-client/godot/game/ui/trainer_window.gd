@@ -20,6 +20,7 @@ var _points: Label
 var _ra_points: Label
 var _selected := ""
 var _selected_ra := -1                        # a Realm Skills row (its place in the class's list)
+var _respec: Button
 const PREVIEW_W := 230.0
 const PREVIEW_ICON := 20.0
 const PAGE_KIND := {2: "style", 3: "spell", 4: "song", 5: "ability"}
@@ -79,6 +80,23 @@ func build() -> void:
 		if PlayerData.train(_selected):
 			refresh())
 	add_child(train)
+	# RESPEC (owner 2026-11-02): /respec all at this trainer - the server's own CAUTION box (ACCEPT / DECLINE) is the
+	# "are you sure"; after an answer the window asks for the new lines (TrainerWindow 0 again)
+	var respec := UiArt.button("RESPEC", Vector2(64, 18), 10)
+	_respec = respec
+	respec.position = Vector2(184, 416)
+	respec.tooltip_text = "Respec all specializations"
+	respec.visible = false                               # (the server's: shown by refresh())
+	respec.pressed.connect(func():
+		if not Server.active:
+			return
+		_selected = ""
+		_selected_ra = -1
+		Server.skills_changed.connect(func():
+			if is_instance_valid(self) and visible:
+				get_tree().create_timer(0.4).timeout.connect(func(): Server.client.call("TrainWindow")), CONNECT_ONE_SHOT)
+		Server.command("/respec all"))
+	add_child(respec)
 	_build_preview()
 	PlayerData.hook(self, PlayerData.skills_changed, func():
 		if visible:
@@ -98,6 +116,8 @@ func open() -> void:
 
 
 func refresh() -> void:
+	if _respec:
+		_respec.visible = Server.active
 	for c in _rows.get_children():
 		c.queue_free()
 	if Server.active:                                      # the trainer window's specializations (TrainerWindow 0)

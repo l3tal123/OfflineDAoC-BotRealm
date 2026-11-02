@@ -10,7 +10,7 @@ namespace OfflineDaoc.Launcher;
 internal sealed partial class MainForm : Form
 {
     // v0.1 (owner 2026-10-31): early in development, not a 1.0.
-    internal const string DisplayVersion = "0.2";
+    internal const string DisplayVersion = "0.3";
     // OfflineDAoC True 1.65 (owner 2026-10-31): a separate version with True 1.65 Mode only - no normal mode, no switch.
     internal const string AppTitle = "OfflineDAoC True 1.65";
     internal const int AutoRefreshMilliseconds = 5 * 60 * 1000;

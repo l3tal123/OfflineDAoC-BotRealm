@@ -1,0 +1,2714 @@
+{
+ "p165_drop_10047": {
+  "name": "Glowing Heatbender Quarterstaff",
+  "from": 118,
+  "from_164": "Black Gem",
+  "to": 442,
+  "to_164": "Quarterstaff",
+  "reason": "consensus medium"
+ },
+ "p165_drop_6969": {
+  "name": "Azurite",
+  "from": 488,
+  "from_164": "All purpose bag",
+  "to": 115,
+  "to_164": "Blue Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_6971": {
+  "name": "Topaz",
+  "from": 520,
+  "from_164": "Wooden boards",
+  "to": 112,
+  "to_164": "Yellow Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_6972": {
+  "name": "Citrine",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 112,
+  "to_164": "Yellow Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_6976": {
+  "name": "Black Opal",
+  "from": 550,
+  "from_164": "Bowl/ plate",
+  "to": 118,
+  "to_164": "Black Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_drop_6978": {
+  "name": "Violet Diamond",
+  "from": 519,
+  "from_164": "Metal bars",
+  "to": 116,
+  "to_164": "Purple Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_drop_6979": {
+  "name": "Amethyst",
+  "from": 554,
+  "from_164": "Bottle",
+  "to": 116,
+  "to_164": "Purple Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_6980": {
+  "name": "Carnelian",
+  "from": 554,
+  "from_164": "Bottle",
+  "to": 111,
+  "to_164": "Orange Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_6981": {
+  "name": "Lapis Lazuli",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 115,
+  "to_164": "Blue Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_6983": {
+  "name": "Green Diamond",
+  "from": 519,
+  "from_164": "Metal bars",
+  "to": 113,
+  "to_164": "Green Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_drop_6985": {
+  "name": "Blue Diamond",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 115,
+  "to_164": "Blue Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_drop_6987": {
+  "name": "Black Star Diopside",
+  "from": 550,
+  "from_164": "Bowl/ plate",
+  "to": 118,
+  "to_164": "Black Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_drop_6988": {
+  "name": "Sphene",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 112,
+  "to_164": "Yellow Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_6989": {
+  "name": "Cat's Eye Opal",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 117,
+  "to_164": "White Gem",
+  "reason": "period/client low"
+ },
+ "p165_drop_6991": {
+  "name": "Blue Spinel",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 115,
+  "to_164": "Blue Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_drop_6993": {
+  "name": "Malachite",
+  "from": 614,
+  "from_164": "mandible",
+  "to": 113,
+  "to_164": "Green Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_6994": {
+  "name": "Green Tourmaline",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 113,
+  "to_164": "Green Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_drop_7000": {
+  "name": "Orange Tourmaline",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 111,
+  "to_164": "Orange Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_drop_7001": {
+  "name": "Kunzite",
+  "from": 106,
+  "from_164": "Tooth/Claw",
+  "to": 116,
+  "to_164": "Purple Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_7004": {
+  "name": "Chryoprase",
+  "from": 520,
+  "from_164": "Wooden boards",
+  "to": 113,
+  "to_164": "Green Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_7005": {
+  "name": "Fire Opal",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 111,
+  "to_164": "Orange Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_drop_7006": {
+  "name": "Sunstone",
+  "from": 605,
+  "from_164": "empty vial",
+  "to": 111,
+  "to_164": "Orange Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_item_3812": {
+  "name": "Mithril Full Helm",
+  "from": 3866,
+  "from_164": "NOT IN 1.64",
+  "to": 93,
+  "to_164": "Albion Plate Helmet 2 (Full)",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1035": {
+  "name": "beech root herb",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 535,
+  "to_164": "Herbs",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1037": {
+  "name": "petrified beech branch",
+  "from": 602,
+  "from_164": "wooden box",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1052": {
+  "name": "small green topaz",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 113,
+  "to_164": "Green Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1065": {
+  "name": "pine cone",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1073": {
+  "name": "lynx claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1074": {
+  "name": "lynx skull",
+  "from": 537,
+  "from_164": "Needle and thread",
+  "to": 540,
+  "to_164": "Skull",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1079": {
+  "name": "soapstone lamp",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 601,
+  "to_164": "torch",
+  "reason": "period/client low"
+ },
+ "p165_uth_111": {
+  "name": "bundle of sapling branches",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1133": {
+  "name": "silverlined leather baldric",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 628,
+  "to_164": "baldric",
+  "reason": "period/client high"
+ },
+ "p165_uth_1134": {
+  "name": "ancient vellum book",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 500,
+  "to_164": "Book",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1157": {
+  "name": "yellow diamond",
+  "from": 519,
+  "from_164": "Metal bars",
+  "to": 112,
+  "to_164": "Yellow Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1213": {
+  "name": "worg's paw",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1220": {
+  "name": "cave bear claw",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1223": {
+  "name": "crawler fang",
+  "from": 522,
+  "from_164": "Roll of cloth",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1229": {
+  "name": "large mauler claw",
+  "from": 100,
+  "from_164": "Animal Skin",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1230": {
+  "name": "spider leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1231": {
+  "name": "chitin leg tip",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 626,
+  "to_164": "chitin leg tip",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1271": {
+  "name": "dragon ant carapace",
+  "from": 1575,
+  "from_164": "ext_rose_trellis",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1282": {
+  "name": "dragon ant mandible",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1302": {
+  "name": "bloated spider claw",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1303": {
+  "name": "bloated spider carapace",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1332": {
+  "name": "ebony fellwood branch",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1342": {
+  "name": "cliff spider claw",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1343": {
+  "name": "spider carapace",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1346": {
+  "name": "pile of ashes",
+  "from": 605,
+  "from_164": "empty vial",
+  "to": 541,
+  "to_164": "Pile of dirt/ dust",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1358": {
+  "name": "sulphuric rock",
+  "from": 548,
+  "from_164": "Cake slice",
+  "to": 514,
+  "to_164": "Stone",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1359": {
+  "name": "yellow topaz",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 112,
+  "to_164": "Yellow Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1364": {
+  "name": "hardened lava stone",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 514,
+  "to_164": "Stone",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1401": {
+  "name": "rooter feet",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1404": {
+  "name": "obsidian stone",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 118,
+  "to_164": "Black Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_1407": {
+  "name": "rotting carrion",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1414": {
+  "name": "diseased claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1419": {
+  "name": "silver cup",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 549,
+  "to_164": "Drinking glass",
+  "reason": "period/client medium"
+ },
+ "p165_uth_149": {
+  "name": "waterskin",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 489,
+  "to_164": "Water skin",
+  "reason": "period/client high"
+ },
+ "p165_uth_1501": {
+  "name": "death stalker hide",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1502": {
+  "name": "death stalker fang",
+  "from": 522,
+  "from_164": "Roll of cloth",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1503": {
+  "name": "cloudy green stone",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 514,
+  "to_164": "Stone",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1504": {
+  "name": "piece of lapis lazuli",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 115,
+  "to_164": "Blue Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_1505": {
+  "name": "pink pearl",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 116,
+  "to_164": "Purple Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1506": {
+  "name": "pearlized shell",
+  "from": 1575,
+  "from_164": "ext_rose_trellis",
+  "to": 517,
+  "to_164": "Carapace (beetle-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1507": {
+  "name": "shiny brown rock",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 514,
+  "to_164": "Stone",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1508": {
+  "name": "copper amber pin",
+  "from": 3458,
+  "from_164": "NOT IN 1.64",
+  "to": 111,
+  "to_164": "Orange Gem",
+  "reason": "period/client low"
+ },
+ "p165_uth_1509": {
+  "name": "small pearl",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 117,
+  "to_164": "White Gem",
+  "reason": "period/client low"
+ },
+ "p165_uth_1519": {
+  "name": "small silver statue",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 593,
+  "to_164": "humanoid statue",
+  "reason": "period/client low"
+ },
+ "p165_uth_1535": {
+  "name": "worm-acid gland",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 591,
+  "to_164": "gland",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1543": {
+  "name": "drakeling eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1546": {
+  "name": "drakeling scales",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 107,
+  "to_164": "Snakeskin",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1579": {
+  "name": "arachnid poison sac",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 590,
+  "to_164": "poison sac",
+  "reason": "period/client high"
+ },
+ "p165_uth_1582": {
+  "name": "arachnid carapace",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1599": {
+  "name": "worm acid sac",
+  "from": 495,
+  "from_164": "Dye pack",
+  "to": 590,
+  "to_164": "poison sac",
+  "reason": "period/client high"
+ },
+ "p165_uth_1610": {
+  "name": "mother totem",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 104,
+  "to_164": "Totem",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1617": {
+  "name": "worg's head",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 503,
+  "to_164": "Head",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1625": {
+  "name": "giant frog eye",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1626": {
+  "name": "giant frog tongue",
+  "from": 589,
+  "from_164": "human leg",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_163": {
+  "name": "streaming wisp essence",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 605,
+  "to_164": "empty vial",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1632": {
+  "name": "silver werewolf fang",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1633": {
+  "name": "silver moon circlet",
+  "from": 537,
+  "from_164": "Needle and thread",
+  "to": 596,
+  "to_164": "circlet",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1635": {
+  "name": "warhound claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1636": {
+  "name": "warhound hide",
+  "from": 538,
+  "from_164": "Dye pot",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1668": {
+  "name": "beach rat claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1670": {
+  "name": "sharp hound claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1793": {
+  "name": "icestrider leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1796": {
+  "name": "icestrider mandible",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1797": {
+  "name": "fenrir paw",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1799": {
+  "name": "frozen waterskin",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 489,
+  "to_164": "Water skin",
+  "reason": "period/client high"
+ },
+ "p165_uth_187": {
+  "name": "huge boar hide",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_194": {
+  "name": "wolf pup's ear",
+  "from": 1870,
+  "from_164": "NOT IN 1.64",
+  "to": 501,
+  "to_164": "Ear (animal)",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1970": {
+  "name": "heart of wood",
+  "from": 520,
+  "from_164": "Wooden boards",
+  "to": 595,
+  "to_164": "heart",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1972": {
+  "name": "leafy willow branch",
+  "from": 337,
+  "from_164": "Norse Leather Helm 3",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_1973": {
+  "name": "willow-carved emerald",
+  "from": 623,
+  "from_164": "gold necklace",
+  "to": 113,
+  "to_164": "Green Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_1986": {
+  "name": "timber cat paw",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1987": {
+  "name": "timber cat fang",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1988": {
+  "name": "timberland badger fang",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1989": {
+  "name": "broken mauler fang",
+  "from": 100,
+  "from_164": "Animal Skin",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_1990": {
+  "name": "scarred mauler paw",
+  "from": 100,
+  "from_164": "Animal Skin",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1993": {
+  "name": "timberland badger paw",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_1994": {
+  "name": "timberland badger claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2024": {
+  "name": "silver full moon collar",
+  "from": 1341,
+  "from_164": "Bed 03",
+  "to": 109,
+  "to_164": "Dog Collar",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2034": {
+  "name": "locket of the forlorn",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 101,
+  "to_164": "Necklace",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_2077": {
+  "name": "bog creeper eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2078": {
+  "name": "bog creeper leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2079": {
+  "name": "hopper leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2080": {
+  "name": "bog creeper leg tip",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 626,
+  "to_164": "chitin leg tip",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2081": {
+  "name": "bog creeper carapace",
+  "from": 499,
+  "from_164": "Scroll",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_214": {
+  "name": "boar tusk",
+  "from": 264,
+  "from_164": "Norse Leather 2 Boots",
+  "to": 615,
+  "to_164": "tusk",
+  "reason": "period/client high"
+ },
+ "p165_uth_2145": {
+  "name": "bloody boar tusk",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 615,
+  "to_164": "tusk",
+  "reason": "period/client high"
+ },
+ "p165_uth_2146": {
+  "name": "large pig tail",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 515,
+  "to_164": "Tail",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_215": {
+  "name": "raw pork",
+  "from": 99,
+  "from_164": "Potion/Flask",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2168": {
+  "name": "draoish sacrificial heart",
+  "from": 242,
+  "from_164": "Norse Leather Arms",
+  "to": 595,
+  "to_164": "heart",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_217": {
+  "name": "large snake head",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 503,
+  "to_164": "Head",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_218": {
+  "name": "bear fang",
+  "from": 99,
+  "from_164": "Potion/Flask",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2243": {
+  "name": "wee wolf tail",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 515,
+  "to_164": "Tail",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2244": {
+  "name": "wee wolf fang",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2246": {
+  "name": "cat fang",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2252": {
+  "name": "rat paw",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_2253": {
+  "name": "brush cat ear",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 501,
+  "to_164": "Ear (animal)",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2254": {
+  "name": "brush cat paw",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_2255": {
+  "name": "willow wood bracelet",
+  "from": 520,
+  "from_164": "Wooden boards",
+  "to": 619,
+  "to_164": "silver bracelet",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2281": {
+  "name": "forest ettin head",
+  "from": 1289,
+  "from_164": "Mid Wolf Helm",
+  "to": 503,
+  "to_164": "Head",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2282": {
+  "name": "hide sack",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high"
+ },
+ "p165_uth_2296": {
+  "name": "bloody bear fang",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2297": {
+  "name": "clouded basilisk eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2298": {
+  "name": "basilisk skull",
+  "from": 1648,
+  "from_164": "NOT IN 1.64",
+  "to": 540,
+  "to_164": "Skull",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2307": {
+  "name": "copper brooch",
+  "from": 1878,
+  "from_164": "NOT IN 1.64",
+  "to": 509,
+  "to_164": "Broach/ pin",
+  "reason": "period/client medium"
+ },
+ "p165_uth_232": {
+  "name": "cracked cwn annwn claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2329": {
+  "name": "gnawed-upon bone",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 497,
+  "to_164": "Bone",
+  "reason": "period/client high"
+ },
+ "p165_uth_233": {
+  "name": "cwn annwn paw",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_237": {
+  "name": "sharp cwn annwn fang",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_25": {
+  "name": "water beetle mandible",
+  "from": 605,
+  "from_164": "empty vial",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2533": {
+  "name": "fire giant nosering",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 103,
+  "to_164": "Ring",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2535": {
+  "name": "charred hide belt",
+  "from": 537,
+  "from_164": "Needle and thread",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high"
+ },
+ "p165_uth_2536": {
+  "name": "charred finger bone",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 497,
+  "to_164": "Bone",
+  "reason": "period/client high"
+ },
+ "p165_uth_2537": {
+  "name": "fire opal ring",
+  "from": 2522,
+  "from_164": "NOT IN 1.64",
+  "to": 103,
+  "to_164": "Ring",
+  "reason": "period/client high"
+ },
+ "p165_uth_2538": {
+  "name": "fire giant scalp",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 506,
+  "to_164": "Hair",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2544": {
+  "name": "lava lizard tongue",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_2545": {
+  "name": "lava lizard hide",
+  "from": 1877,
+  "from_164": "NOT IN 1.64",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2546": {
+  "name": "lizard eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2550": {
+  "name": "chunk of ghoul flesh",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client high"
+ },
+ "p165_uth_2551": {
+  "name": "piece of polished onyx",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 118,
+  "to_164": "Black Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_2555": {
+  "name": "hound paw",
+  "from": 522,
+  "from_164": "Roll of cloth",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_2556": {
+  "name": "hound tail",
+  "from": 537,
+  "from_164": "Needle and thread",
+  "to": 515,
+  "to_164": "Tail",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2557": {
+  "name": "glowing hound eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2559": {
+  "name": "pile of glowing cinders",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 541,
+  "to_164": "Pile of dirt/ dust",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_2560": {
+  "name": "large yellow topaz",
+  "from": 611,
+  "from_164": "vine",
+  "to": 112,
+  "to_164": "Yellow Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_2562": {
+  "name": "red carnelian",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 110,
+  "to_164": "Red Gem",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2563": {
+  "name": "fire toad leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_2564": {
+  "name": "fire toad tongue",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_2566": {
+  "name": "flaming chunk of lava",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 514,
+  "to_164": "Stone",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2567": {
+  "name": "large glowing eye",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_26": {
+  "name": "water beetle carapace",
+  "from": 605,
+  "from_164": "empty vial",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_2731": {
+  "name": "white boar hide",
+  "from": 605,
+  "from_164": "empty vial",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2910": {
+  "name": "shimmering orb",
+  "from": 1877,
+  "from_164": "NOT IN 1.64",
+  "to": 523,
+  "to_164": "Blue orb",
+  "reason": "period/client low"
+ },
+ "p165_uth_2913": {
+  "name": "crudely drawn realm map",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 499,
+  "to_164": "Scroll",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2924": {
+  "name": "bottle of fetid wine",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 554,
+  "to_164": "Bottle",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_2929": {
+  "name": "emerald",
+  "from": 623,
+  "from_164": "gold necklace",
+  "to": 113,
+  "to_164": "Green Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_2930": {
+  "name": "sapphire ring",
+  "from": 2522,
+  "from_164": "NOT IN 1.64",
+  "to": 103,
+  "to_164": "Ring",
+  "reason": "period/client high"
+ },
+ "p165_uth_2958": {
+  "name": "engraved pewter bowl",
+  "from": 1889,
+  "from_164": "NOT IN 1.64",
+  "to": 550,
+  "to_164": "Bowl/ plate",
+  "reason": "period/client medium"
+ },
+ "p165_uth_298": {
+  "name": "giant beetle leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2982": {
+  "name": "bracelet of bark",
+  "from": 612,
+  "from_164": "splinter",
+  "to": 619,
+  "to_164": "silver bracelet",
+  "reason": "period/client medium"
+ },
+ "p165_uth_299": {
+  "name": "giant beetle leg tip",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 626,
+  "to_164": "chitin leg tip",
+  "reason": "period/client medium"
+ },
+ "p165_uth_2993": {
+  "name": "muryan leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_2994": {
+  "name": "brown bear paw",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_3033": {
+  "name": "water badger claw",
+  "from": 605,
+  "from_164": "empty vial",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_31": {
+  "name": "stolen slice of cake",
+  "from": 609,
+  "from_164": "pile of coins",
+  "to": 548,
+  "to_164": "Cake slice",
+  "reason": "period/client medium"
+ },
+ "p165_uth_311": {
+  "name": "red spinel",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 110,
+  "to_164": "Red Gem",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3140": {
+  "name": "spider claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3144": {
+  "name": "serpent fillet",
+  "from": 1877,
+  "from_164": "NOT IN 1.64",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3145": {
+  "name": "serpent scale",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 107,
+  "to_164": "Snakeskin",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_3146": {
+  "name": "chitin shard",
+  "from": 1548,
+  "from_164": "ext outhouse mid",
+  "to": 612,
+  "to_164": "splinter",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3147": {
+  "name": "huge crab claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3151": {
+  "name": "bloodied banner",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 555,
+  "to_164": "Banner",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3153": {
+  "name": "short piece of vine",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 611,
+  "to_164": "vine",
+  "reason": "period/client high"
+ },
+ "p165_uth_3158": {
+  "name": "marsh worm gland",
+  "from": 1877,
+  "from_164": "NOT IN 1.64",
+  "to": 591,
+  "to_164": "gland",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3160": {
+  "name": "brown stone",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 514,
+  "to_164": "Stone",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3161": {
+  "name": "long piece of vine",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 611,
+  "to_164": "vine",
+  "reason": "period/client high"
+ },
+ "p165_uth_3180": {
+  "name": "faerie badger claw",
+  "from": 506,
+  "from_164": "Hair",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3200": {
+  "name": "wyrm hide",
+  "from": 522,
+  "from_164": "Roll of cloth",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3205": {
+  "name": "heart of fire",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 595,
+  "to_164": "heart",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_3209": {
+  "name": "charred golden medal",
+  "from": 609,
+  "from_164": "pile of coins",
+  "to": 509,
+  "to_164": "Broach/ pin",
+  "reason": "period/client medium"
+ },
+ "p165_uth_328": {
+  "name": "worm carapace",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_3296": {
+  "name": "large eirebug carapace",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_33": {
+  "name": "derg fillet",
+  "from": 615,
+  "from_164": "tusk",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3307": {
+  "name": "bog creeper poison sac",
+  "from": 499,
+  "from_164": "Scroll",
+  "to": 590,
+  "to_164": "poison sac",
+  "reason": "period/client high"
+ },
+ "p165_uth_3308": {
+  "name": "bog worm husk",
+  "from": 499,
+  "from_164": "Scroll",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "consensus medium"
+ },
+ "p165_uth_3314": {
+  "name": "phantom essence",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 605,
+  "to_164": "empty vial",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3326": {
+  "name": "ollipheist fang",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3327": {
+  "name": "ollipheist claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3352": {
+  "name": "fisher hatcher leg tip",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 626,
+  "to_164": "chitin leg tip",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3353": {
+  "name": "fisher hatcher carapace",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_3409": {
+  "name": "frosty hide",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3410": {
+  "name": "sleipneirson hide",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3411": {
+  "name": "mature wyvern hide",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3418": {
+  "name": "pristine sleipneirson hide",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3421": {
+  "name": "widow claw",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3422": {
+  "name": "widow claw shell",
+  "from": 600,
+  "from_164": "strapping",
+  "to": 517,
+  "to_164": "Carapace (beetle-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_3459": {
+  "name": "pristine ollipheist hide",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3460": {
+  "name": "manifested terror claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3463": {
+  "name": "headsman's hood",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 57,
+  "to_164": "Cloak",
+  "reason": "consensus medium"
+ },
+ "p165_uth_3511": {
+  "name": "beaded sinew bracelet",
+  "from": 116,
+  "from_164": "Purple Gem",
+  "to": 619,
+  "to_164": "silver bracelet",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3512": {
+  "name": "retainer's beaded insignia",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 509,
+  "to_164": "Broach/ pin",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3517": {
+  "name": "pallid hog's hoof",
+  "from": 1870,
+  "from_164": "NOT IN 1.64",
+  "to": 518,
+  "to_164": "Hoof",
+  "reason": "period/client high"
+ },
+ "p165_uth_3518": {
+  "name": "frigid hog's tusk",
+  "from": 1870,
+  "from_164": "NOT IN 1.64",
+  "to": 615,
+  "to_164": "tusk",
+  "reason": "period/client high"
+ },
+ "p165_uth_3519": {
+  "name": "myrkcat claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3525": {
+  "name": "green orm fang",
+  "from": 489,
+  "from_164": "Water skin",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3554": {
+  "name": "black willow branch",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3555": {
+  "name": "white willow branch",
+  "from": 605,
+  "from_164": "empty vial",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3557": {
+  "name": "aspen branch",
+  "from": 260,
+  "from_164": "Norse Leather 2 Vest",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3558": {
+  "name": "downy branch",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3563": {
+  "name": "cracked muryan carapace",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_3564": {
+  "name": "pristine muryan carapace",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_366": {
+  "name": "hill hound canine",
+  "from": 100,
+  "from_164": "Animal Skin",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3687": {
+  "name": "large werewolf paw",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_369": {
+  "name": "rock clipper leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3697": {
+  "name": "bog crawler leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3698": {
+  "name": "bog crawler leg tip",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 626,
+  "to_164": "chitin leg tip",
+  "reason": "period/client medium"
+ },
+ "p165_uth_3699": {
+  "name": "bog crawler mandible",
+  "from": 499,
+  "from_164": "Scroll",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_370": {
+  "name": "rock clipper mandible",
+  "from": 548,
+  "from_164": "Cake slice",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_3740": {
+  "name": "spectral wickerman essence",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 605,
+  "to_164": "empty vial",
+  "reason": "period/client medium"
+ },
+ "p165_uth_38": {
+  "name": "badger claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_39": {
+  "name": "pristine badger hide",
+  "from": 533,
+  "from_164": "Pitcher",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_402": {
+  "name": "dampwood mite leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_403": {
+  "name": "mite poison gland",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 591,
+  "to_164": "gland",
+  "reason": "period/client medium"
+ },
+ "p165_uth_4034": {
+  "name": "forest cat claw",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4055": {
+  "name": "fellwood branch",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_408": {
+  "name": "luch claw",
+  "from": 539,
+  "from_164": "Dice",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4147": {
+  "name": "wolverine claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4158": {
+  "name": "horn of fire grog",
+  "from": 101,
+  "from_164": "Necklace",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high"
+ },
+ "p165_uth_4210": {
+  "name": "broken levian-al claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4347": {
+  "name": "large luch claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4348": {
+  "name": "pristine large luch hide",
+  "from": 539,
+  "from_164": "Dice",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4378": {
+  "name": "gilded grimwood branch",
+  "from": 1357,
+  "from_164": "Desk 01",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_442": {
+  "name": "primrose eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_444": {
+  "name": "orb of viewing",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 606,
+  "to_164": "silver orb",
+  "reason": "consensus medium; 606 not 525 (525 = spellcrafting dust)"
+ },
+ "p165_uth_445": {
+  "name": "dark heart of the vindictive spirit",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 595,
+  "to_164": "heart",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_447": {
+  "name": "fog wraith essence",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 605,
+  "to_164": "empty vial",
+  "reason": "period/client medium"
+ },
+ "p165_uth_4493": {
+  "name": "dark hound ear",
+  "from": 521,
+  "from_164": "Square of leather",
+  "to": 501,
+  "to_164": "Ear (animal)",
+  "reason": "period/client medium"
+ },
+ "p165_uth_4514": {
+  "name": "wyvern hide",
+  "from": 1877,
+  "from_164": "NOT IN 1.64",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4546": {
+  "name": "black poplar branch",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_4547": {
+  "name": "hornbeam branch",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_463": {
+  "name": "giant beetle mandible",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_464": {
+  "name": "giant beetle carapace",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_4728": {
+  "name": "sulphur crab shell",
+  "from": 600,
+  "from_164": "strapping",
+  "to": 517,
+  "to_164": "Carapace (beetle-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_4729": {
+  "name": "sulphur crab claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_473": {
+  "name": "fine basilisk hide",
+  "from": 522,
+  "from_164": "Roll of cloth",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_474": {
+  "name": "average basilisk hide",
+  "from": 1648,
+  "from_164": "NOT IN 1.64",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4827": {
+  "name": "glowing yellow eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4832": {
+  "name": "large bloated spider claw",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4833": {
+  "name": "large bloated spider carapace",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_4869": {
+  "name": "fire opal earring",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 621,
+  "to_164": "silver earring",
+  "reason": "period/client medium"
+ },
+ "p165_uth_4871": {
+  "name": "troll-hide bag",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high"
+ },
+ "p165_uth_4876": {
+  "name": "frog wart ring",
+  "from": 2522,
+  "from_164": "NOT IN 1.64",
+  "to": 103,
+  "to_164": "Ring",
+  "reason": "period/client high"
+ },
+ "p165_uth_4879": {
+  "name": "blue topaz",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 115,
+  "to_164": "Blue Gem",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_4881": {
+  "name": "spiral twig ring",
+  "from": 2522,
+  "from_164": "NOT IN 1.64",
+  "to": 103,
+  "to_164": "Ring",
+  "reason": "period/client high"
+ },
+ "p165_uth_4884": {
+  "name": "spiteful black heart",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 595,
+  "to_164": "heart",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_4885": {
+  "name": "leafy branch",
+  "from": 522,
+  "from_164": "Roll of cloth",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_4886": {
+  "name": "leafy bracelet",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 619,
+  "to_164": "silver bracelet",
+  "reason": "period/client medium"
+ },
+ "p165_uth_4973": {
+  "name": "golden oak branch",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_4997": {
+  "name": "Scar-Nose's Remains",
+  "from": 605,
+  "from_164": "empty vial",
+  "to": 105,
+  "to_164": "Bones",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_506": {
+  "name": "zircon",
+  "from": 242,
+  "from_164": "Norse Leather Arms",
+  "to": 115,
+  "to_164": "Blue Gem",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_5161": {
+  "name": "bloodstained bear claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_5172": {
+  "name": "army ant mandible",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_5216": {
+  "name": "strider eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_5217": {
+  "name": "strider antenna",
+  "from": 1877,
+  "from_164": "NOT IN 1.64",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "consensus low"
+ },
+ "p165_uth_5218": {
+  "name": "strider carapace",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_5246": {
+  "name": "cliff hanger carapace",
+  "from": 522,
+  "from_164": "Roll of cloth",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_5419": {
+  "name": "bloody broken bear trap",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 625,
+  "to_164": "animal trap",
+  "reason": "period/client medium"
+ },
+ "p165_uth_5422": {
+  "name": "cracked levian-al fang",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_5423": {
+  "name": "levian-al fang",
+  "from": 335,
+  "from_164": "Norse Leather Helm 1",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_5424": {
+  "name": "levian-al claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_5435": {
+  "name": "small wolf paw",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_5436": {
+  "name": "patch of wolf fur",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_5508": {
+  "name": "small wolverine paw",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_566": {
+  "name": "zephyr's windy essence",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 605,
+  "to_164": "empty vial",
+  "reason": "period/client medium"
+ },
+ "p165_uth_572": {
+  "name": "dried pork",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_573": {
+  "name": "cliff beetle leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_576": {
+  "name": "cliff beetle leg tip",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 626,
+  "to_164": "chitin leg tip",
+  "reason": "period/client medium"
+ },
+ "p165_uth_580": {
+  "name": "tingler mandible",
+  "from": 1878,
+  "from_164": "NOT IN 1.64",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_581": {
+  "name": "tingler claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_5849": {
+  "name": "luminescent crimson orb",
+  "from": 336,
+  "from_164": "Norse Leather Helm 2",
+  "to": 524,
+  "to_164": "Red orb",
+  "reason": "consensus medium; red orb for a crimson orb, not 525 (spellcrafting dust)"
+ },
+ "p165_uth_5852": {
+  "name": "netherworld coins",
+  "from": 335,
+  "from_164": "Norse Leather Helm 1",
+  "to": 609,
+  "to_164": "pile of coins",
+  "reason": "period/client medium"
+ },
+ "p165_uth_586": {
+  "name": "ribbon toad leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_587": {
+  "name": "rotting ration",
+  "from": 615,
+  "from_164": "tusk",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "consensus high"
+ },
+ "p165_uth_588": {
+  "name": "rusty shackles",
+  "from": 3455,
+  "from_164": "NOT IN 1.64",
+  "to": 600,
+  "to_164": "strapping",
+  "reason": "period/client low"
+ },
+ "p165_uth_589": {
+  "name": "half-gnawed bone",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 497,
+  "to_164": "Bone",
+  "reason": "period/client high"
+ },
+ "p165_uth_61": {
+  "name": "worm fishing bait",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 582,
+  "to_164": "can of bait",
+  "reason": "period/client medium"
+ },
+ "p165_uth_6113": {
+  "name": "belt of oak leaves",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 597,
+  "to_164": "belt",
+  "reason": "period/client medium"
+ },
+ "p165_uth_6115": {
+  "name": "branch of oak",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_62": {
+  "name": "driftwood",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_631": {
+  "name": "studded warhound collar",
+  "from": 1347,
+  "from_164": "Box",
+  "to": 109,
+  "to_164": "Dog Collar",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_6366": {
+  "name": "sinach claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_6368": {
+  "name": "sinach fang",
+  "from": 113,
+  "from_164": "Green Gem",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_6370": {
+  "name": "sinach femur",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 497,
+  "to_164": "Bone",
+  "reason": "period/client medium"
+ },
+ "p165_uth_639": {
+  "name": "cliff hanger leg",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 108,
+  "to_164": "Spider Legs",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_640": {
+  "name": "cliff hanger leg tip",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 626,
+  "to_164": "chitin leg tip",
+  "reason": "period/client medium"
+ },
+ "p165_uth_6533": {
+  "name": "fire wyrm fang",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_662": {
+  "name": "huge cloven hoof",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 518,
+  "to_164": "Hoof",
+  "reason": "period/client high"
+ },
+ "p165_uth_664": {
+  "name": "huge boar tusk",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 615,
+  "to_164": "tusk",
+  "reason": "period/client high"
+ },
+ "p165_uth_688": {
+  "name": "string of polished beads",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 101,
+  "to_164": "Necklace",
+  "reason": "period/client medium"
+ },
+ "p165_uth_691": {
+  "name": "silver armband",
+  "from": 110,
+  "from_164": "Red Gem",
+  "to": 619,
+  "to_164": "silver bracelet",
+  "reason": "period/client medium"
+ },
+ "p165_uth_694": {
+  "name": "ant parts",
+  "from": 264,
+  "from_164": "Norse Leather 2 Boots",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "consensus medium"
+ },
+ "p165_uth_7159": {
+  "name": "shadowy orm eye",
+  "from": 1664,
+  "from_164": "NOT IN 1.64",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_7194": {
+  "name": "rotting flesh",
+  "from": 515,
+  "from_164": "Tail",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client high"
+ },
+ "p165_uth_7655": {
+  "name": "onyx and carnelian belt",
+  "from": 534,
+  "from_164": "Mortar and pestle",
+  "to": 597,
+  "to_164": "belt",
+  "reason": "period/client medium"
+ },
+ "p165_uth_7658": {
+  "name": "small wolverine claw",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_7659": {
+  "name": "small wolverine tail",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 515,
+  "to_164": "Tail",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_7866": {
+  "name": "bright Adroit crossbow",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 226,
+  "to_164": "Crossbow",
+  "reason": "consensus medium"
+ },
+ "p165_uth_793": {
+  "name": "large eirebug mandible",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_7964": {
+  "name": "wolverine paw",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 542,
+  "to_164": "Paw",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_825": {
+  "name": "animal gland",
+  "from": 610,
+  "from_164": "backpack",
+  "to": 591,
+  "to_164": "gland",
+  "reason": "period/client medium"
+ },
+ "p165_uth_829": {
+  "name": "clear green stone",
+  "from": 541,
+  "from_164": "Pile of dirt/ dust",
+  "to": 514,
+  "to_164": "Stone",
+  "reason": "period/client medium"
+ },
+ "p165_uth_830": {
+  "name": "leaper tongue",
+  "from": 260,
+  "from_164": "Norse Leather 2 Vest",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client low (both agree)"
+ },
+ "p165_uth_8379": {
+  "name": "large red diamond",
+  "from": 229,
+  "from_164": "Dyes",
+  "to": 110,
+  "to_164": "Red Gem",
+  "reason": "period/client medium"
+ },
+ "p165_uth_839": {
+  "name": "rock crab shell",
+  "from": 548,
+  "from_164": "Cake slice",
+  "to": 517,
+  "to_164": "Carapace (beetle-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_8402": {
+  "name": "pristine wyvern hide",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_8487": {
+  "name": "luminous Sturdy dwarven short sword",
+  "from": 495,
+  "from_164": "Dye pack",
+  "to": 445,
+  "to_164": "Celtic Short Sword",
+  "reason": "consensus medium"
+ },
+ "p165_uth_8489": {
+  "name": "shimmering Sturdy moon claw",
+  "from": 1,
+  "from_164": "briton dagger",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high"
+ },
+ "p165_uth_853": {
+  "name": "veined mandible",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_859": {
+  "name": "water snake fang",
+  "from": 99,
+  "from_164": "Potion/Flask",
+  "to": 106,
+  "to_164": "Tooth/Claw",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_863": {
+  "name": "whelp hide",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_866": {
+  "name": "string of blue beads",
+  "from": 603,
+  "from_164": "scroll tube",
+  "to": 101,
+  "to_164": "Necklace",
+  "reason": "period/client medium"
+ },
+ "p165_uth_874": {
+  "name": "small hog tusk",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 615,
+  "to_164": "tusk",
+  "reason": "period/client high"
+ },
+ "p165_uth_875": {
+  "name": "small hog hoof",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 518,
+  "to_164": "Hoof",
+  "reason": "period/client high"
+ },
+ "p165_uth_876": {
+  "name": "small hog hide",
+  "from": 1876,
+  "from_164": "NOT IN 1.64",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_877": {
+  "name": "curly hog tail",
+  "from": 520,
+  "from_164": "Wooden boards",
+  "to": 515,
+  "to_164": "Tail",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_893": {
+  "name": "pine talisman",
+  "from": 533,
+  "from_164": "Pitcher",
+  "to": 101,
+  "to_164": "Necklace",
+  "reason": "period/client medium"
+ },
+ "p165_uth_896": {
+  "name": "pony hide",
+  "from": 102,
+  "from_164": "Meat",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_898": {
+  "name": "a blank spell book",
+  "from": 530,
+  "from_164": "Blue vial",
+  "to": 500,
+  "to_164": "Book",
+  "reason": "period/client medium"
+ },
+ "p165_uth_899": {
+  "name": "initiate's bracelet",
+  "from": 1870,
+  "from_164": "NOT IN 1.64",
+  "to": 619,
+  "to_164": "silver bracelet",
+  "reason": "period/client medium"
+ },
+ "p165_uth_904": {
+  "name": "bulbous spider eye",
+  "from": 590,
+  "from_164": "poison sac",
+  "to": 496,
+  "to_164": "Eyeball",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_905": {
+  "name": "veined carapace",
+  "from": 535,
+  "from_164": "Herbs",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_907": {
+  "name": "hunk of gooey flesh",
+  "from": 527,
+  "from_164": "Orange vial",
+  "to": 102,
+  "to_164": "Meat",
+  "reason": "period/client high"
+ },
+ "p165_uth_908": {
+  "name": "scrap of grendelorm hide",
+  "from": 529,
+  "from_164": "Red vial",
+  "to": 100,
+  "to_164": "Animal Skin",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_914": {
+  "name": "leafy grovewood branch",
+  "from": 533,
+  "from_164": "Pitcher",
+  "to": 543,
+  "to_164": "Tree branch",
+  "reason": "period/client medium"
+ },
+ "p165_uth_927": {
+  "name": "cliff hanger mandible",
+  "from": 240,
+  "from_164": "Norse Leather Vest",
+  "to": 614,
+  "to_164": "mandible",
+  "reason": "period/client high (both agree)"
+ },
+ "p165_uth_967": {
+  "name": "army ant carapace",
+  "from": 1878,
+  "from_164": "NOT IN 1.64",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ },
+ "p165_uth_980": {
+  "name": "harvestman carapace",
+  "from": 553,
+  "from_164": "Glop of slime",
+  "to": 516,
+  "to_164": "Carapace (ant-like)",
+  "reason": "period/client medium (both agree)"
+ }
+}
