@@ -274,7 +274,14 @@ class QuickSlot extends Control:
 			_hold.call_deferred(old)
 
 	func _hold(e: Dictionary) -> void:
-		force_drag({"kind": "quickslot", "entry": e}, _preview(e))
+		# a spell already on the pointer is put down with a click: the drop comes on the press, and a drag started
+		# before the release was ended by that release - the displaced spell was thrown away (GitHub issue #6: "displaced
+		# skill/spell is deleted instead of picked up"); it goes onto the pointer once the button is up
+		while Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			await get_tree().process_frame
+		await get_tree().process_frame
+		if is_inside_tree():
+			force_drag({"kind": "quickslot", "entry": e}, _preview(e))
 
 	# one left click uses the slot, as the 1.65 quickbar (was: double-click only - most clicks did nothing, owner
 	# 2026-10-10); right-click shows what it is; shift + right-click empties it, as the old client (owner 2026-10-19);

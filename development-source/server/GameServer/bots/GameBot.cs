@@ -2071,7 +2071,9 @@ namespace DOL.GS
                     ClientService.CreateObjectForPlayers(this);
                     BroadcastLivingEquipmentUpdate();
                 }
-                Group?.UpdateMember(this, false, true);
+                // The member update carries health/power/status only; the level is in the full group window
+                // (GitHub issue #7: the window kept showing the old level).
+                Group?.UpdateGroupWindow();
                 AutonomousBotStatusPersistence.Queue(this, true);
                 LogCompanionSkills($"level {Level}");
             }
