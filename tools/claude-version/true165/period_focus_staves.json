@@ -1,0 +1,4714 @@
+{
+ "elm spiritmaster staff of darkness": {
+  "name": "Elm Spiritmaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Summoning",
+    2
+   ],
+   [
+    "Suppression",
+    2
+   ]
+  ],
+  "ts": "20030806062040",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7670"
+ },
+ "elm spiritmaster staff of mysticism": {
+  "name": "Elm Spiritmaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    4
+   ],
+   [
+    "Summoning",
+    4
+   ],
+   [
+    "Suppression",
+    4
+   ]
+  ],
+  "ts": "20030806063315",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7671"
+ },
+ "elm spiritmaster staff of summoning": {
+  "name": "Elm Spiritmaster Staff of Summoning",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    2
+   ],
+   [
+    "Summoning",
+    5
+   ],
+   [
+    "Suppression",
+    2
+   ]
+  ],
+  "ts": "20030806065544",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7672"
+ },
+ "elm spiritmaster staff of suppression": {
+  "name": "Elm Spiritmaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    2
+   ],
+   [
+    "Summoning",
+    2
+   ],
+   [
+    "Suppression",
+    5
+   ]
+  ],
+  "ts": "20030806065414",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7673"
+ },
+ "heartwood spiritmaster staff of darkness": {
+  "name": "Heartwood Spiritmaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    18
+   ],
+   [
+    "Summoning",
+    9
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030806071019",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7674"
+ },
+ "heartwood spiritmaster staff of mysticism": {
+  "name": "Heartwood Spiritmaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    14
+   ],
+   [
+    "Summoning",
+    14
+   ],
+   [
+    "Suppression",
+    14
+   ]
+  ],
+  "ts": "20030806071519",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7675"
+ },
+ "heartwood spiritmaster staff of summoning": {
+  "name": "Heartwood Spiritmaster Staff of Summoning",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Summoning",
+    18
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030806072640",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7676"
+ },
+ "heartwood spiritmaster staff of suppression": {
+  "name": "Heartwood Spiritmaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Summoning",
+    9
+   ],
+   [
+    "Suppression",
+    18
+   ]
+  ],
+  "ts": "20030806073143",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7677"
+ },
+ "ironwood spiritmaster staff of darkness": {
+  "name": "Ironwood Spiritmaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    13
+   ],
+   [
+    "Summoning",
+    7
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030806073839",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7683"
+ },
+ "ironwood spiritmaster staff of mysticism": {
+  "name": "Ironwood Spiritmaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "16"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Summoning",
+    11
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030806074743",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7684"
+ },
+ "ironwood spiritmaster staff of summoning": {
+  "name": "Ironwood Spiritmaster Staff of Summoning",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Summoning",
+    13
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030826005537",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7685&start=0"
+ },
+ "ironwood spiritmaster staff of suppresion": {
+  "name": "Ironwood Spiritmaster Staff of Suppresion",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Summoning",
+    7
+   ],
+   [
+    "Suppression",
+    13
+   ]
+  ],
+  "ts": "20030806080440",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7686"
+ },
+ "oaken spiritmaster staff of darkness": {
+  "name": "Oaken Spiritmaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Summoning",
+    5
+   ],
+   [
+    "Suppression",
+    5
+   ]
+  ],
+  "ts": "20030806081554",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7687"
+ },
+ "oaken spiritmaster staff of mysticism": {
+  "name": "Oaken Spiritmaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": null,
+  "use": [
+   "1",
+   "50"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Summoning",
+    7
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030521131840",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7688"
+ },
+ "oaken spiritmaster staff of summoning": {
+  "name": "Oaken Spiritmaster Staff of Summoning",
+  "realm": "Midgard",
+  "level": null,
+  "use": [
+   "1",
+   "50"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Summoning",
+    9
+   ],
+   [
+    "Suppression",
+    5
+   ]
+  ],
+  "ts": "20030521135607",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7689"
+ },
+ "oaken spiritmaster staff of suppression": {
+  "name": "Oaken Spiritmaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Summoning",
+    5
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030806085328",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7690"
+ },
+ "runewood spiritmaster staff of darkness": {
+  "name": "Runewood Spiritmaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    21
+   ],
+   [
+    "Summoning",
+    11
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030806085550",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7691"
+ },
+ "runewood spiritmaster staff of mysticism": {
+  "name": "Runewood Spiritmaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": null,
+  "use": [
+   "1",
+   "50"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    17
+   ],
+   [
+    "Summoning",
+    17
+   ],
+   [
+    "Suppression",
+    17
+   ]
+  ],
+  "ts": "20030521131108",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7692"
+ },
+ "runewood spiritmaster staff of summoning": {
+  "name": "Runewood Spiritmaster Staff of Summoning",
+  "realm": "Midgard",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Summoning",
+    21
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030806091058",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7693"
+ },
+ "runewood spiritmaster staff of suppression": {
+  "name": "Runewood Spiritmaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": null,
+  "use": [
+   "1",
+   "50"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Summoning",
+    11
+   ],
+   [
+    "Suppression",
+    21
+   ]
+  ],
+  "ts": "20030521130923",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7694"
+ },
+ "elm runemaster staff of darkness": {
+  "name": "Elm Runemaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Runecarving",
+    2
+   ],
+   [
+    "Suppression",
+    2
+   ]
+  ],
+  "ts": "20030806093639",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7963"
+ },
+ "elm runemaster staff of mysticism": {
+  "name": "Elm Runemaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    4
+   ],
+   [
+    "Runecarving",
+    4
+   ],
+   [
+    "Suppression",
+    4
+   ]
+  ],
+  "ts": "20030806095300",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7964"
+ },
+ "elm runemaster staff of runecarving": {
+  "name": "Elm Runemaster Staff of Runecarving",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    2
+   ],
+   [
+    "Runecarving",
+    5
+   ],
+   [
+    "Suppression",
+    2
+   ]
+  ],
+  "ts": "20030806095421",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7965"
+ },
+ "elm runemaster staff of suppression": {
+  "name": "Elm Runemaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    2
+   ],
+   [
+    "Runecarving",
+    2
+   ],
+   [
+    "Suppression",
+    5
+   ]
+  ],
+  "ts": "20030806100150",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7966"
+ },
+ "heartwood runemaster staff of darkness": {
+  "name": "Heartwood Runemaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    18
+   ],
+   [
+    "Runecarving",
+    9
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030806100814",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7967"
+ },
+ "heartwood runemaster staff of mysticism": {
+  "name": "Heartwood Runemaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": null,
+  "use": [
+   "1",
+   "50"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    14
+   ],
+   [
+    "Runecarving",
+    14
+   ],
+   [
+    "Suppression",
+    14
+   ]
+  ],
+  "ts": "20030521140214",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7968"
+ },
+ "heartwood runemaster staff of runecarving": {
+  "name": "Heartwood Runemaster Staff of Runecarving",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Runecarving",
+    18
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030806102625",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7969"
+ },
+ "heartwood runemaster staff of suppression": {
+  "name": "Heartwood Runemaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Runecarving",
+    9
+   ],
+   [
+    "Suppression",
+    18
+   ]
+  ],
+  "ts": "20030821205239",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7970&start=0"
+ },
+ "ironwood runemaster staff of darkness": {
+  "name": "Ironwood Runemaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    13
+   ],
+   [
+    "Runecarving",
+    7
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030806104017",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7971"
+ },
+ "ironwood runemaster staff of mysticism": {
+  "name": "Ironwood Runemaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Runecarving",
+    11
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030806105022",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7972"
+ },
+ "ironwood runemaster staff of runecarving": {
+  "name": "Ironwood Runemaster Staff of Runecarving",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Runecarving",
+    13
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030806105857",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7973"
+ },
+ "oaken runemaster staff of mysticism": {
+  "name": "Oaken Runemaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Runecarving",
+    7
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030806112851",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7976"
+ },
+ "oaken runemaster staff of runecarving": {
+  "name": "Oaken Runemaster Staff of Runecarving",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Runecarving",
+    9
+   ],
+   [
+    "Suppression",
+    5
+   ]
+  ],
+  "ts": "20030806114409",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7977"
+ },
+ "oaken runemaster staff of suppression": {
+  "name": "Oaken Runemaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Runecarving",
+    5
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030821211439",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7978&start=0"
+ },
+ "runewood runemaster staff of darkness": {
+  "name": "Runewood Runemaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": null,
+  "use": [
+   "1",
+   "50"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    21
+   ],
+   [
+    "Runecarving",
+    11
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030521142218",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7979"
+ },
+ "runewood runemaster staff of mysticism": {
+  "name": "Runewood Runemaster Staff of Mysticism",
+  "realm": "Midgard",
+  "level": null,
+  "use": [
+   "1",
+   "50"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    17
+   ],
+   [
+    "Runecarving",
+    17
+   ],
+   [
+    "Suppression",
+    17
+   ]
+  ],
+  "ts": "20030521132101",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7980"
+ },
+ "runewood runemaster staff of runecarving": {
+  "name": "Runewood Runemaster Staff of Runecarving",
+  "realm": "Midgard",
+  "level": null,
+  "use": [
+   "1",
+   "50"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Runecarving",
+    21
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030521131945",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7981"
+ },
+ "runewood runemaster staff of suppression": {
+  "name": "Runewood Runemaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Runecarving",
+    11
+   ],
+   [
+    "Suppression",
+    21
+   ]
+  ],
+  "ts": "20030806182427",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=7982"
+ },
+ "elm mentalist staff of light": {
+  "name": "Elm Mentalist Staff of Light",
+  "realm": "Hibernia",
+  "level": 5,
+  "use": [
+   "5",
+   "10"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    2
+   ],
+   [
+    "Way of the Moon",
+    2
+   ],
+   [
+    "Way of the Sun",
+    5
+   ]
+  ],
+  "ts": "20030806185040",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8345"
+ },
+ "elm mentalist staff of mana": {
+  "name": "Elm Mentalist Staff of Mana",
+  "realm": "Hibernia",
+  "level": 5,
+  "use": [
+   "5",
+   "10"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    2
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    2
+   ]
+  ],
+  "ts": "20030806190225",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8347"
+ },
+ "elm mentalist staff of mentalism": {
+  "name": "Elm Mentalist Staff of Mentalism",
+  "realm": "Hibernia",
+  "level": 5,
+  "use": [
+   "5",
+   "10"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    5
+   ],
+   [
+    "Way of the Moon",
+    2
+   ],
+   [
+    "Way of the Sun",
+    2
+   ]
+  ],
+  "ts": "20030607031808",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8348"
+ },
+ "heartwood mentalist staff of magic": {
+  "name": "Heartwood Mentalist Staff of Magic",
+  "realm": "Hibernia",
+  "level": 20,
+  "use": [
+   "20",
+   "25"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    14
+   ],
+   [
+    "Way of the Moon",
+    14
+   ],
+   [
+    "Way of the Sun",
+    14
+   ]
+  ],
+  "ts": "20030821184337",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8349&start=0"
+ },
+ "heartwood mentalist staff of mana": {
+  "name": "Heartwood Mentalist Staff of Mana",
+  "realm": "Hibernia",
+  "level": 20,
+  "use": [
+   "20",
+   "25"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    9
+   ],
+   [
+    "Way of the Moon",
+    18
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030806192953",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8350"
+ },
+ "heartwood mentalist staff of mentalism": {
+  "name": "Heartwood Mentalist Staff of Mentalism",
+  "realm": "Hibernia",
+  "level": 20,
+  "use": [
+   "20",
+   "25"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    18
+   ],
+   [
+    "Way of the Moon",
+    9
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030806193943",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8351"
+ },
+ "heartwood mentalist staff of light": {
+  "name": "Heartwood Mentalist Staff of Light",
+  "realm": "Hibernia",
+  "level": 20,
+  "use": [
+   "20",
+   "25"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    9
+   ],
+   [
+    "Way of the Moon",
+    9
+   ],
+   [
+    "Way of the Sun",
+    18
+   ]
+  ],
+  "ts": "20030806195012",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8352"
+ },
+ "ironwood mentalist staff of magic": {
+  "name": "Ironwood Mentalist Staff of Magic",
+  "realm": "Hibernia",
+  "level": 15,
+  "use": [
+   "15",
+   "20"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    11
+   ],
+   [
+    "Way of the Moon",
+    11
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030806200716",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8354"
+ },
+ "ironwood mentalist staff of mana": {
+  "name": "Ironwood Mentalist Staff of Mana",
+  "realm": "Hibernia",
+  "level": 15,
+  "use": [
+   "15",
+   "20"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    7
+   ],
+   [
+    "Way of the Moon",
+    13
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030806201153",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8355"
+ },
+ "ironwood mentalist staff of mentalism": {
+  "name": "Ironwood Mentalist Staff of Mentalism",
+  "realm": "Hibernia",
+  "level": 15,
+  "use": [
+   "15",
+   "20"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    13
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030806202105",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8356"
+ },
+ "oaken mentalist staff of light": {
+  "name": "Oaken Mentalist Staff of Light",
+  "realm": "Hibernia",
+  "level": 10,
+  "use": [
+   "1",
+   "15"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    5
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030806202657",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8357"
+ },
+ "oaken mentalist staff of magic": {
+  "name": "Oaken Mentalist Staff of Magic",
+  "realm": "Hibernia",
+  "level": 10,
+  "use": [
+   "10",
+   "15"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    7
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030808161146",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8358"
+ },
+ "oaken mentalist staff of mentalism": {
+  "name": "Oaken Mentalist Staff of Mentalism",
+  "realm": "Hibernia",
+  "level": 110,
+  "use": [
+   "10",
+   "15"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    9
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    5
+   ]
+  ],
+  "ts": "20030808165129",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8360"
+ },
+ "runewood mentalist staff of magic": {
+  "name": "Runewood Mentalist Staff of Magic",
+  "realm": "Hibernia",
+  "level": 25,
+  "use": [
+   "25",
+   "30"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    17
+   ],
+   [
+    "Way of the Moon",
+    17
+   ],
+   [
+    "Way of the Sun",
+    17
+   ]
+  ],
+  "ts": "20030808170509",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8362"
+ },
+ "runewood mentalist staff of mana": {
+  "name": "Runewood Mentalist Staff of Mana",
+  "realm": "Hibernia",
+  "level": 25,
+  "use": [
+   "25",
+   "30"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    11
+   ],
+   [
+    "Way of the Moon",
+    21
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030808170510",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8363"
+ },
+ "runewood mentalist staff of mentalism": {
+  "name": "Runewood Mentalist Staff of Mentalism",
+  "realm": "Hibernia",
+  "level": 25,
+  "use": [
+   "25",
+   "30"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    21
+   ],
+   [
+    "Way of the Moon",
+    11
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030808171913",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8364"
+ },
+ "ironwood mentalist staff of light": {
+  "name": "Ironwood Mentalist Staff of Light",
+  "realm": "Hibernia",
+  "level": 15,
+  "use": [
+   "15",
+   "20"
+  ],
+  "focus": [
+   [
+    "Mentalism",
+    7
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    13
+   ]
+  ],
+  "ts": "20030806200029",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8353"
+ },
+ "elm theurgist staff of elements": {
+  "name": "Elm Theurgist Staff of Elements",
+  "realm": "Albion",
+  "level": 5,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    4
+   ],
+   [
+    "Path of Earth",
+    4
+   ],
+   [
+    "Path of Ice",
+    4
+   ]
+  ],
+  "ts": "20031008221722",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8473"
+ },
+ "elm theurgist staff of ice": {
+  "name": "Elm Theurgist Staff of Ice",
+  "realm": "Albion",
+  "level": 5,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    2
+   ],
+   [
+    "Path of Earth",
+    2
+   ],
+   [
+    "Path of Ice",
+    5
+   ]
+  ],
+  "ts": "20031008222946",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8474"
+ },
+ "elm theurgist staff of wind": {
+  "name": "Elm Theurgist Staff of Wind",
+  "realm": "Albion",
+  "level": 5,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    5
+   ],
+   [
+    "Path of Earth",
+    2
+   ],
+   [
+    "Path of Ice",
+    2
+   ]
+  ],
+  "ts": "20031008223406",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8475"
+ },
+ "heartwood theurgist staff of earth": {
+  "name": "Heartwood Theurgist Staff of Earth",
+  "realm": "Albion",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Path of Air",
+    9
+   ],
+   [
+    "Path of Earth",
+    18
+   ],
+   [
+    "Path of Ice",
+    9
+   ]
+  ],
+  "ts": "20030813140728",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8476"
+ },
+ "heartwood theurgist staff of elementals": {
+  "name": "Heartwood Theurgist Staff of Elementals",
+  "realm": "Albion",
+  "level": 21,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    14
+   ],
+   [
+    "Path of Earth",
+    14
+   ],
+   [
+    "Path of Ice",
+    14
+   ]
+  ],
+  "ts": "20031008225042",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8477"
+ },
+ "heartwood theurgist staff of ice": {
+  "name": "Heartwood Theurgist Staff of Ice",
+  "realm": "Albion",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Path of Air",
+    9
+   ],
+   [
+    "Path of Earth",
+    9
+   ],
+   [
+    "Path of Ice",
+    18
+   ]
+  ],
+  "ts": "20030813141414",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8478"
+ },
+ "heartwood theurgist staff of wind": {
+  "name": "Heartwood Theurgist Staff of Wind",
+  "realm": "Albion",
+  "level": 21,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    18
+   ],
+   [
+    "Path of Earth",
+    9
+   ],
+   [
+    "Path of Ice",
+    9
+   ]
+  ],
+  "ts": "20031008230258",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8479"
+ },
+ "ironwood theurgist staff of earth": {
+  "name": "Ironwood Theurgist Staff of Earth",
+  "realm": "Albion",
+  "level": 16,
+  "use": [
+   "16",
+   "24"
+  ],
+  "focus": [
+   [
+    "Path of Air",
+    7
+   ],
+   [
+    "Path of Earth",
+    13
+   ],
+   [
+    "Path of Ice",
+    7
+   ]
+  ],
+  "ts": "20030813211443",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8480"
+ },
+ "ironwood theurgist staff of elements": {
+  "name": "Ironwood Theurgist Staff of Elements",
+  "realm": "Albion",
+  "level": 16,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    11
+   ],
+   [
+    "Path of Earth",
+    11
+   ],
+   [
+    "Path of Ice",
+    11
+   ]
+  ],
+  "ts": "20031008232138",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8481"
+ },
+ "ironwood theurgist staff of fire": {
+  "name": "Ironwood Theurgist Staff of Fire",
+  "realm": "Albion",
+  "level": 16,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    7
+   ],
+   [
+    "Path of Earth",
+    7
+   ],
+   [
+    "Path of Ice",
+    13
+   ]
+  ],
+  "ts": "20031008233009",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8482"
+ },
+ "ironwood theurgist staff of wind": {
+  "name": "Ironwood Theurgist Staff of Wind",
+  "realm": "Albion",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Path of Air",
+    13
+   ],
+   [
+    "Path of Fire",
+    7
+   ],
+   [
+    "Path of Ice",
+    7
+   ]
+  ],
+  "ts": "20030813210603",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8483"
+ },
+ "oaken theurgist staff of earth": {
+  "name": "Oaken Theurgist Staff of Earth",
+  "realm": "Albion",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Path of Air",
+    5
+   ],
+   [
+    "Path of Earth",
+    9
+   ],
+   [
+    "Path of Ice",
+    5
+   ]
+  ],
+  "ts": "20030813212222",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8492"
+ },
+ "oaken theurgist staff of elements": {
+  "name": "Oaken Theurgist Staff of Elements",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    7
+   ],
+   [
+    "Path of Earth",
+    7
+   ],
+   [
+    "Path of Ice",
+    7
+   ]
+  ],
+  "ts": "20031008234757",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8493"
+ },
+ "oaken theurgist staff of ice": {
+  "name": "Oaken Theurgist Staff of Ice",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    5
+   ],
+   [
+    "Path of Earth",
+    5
+   ],
+   [
+    "Path of Ice",
+    9
+   ]
+  ],
+  "ts": "20031008235525",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8494"
+ },
+ "runewood theurgist staff of earth": {
+  "name": "Runewood Theurgist Staff of Earth",
+  "realm": "Albion",
+  "level": 26,
+  "use": null,
+  "focus": [
+   [
+    "Path of Air",
+    11
+   ],
+   [
+    "Path of Earth",
+    21
+   ],
+   [
+    "Path of Ice",
+    11
+   ]
+  ],
+  "ts": "20031009001301",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8496"
+ },
+ "runewood theurgist staff of wind": {
+  "name": "Runewood Theurgist Staff of Wind",
+  "realm": "Albion",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Path of Air",
+    21
+   ],
+   [
+    "Path of Earth",
+    11
+   ],
+   [
+    "Path of Ice",
+    11
+   ]
+  ],
+  "ts": "20030813213535",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8499"
+ },
+ "elm wizard staff of earth": {
+  "name": "Elm Wizard Staff of Earth",
+  "realm": "Albion",
+  "level": 6,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    5
+   ],
+   [
+    "Path of Fire",
+    2
+   ],
+   [
+    "Path of Ice",
+    2
+   ]
+  ],
+  "ts": "20031009084904",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8641"
+ },
+ "elm wizard staff of elements": {
+  "name": "Elm Wizard Staff of Elements",
+  "realm": "Albion",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Path of Earth",
+    4
+   ],
+   [
+    "Path of Fire",
+    4
+   ],
+   [
+    "Path of Ice",
+    4
+   ]
+  ],
+  "ts": "20030817174423",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8642&start=0"
+ },
+ "elm wizard staff of fire": {
+  "name": "Elm Wizard Staff of Fire",
+  "realm": "Albion",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Path of Earth",
+    2
+   ],
+   [
+    "Path of Fire",
+    5
+   ],
+   [
+    "Path of Ice",
+    2
+   ]
+  ],
+  "ts": "20030803060135",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8643"
+ },
+ "elm wizard staff of ice": {
+  "name": "Elm Wizard Staff of Ice",
+  "realm": "Albion",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Path of Earth",
+    2
+   ],
+   [
+    "Path of Fire",
+    2
+   ],
+   [
+    "Path of Ice",
+    5
+   ]
+  ],
+  "ts": "20030803061029",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8644"
+ },
+ "heartwood wizard staff of earth": {
+  "name": "Heartwood Wizard Staff of Earth",
+  "realm": "Albion",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Path of Earth",
+    18
+   ],
+   [
+    "Path of Fire",
+    9
+   ],
+   [
+    "Path of Ice",
+    9
+   ]
+  ],
+  "ts": "20030817022135",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8645"
+ },
+ "heartwood wizard staff of elements": {
+  "name": "Heartwood Wizard Staff of Elements",
+  "realm": "Albion",
+  "level": 21,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    14
+   ],
+   [
+    "Path of Fire",
+    14
+   ],
+   [
+    "Path of Ice",
+    14
+   ]
+  ],
+  "ts": "20031009093940",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8646"
+ },
+ "heartwood wizard staff of fire": {
+  "name": "Heartwood Wizard Staff of Fire",
+  "realm": "Albion",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Path of Earth",
+    9
+   ],
+   [
+    "Path of Fire",
+    18
+   ],
+   [
+    "Path of Ice",
+    9
+   ]
+  ],
+  "ts": "20030731123444",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8647"
+ },
+ "heartwood wizard staff of ice": {
+  "name": "Heartwood Wizard Staff of Ice",
+  "realm": "Albion",
+  "level": 21,
+  "use": null,
+  "focus": [
+   [
+    "Path of Ice",
+    18
+   ],
+   [
+    "Path of Earth",
+    9
+   ],
+   [
+    "Path of Fire",
+    9
+   ]
+  ],
+  "ts": "20031009101234",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8648"
+ },
+ "ironwood wizard staff of earth": {
+  "name": "Ironwood Wizard Staff of Earth",
+  "realm": "Albion",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Path of Earth",
+    13
+   ],
+   [
+    "Path of Fire",
+    7
+   ],
+   [
+    "Path of Ice",
+    7
+   ]
+  ],
+  "ts": "20030817030119",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8649"
+ },
+ "ironwood wizard staff of elements": {
+  "name": "Ironwood Wizard Staff of Elements",
+  "realm": "Albion",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Path of Earth",
+    11
+   ],
+   [
+    "Path of Fire",
+    11
+   ],
+   [
+    "Path of Ice",
+    11
+   ]
+  ],
+  "ts": "20030817030533",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8650"
+ },
+ "ironwood wizard staff of fire": {
+  "name": "Ironwood Wizard Staff of Fire",
+  "realm": "Albion",
+  "level": 16,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    7
+   ],
+   [
+    "Path of Fire",
+    13
+   ],
+   [
+    "Path of Ice",
+    7
+   ]
+  ],
+  "ts": "20031009104849",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8651"
+ },
+ "ironwood wizard staff of ice": {
+  "name": "Ironwood Wizard Staff of Ice",
+  "realm": "Albion",
+  "level": 16,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    7
+   ],
+   [
+    "Path of Fire",
+    7
+   ],
+   [
+    "Path of Ice",
+    13
+   ]
+  ],
+  "ts": "20031009110212",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8652"
+ },
+ "oaken wizard staff of earth": {
+  "name": "Oaken Wizard Staff of Earth",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    9
+   ],
+   [
+    "Path of Fire",
+    5
+   ],
+   [
+    "Path of Ice",
+    5
+   ]
+  ],
+  "ts": "20031009111610",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8653"
+ },
+ "oaken wizard staff of elements": {
+  "name": "Oaken Wizard Staff of Elements",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    7
+   ],
+   [
+    "Path of Fire",
+    7
+   ],
+   [
+    "Path of Ice",
+    7
+   ]
+  ],
+  "ts": "20031009112345",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8654"
+ },
+ "oaken wizard staff of fire": {
+  "name": "Oaken Wizard Staff of Fire",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    5
+   ],
+   [
+    "Path of Fire",
+    9
+   ],
+   [
+    "Path of Ice",
+    5
+   ]
+  ],
+  "ts": "20031009113718",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8655"
+ },
+ "oaken wizard staff of ice": {
+  "name": "Oaken Wizard Staff of Ice",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    5
+   ],
+   [
+    "Path of Fire",
+    5
+   ],
+   [
+    "Path of Ice",
+    9
+   ]
+  ],
+  "ts": "20031009114446",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8656"
+ },
+ "runewood wizard staff of earth": {
+  "name": "Runewood Wizard Staff of Earth",
+  "realm": "Albion",
+  "level": 26,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    21
+   ],
+   [
+    "Path of Fire",
+    11
+   ],
+   [
+    "Path of Ice",
+    11
+   ]
+  ],
+  "ts": "20031009115758",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8657"
+ },
+ "runewood wizard staff of elements": {
+  "name": "Runewood Wizard Staff of Elements",
+  "realm": "Albion",
+  "level": 26,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    17
+   ],
+   [
+    "Path of Fire",
+    17
+   ],
+   [
+    "Path of Ice",
+    17
+   ]
+  ],
+  "ts": "20031009120107",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8658"
+ },
+ "runewood wizard staff of fire": {
+  "name": "Runewood Wizard Staff of Fire",
+  "realm": "Albion",
+  "level": 26,
+  "use": null,
+  "focus": [
+   [
+    "Path of Earth",
+    11
+   ],
+   [
+    "Path of Fire",
+    21
+   ],
+   [
+    "Path of Ice",
+    11
+   ]
+  ],
+  "ts": "20031009122001",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8659"
+ },
+ "runewood wizard staff of ice": {
+  "name": "Runewood Wizard Staff of Ice",
+  "realm": "Albion",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Path of Earth",
+    11
+   ],
+   [
+    "Path of Fire",
+    11
+   ],
+   [
+    "Path of Ice",
+    21
+   ]
+  ],
+  "ts": "20030817032504",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8660"
+ },
+ "elm sorcerer staff of alteration": {
+  "name": "Elm Sorcerer Staff of Alteration",
+  "realm": "Albion",
+  "level": 6,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    4
+   ],
+   [
+    "Matter",
+    4
+   ],
+   [
+    "Mind Twisting",
+    4
+   ]
+  ],
+  "ts": "20031009130822",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8712"
+ },
+ "elm sorcerer staff of body": {
+  "name": "Elm Sorcerer Staff of Body",
+  "realm": "Albion",
+  "level": 6,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    5
+   ],
+   [
+    "Matter",
+    2
+   ],
+   [
+    "Mind Twisting",
+    2
+   ]
+  ],
+  "ts": "20031009132210",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8713"
+ },
+ "elm sorcerer staff of matter": {
+  "name": "Elm Sorcerer Staff of Matter",
+  "realm": "Albion",
+  "level": 6,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    2
+   ],
+   [
+    "Matter",
+    5
+   ],
+   [
+    "Mind Twisting",
+    2
+   ]
+  ],
+  "ts": "20031009133312",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8714"
+ },
+ "elm sorcerer staff of mind": {
+  "name": "Elm Sorcerer Staff of Mind",
+  "realm": "Albion",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Body Destruction",
+    2
+   ],
+   [
+    "Matter",
+    2
+   ],
+   [
+    "Mind Twisting",
+    5
+   ]
+  ],
+  "ts": "20030817034316",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8715"
+ },
+ "heartwood sorcerer staff of matter": {
+  "name": "Heartwood Sorcerer Staff of Matter",
+  "realm": "Albion",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Body Destruction",
+    9
+   ],
+   [
+    "Matter",
+    18
+   ],
+   [
+    "Mind Twisting",
+    9
+   ]
+  ],
+  "ts": "20030816233510",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8718"
+ },
+ "heartwood sorcerer staff of mind": {
+  "name": "Heartwood Sorcerer Staff of Mind",
+  "realm": "Albion",
+  "level": 21,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    9
+   ],
+   [
+    "Matter",
+    9
+   ],
+   [
+    "Mind Twisting",
+    18
+   ]
+  ],
+  "ts": "20031002184948",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8719"
+ },
+ "ironwood sorcerer staff of alteration": {
+  "name": "Ironwood Sorcerer Staff of Alteration",
+  "realm": "Albion",
+  "level": 16,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    11
+   ],
+   [
+    "Matter",
+    11
+   ],
+   [
+    "Mind Twisting",
+    11
+   ]
+  ],
+  "ts": "20031002185503",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8720"
+ },
+ "ironwood sorcerer staff of body": {
+  "name": "Ironwood Sorcerer Staff of Body",
+  "realm": "Albion",
+  "level": 16,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    13
+   ],
+   [
+    "Matter",
+    7
+   ],
+   [
+    "Mind Twisting",
+    7
+   ]
+  ],
+  "ts": "20031002191821",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8721"
+ },
+ "ironwood sorcerer staff of matter": {
+  "name": "Ironwood Sorcerer Staff of Matter",
+  "realm": "Albion",
+  "level": 16,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    7
+   ],
+   [
+    "Matter",
+    13
+   ],
+   [
+    "Mind Twisting",
+    7
+   ]
+  ],
+  "ts": "20031002195025",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8722"
+ },
+ "ironwood sorcerer staff of mind": {
+  "name": "Ironwood Sorcerer Staff of Mind",
+  "realm": "Albion",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Body Destruction",
+    7
+   ],
+   [
+    "Matter",
+    7
+   ],
+   [
+    "Mind Twisting",
+    13
+   ]
+  ],
+  "ts": "20030731141417",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8723"
+ },
+ "oaken sorcerer staff of alteration": {
+  "name": "Oaken Sorcerer Staff of Alteration",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    7
+   ],
+   [
+    "Matter",
+    7
+   ],
+   [
+    "Mind Twisting",
+    7
+   ]
+  ],
+  "ts": "20031002201224",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8724"
+ },
+ "oaken sorcerer staff of body": {
+  "name": "Oaken Sorcerer Staff of Body",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    9
+   ],
+   [
+    "Matter",
+    5
+   ],
+   [
+    "Mind Twisting",
+    5
+   ]
+  ],
+  "ts": "20031002200922",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8725"
+ },
+ "oaken sorcerer staff of matter": {
+  "name": "Oaken Sorcerer Staff of Matter",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    5
+   ],
+   [
+    "Matter",
+    9
+   ],
+   [
+    "Mind Twisting",
+    5
+   ]
+  ],
+  "ts": "20031002203550",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8726"
+ },
+ "oaken sorcerer staff of mind": {
+  "name": "Oaken Sorcerer Staff of Mind",
+  "realm": "Albion",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    5
+   ],
+   [
+    "Matter",
+    5
+   ],
+   [
+    "Mind Twisting",
+    9
+   ]
+  ],
+  "ts": "20031019164527",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8727"
+ },
+ "runewood sorcerer staff of alteration": {
+  "name": "Runewood Sorcerer Staff of Alteration",
+  "realm": "Albion",
+  "level": 26,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    17
+   ],
+   [
+    "Matter",
+    17
+   ],
+   [
+    "Mind Twisting",
+    17
+   ]
+  ],
+  "ts": "20031002205008",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8728"
+ },
+ "runewood sorcerer staff of body": {
+  "name": "Runewood Sorcerer Staff of Body",
+  "realm": "Albion",
+  "level": 26,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    21
+   ],
+   [
+    "Matter",
+    11
+   ],
+   [
+    "Mind Twisting",
+    11
+   ]
+  ],
+  "ts": "20031002212747",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8729"
+ },
+ "runewood sorcerer staff of matter": {
+  "name": "Runewood Sorcerer Staff of Matter",
+  "realm": "Albion",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Body Destruction",
+    11
+   ],
+   [
+    "Matter",
+    21
+   ],
+   [
+    "Mind Twisting",
+    11
+   ]
+  ],
+  "ts": "20030817022325",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8730"
+ },
+ "runewood sorcerer staff of mind": {
+  "name": "Runewood Sorcerer Staff of Mind",
+  "realm": "Albion",
+  "level": 26,
+  "use": null,
+  "focus": [
+   [
+    "Body Destruction",
+    11
+   ],
+   [
+    "Matter",
+    11
+   ],
+   [
+    "Mind Twisting",
+    21
+   ]
+  ],
+  "ts": "20031002214950",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=8731"
+ },
+ "elm bonedancer staff of bones": {
+  "name": "Elm Bonedancer Staff of Bones",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    5
+   ],
+   [
+    "Darkness",
+    2
+   ],
+   [
+    "Suppression",
+    2
+   ]
+  ],
+  "ts": "20030810123939",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9772"
+ },
+ "elm bonedancer staff of darkness": {
+  "name": "Elm Bonedancer Staff of Darkness",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    2
+   ],
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Suppression",
+    2
+   ]
+  ],
+  "ts": "20030810125118",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9773"
+ },
+ "elm bonedancer staff of mysticism": {
+  "name": "Elm Bonedancer Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    4
+   ],
+   [
+    "Darkness",
+    4
+   ],
+   [
+    "Suppression",
+    4
+   ]
+  ],
+  "ts": "20030810125132",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9774"
+ },
+ "elm bonedancer staff of suppresion": {
+  "name": "Elm Bonedancer Staff of Suppresion",
+  "realm": "Midgard",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    2
+   ],
+   [
+    "Darkness",
+    2
+   ],
+   [
+    "Suppression",
+    5
+   ]
+  ],
+  "ts": "20030810125222",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9775"
+ },
+ "heartwood bonedancer staff of darkness": {
+  "name": "Heartwood Bonedancer Staff of Darkness",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    9
+   ],
+   [
+    "Darkness",
+    18
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030810130710",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9777"
+ },
+ "heartwood bonedancer staff of mysticism": {
+  "name": "Heartwood Bonedancer Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    14
+   ],
+   [
+    "Darkness",
+    14
+   ],
+   [
+    "Suppression",
+    14
+   ]
+  ],
+  "ts": "20030810131353",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9778"
+ },
+ "heartwood bonedancer staff of suppression": {
+  "name": "Heartwood Bonedancer Staff of Suppression",
+  "realm": "Midgard",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    9
+   ],
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Suppression",
+    18
+   ]
+  ],
+  "ts": "20030902005333",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9779&start=0"
+ },
+ "ironwood bonedancer staff of bones": {
+  "name": "Ironwood Bonedancer Staff of Bones",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    13
+   ],
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030810151417",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9780"
+ },
+ "ironwood bonedancer staff of darkness": {
+  "name": "Ironwood Bonedancer Staff of Darkness",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    7
+   ],
+   [
+    "Darkness",
+    13
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030902022628",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9781&start=0"
+ },
+ "ironwood bonedancer staff of mysticism": {
+  "name": "Ironwood Bonedancer Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    11
+   ],
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030810153015",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9782"
+ },
+ "ironwood bonedancer staff of suppression": {
+  "name": "Ironwood Bonedancer Staff of Suppression",
+  "realm": "Midgard",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    7
+   ],
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Suppression",
+    13
+   ]
+  ],
+  "ts": "20030810185021",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9783"
+ },
+ "oaken bonedancer staff of bones": {
+  "name": "Oaken Bonedancer Staff of Bones",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    9
+   ],
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Suppression",
+    5
+   ]
+  ],
+  "ts": "20030810185914",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9784"
+ },
+ "oaken bonedancer staff of darkness": {
+  "name": "Oaken Bonedancer Staff of Darkness",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    5
+   ],
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030810190853",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9785"
+ },
+ "oaken bonedancer staff of mysticism": {
+  "name": "Oaken Bonedancer Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    7
+   ],
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Suppression",
+    7
+   ]
+  ],
+  "ts": "20030810191216",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9786"
+ },
+ "oaken bonedancer staff of suppression": {
+  "name": "Oaken Bonedancer Staff of Suppression",
+  "realm": "Midgard",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    5
+   ],
+   [
+    "Darkness",
+    5
+   ],
+   [
+    "Suppression",
+    9
+   ]
+  ],
+  "ts": "20030810192043",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9787"
+ },
+ "runewood bonedancer staff of bones": {
+  "name": "Runewood Bonedancer Staff of Bones",
+  "realm": "Midgard",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    21
+   ],
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030810192700",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9788"
+ },
+ "runewood bonedancer staff of darkness": {
+  "name": "Runewood Bonedancer Staff of Darkness",
+  "realm": "Midgard",
+  "level": 26,
+  "use": [
+   "26",
+   "32"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    11
+   ],
+   [
+    "Darkness",
+    21
+   ],
+   [
+    "Suppression",
+    11
+   ]
+  ],
+  "ts": "20030810193325",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9789"
+ },
+ "runewood bonedancer staff of mysticism": {
+  "name": "Runewood Bonedancer Staff of Mysticism",
+  "realm": "Midgard",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    17
+   ],
+   [
+    "Darkness",
+    17
+   ],
+   [
+    "Suppression",
+    17
+   ]
+  ],
+  "ts": "20030810194101",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9790"
+ },
+ "runewood bonedancer staff of suppression": {
+  "name": "Runewood Bonedancer Staff of Suppression",
+  "realm": "Midgard",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Bone Army",
+    11
+   ],
+   [
+    "Darkness",
+    11
+   ],
+   [
+    "Suppression",
+    21
+   ]
+  ],
+  "ts": "20030810194728",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9791"
+ },
+ "elm animist staff of arboreal path": {
+  "name": "Elm Animist Staff of Arboreal Path",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    5
+   ],
+   [
+    "Creeping Path",
+    2
+   ],
+   [
+    "Verdant Path Spec",
+    2
+   ]
+  ],
+  "ts": "20030810195456",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9792"
+ },
+ "elm animist staff of creeping path": {
+  "name": "Elm Animist Staff of Creeping Path",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    2
+   ],
+   [
+    "Creeping Path",
+    5
+   ],
+   [
+    "Verdant Path",
+    2
+   ]
+  ],
+  "ts": "20030810200542",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9793"
+ },
+ "elm animist staff of mysticism": {
+  "name": "Elm Animist Staff of Mysticism",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    4
+   ],
+   [
+    "Creeping Path",
+    4
+   ],
+   [
+    "Verdant Path",
+    4
+   ]
+  ],
+  "ts": "20030902004456",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9794&start=0"
+ },
+ "elm animist staff of verdant path": {
+  "name": "Elm Animist Staff of Verdant Path",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    2
+   ],
+   [
+    "Creeping Path",
+    2
+   ],
+   [
+    "Verdant Path",
+    5
+   ]
+  ],
+  "ts": "20030810201417",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9795"
+ },
+ "heartwood animist staff of arboreal path": {
+  "name": "Heartwood Animist Staff of Arboreal Path",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    18
+   ],
+   [
+    "Creeping Path",
+    9
+   ],
+   [
+    "Verdant Path",
+    9
+   ]
+  ],
+  "ts": "20030810201959",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9796"
+ },
+ "heartwood animist staff of creeping path": {
+  "name": "Heartwood Animist Staff of Creeping Path",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    9
+   ],
+   [
+    "Creeping Path",
+    18
+   ],
+   [
+    "Verdant Path",
+    9
+   ]
+  ],
+  "ts": "20030810211110",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9797"
+ },
+ "heartwood animist staff of mysticism": {
+  "name": "Heartwood Animist Staff of Mysticism",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    14
+   ],
+   [
+    "Creeping Path",
+    14
+   ],
+   [
+    "Verdant Path",
+    14
+   ]
+  ],
+  "ts": "20030810212136",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9798"
+ },
+ "heartwood animist staff of verdant path": {
+  "name": "Heartwood Animist Staff of Verdant Path",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    9
+   ],
+   [
+    "Creeping Path",
+    9
+   ],
+   [
+    "Verdant Path",
+    18
+   ]
+  ],
+  "ts": "20030810212724",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9799"
+ },
+ "ironwood animist staff of arboreal path": {
+  "name": "Ironwood Animist Staff of Arboreal Path",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    13
+   ],
+   [
+    "Creeping Path",
+    7
+   ],
+   [
+    "Verdant Path",
+    7
+   ]
+  ],
+  "ts": "20030810214347",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9800"
+ },
+ "ironwood animist staff of creeping path": {
+  "name": "Ironwood Animist Staff of Creeping Path",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    7
+   ],
+   [
+    "Creeping Path",
+    13
+   ],
+   [
+    "Verdant Path",
+    7
+   ]
+  ],
+  "ts": "20030810215433",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9801"
+ },
+ "ironwood animist staff of mysticism": {
+  "name": "Ironwood Animist Staff of Mysticism",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    11
+   ],
+   [
+    "Creeping Path",
+    11
+   ],
+   [
+    "Verdant Path",
+    11
+   ]
+  ],
+  "ts": "20030810215118",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9802"
+ },
+ "ironwood animist staff of verdant path": {
+  "name": "Ironwood Animist Staff of Verdant Path",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    7
+   ],
+   [
+    "Creeping Path",
+    7
+   ],
+   [
+    "Verdant Path",
+    13
+   ]
+  ],
+  "ts": "20030902031152",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9803&start=0"
+ },
+ "oaken animist staff of arboreal path": {
+  "name": "Oaken Animist Staff of Arboreal Path",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    9
+   ],
+   [
+    "Creeping Path",
+    5
+   ],
+   [
+    "Verdant Path",
+    5
+   ]
+  ],
+  "ts": "20030904141959",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9804&start=0"
+ },
+ "oaken animist staff of mysticism": {
+  "name": "Oaken Animist Staff of Mysticism",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    7
+   ],
+   [
+    "Creeping Path",
+    7
+   ],
+   [
+    "Verdant Path",
+    7
+   ]
+  ],
+  "ts": "20030810222144",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9806"
+ },
+ "oaken animist staff of verdant path": {
+  "name": "Oaken Animist Staff of Verdant Path",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    5
+   ],
+   [
+    "Creeping Path",
+    5
+   ],
+   [
+    "Verdant Path",
+    9
+   ]
+  ],
+  "ts": "20030810222713",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9807"
+ },
+ "runewood animist staff of arboreal path": {
+  "name": "Runewood Animist Staff of Arboreal Path",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    21
+   ],
+   [
+    "Creeping Path",
+    11
+   ],
+   [
+    "Verdant Path",
+    11
+   ]
+  ],
+  "ts": "20030801122310",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9808"
+ },
+ "runewood animist staff of creeping path": {
+  "name": "Runewood Animist Staff of Creeping Path",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    11
+   ],
+   [
+    "Creeping Path",
+    21
+   ],
+   [
+    "Verdant Path",
+    11
+   ]
+  ],
+  "ts": "20030801131129",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9809"
+ },
+ "runewood animist staff of verdant path": {
+  "name": "Runewood Animist Staff of Verdant Path",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Arborial Path",
+    11
+   ],
+   [
+    "Creeping Path",
+    11
+   ],
+   [
+    "Verdant Path",
+    21
+   ]
+  ],
+  "ts": "20030801132016",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9811"
+ },
+ "elm eldritch staff of light": {
+  "name": "Elm Eldritch Staff of Light",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    2
+   ],
+   [
+    "Way of the Moon",
+    2
+   ],
+   [
+    "Way of the Sun",
+    5
+   ]
+  ],
+  "ts": "20030801132508",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9812"
+ },
+ "elm eldritch staff of magic": {
+  "name": "Elm Eldritch Staff of Magic",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    4
+   ],
+   [
+    "Way of the Moon",
+    4
+   ],
+   [
+    "Way of the Sun",
+    4
+   ]
+  ],
+  "ts": "20030801134003",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9813"
+ },
+ "elm eldritch staff of mana": {
+  "name": "Elm Eldritch Staff of Mana",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    2
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    2
+   ]
+  ],
+  "ts": "20030801142753",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9814"
+ },
+ "elm eldritch staff of void": {
+  "name": "Elm Eldritch Staff of Void",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    5
+   ],
+   [
+    "Way of the Moon",
+    2
+   ],
+   [
+    "Way of the Sun",
+    2
+   ]
+  ],
+  "ts": "20030801143739",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9815"
+ },
+ "heartwood eldritch staff of light": {
+  "name": "Heartwood Eldritch Staff of Light",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    9
+   ],
+   [
+    "Way of the Moon",
+    9
+   ],
+   [
+    "Way of the Sun",
+    18
+   ]
+  ],
+  "ts": "20030801144429",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9816"
+ },
+ "heartwood eldritch staff of magic": {
+  "name": "Heartwood Eldritch Staff of Magic",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    14
+   ],
+   [
+    "Way of the Moon",
+    14
+   ],
+   [
+    "Way of the Sun",
+    14
+   ]
+  ],
+  "ts": "20030801163308",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9817"
+ },
+ "heartwood eldritch staff of mana": {
+  "name": "Heartwood Eldritch Staff of Mana",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    9
+   ],
+   [
+    "Way of the Moon",
+    18
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030821190619",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9818&start=0"
+ },
+ "heartwood eldritch staff of void": {
+  "name": "Heartwood Eldritch Staff of Void",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    18
+   ],
+   [
+    "Way of the Moon",
+    9
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030806050150",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9819"
+ },
+ "ironwood eldritch staff of light": {
+  "name": "Ironwood Eldritch Staff of Light",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    7
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    13
+   ]
+  ],
+  "ts": "20030806051420",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9820"
+ },
+ "ironwood eldritch staff of magic": {
+  "name": "Ironwood Eldritch Staff of Magic",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    11
+   ],
+   [
+    "Way of the Moon",
+    11
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030806051602",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9821"
+ },
+ "ironwood eldritch staff of mana": {
+  "name": "Ironwood Eldritch Staff of Mana",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    7
+   ],
+   [
+    "Way of the Moon",
+    13
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030806052353",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9822"
+ },
+ "ironwood eldritch staff of void": {
+  "name": "Ironwood Eldritch Staff of Void",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    13
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030806053502",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9823"
+ },
+ "oaken eldritch staff of light": {
+  "name": "Oaken Eldritch Staff of Light",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    5
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030821210950",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9824&start=0"
+ },
+ "oaken eldritch staff of magic": {
+  "name": "Oaken Eldritch Staff of Magic",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    7
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030806055202",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9825"
+ },
+ "oaken eldritch staff of mana": {
+  "name": "Oaken Eldritch Staff of Mana",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    5
+   ],
+   [
+    "Way of the Moon",
+    9
+   ],
+   [
+    "Way of the Sun",
+    5
+   ]
+  ],
+  "ts": "20030821211832",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9826&start=0"
+ },
+ "oaken eldritch staff of void": {
+  "name": "Oaken Eldritch Staff of Void",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    9
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    5
+   ]
+  ],
+  "ts": "20030806062251",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9827"
+ },
+ "runewood eldritch staff of light": {
+  "name": "Runewood Eldritch Staff of Light",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    11
+   ],
+   [
+    "Way of the Moon",
+    11
+   ],
+   [
+    "Way of the Sun",
+    21
+   ]
+  ],
+  "ts": "20030825233856",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9828&start=0"
+ },
+ "runewood eldritch staff of magic": {
+  "name": "Runewood Eldritch Staff of Magic",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    17
+   ],
+   [
+    "Way of the Moon",
+    17
+   ],
+   [
+    "Way of the Sun",
+    17
+   ]
+  ],
+  "ts": "20030806064822",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9829"
+ },
+ "runewood eldritch staff of mana": {
+  "name": "Runewood Eldritch Staff of Mana",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    11
+   ],
+   [
+    "Way of the Moon",
+    21
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030821211028",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9830&start=0"
+ },
+ "runewood eldritch staff of void": {
+  "name": "Runewood Eldritch Staff of Void",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Void Mastery",
+    21
+   ],
+   [
+    "Way of the Moon",
+    11
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030821190651",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9831&start=0"
+ },
+ "elm enchanter staff of enchantments": {
+  "name": "Elm Enchanter Staff of Enchantments",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    5
+   ],
+   [
+    "Way of the Moon",
+    2
+   ],
+   [
+    "Way of the Sun",
+    2
+   ]
+  ],
+  "ts": "20030806072049",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9832"
+ },
+ "elm enchanter staff of light": {
+  "name": "Elm Enchanter Staff of Light",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    2
+   ],
+   [
+    "Way of the Moon",
+    2
+   ],
+   [
+    "Way of the Sun",
+    5
+   ]
+  ],
+  "ts": "20030806073243",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9833"
+ },
+ "elm enchanter staff of magic": {
+  "name": "Elm Enchanter Staff of Magic",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    4
+   ],
+   [
+    "Way of the Moon",
+    4
+   ],
+   [
+    "Way of the Sun",
+    4
+   ]
+  ],
+  "ts": "20030806073547",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9834"
+ },
+ "elm enchanter staff of mana": {
+  "name": "Elm Enchanter Staff of Mana",
+  "realm": "Hibernia",
+  "level": 6,
+  "use": [
+   "6",
+   "11"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    2
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    2
+   ]
+  ],
+  "ts": "20030806074833",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9835"
+ },
+ "heartwood enchanter staff of enchantments": {
+  "name": "Heartwood Enchanter Staff of Enchantments",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    18
+   ],
+   [
+    "Way of the Moon",
+    9
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030806075619",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9836"
+ },
+ "heartwood enchanter staff of light": {
+  "name": "Heartwood Enchanter Staff of Light",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    9
+   ],
+   [
+    "Way of the Moon",
+    9
+   ],
+   [
+    "Way of the Sun",
+    18
+   ]
+  ],
+  "ts": "20030806080219",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9837"
+ },
+ "heartwood enchanter staff of magic": {
+  "name": "Heartwood Enchanter Staff of Magic",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    14
+   ],
+   [
+    "Way of the Moon",
+    14
+   ],
+   [
+    "Way of the Sun",
+    14
+   ]
+  ],
+  "ts": "20030806081202",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9838"
+ },
+ "heartwood enchanter staff of mana": {
+  "name": "Heartwood Enchanter Staff of Mana",
+  "realm": "Hibernia",
+  "level": 21,
+  "use": [
+   "21",
+   "26"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    9
+   ],
+   [
+    "Way of the Moon",
+    18
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030821205800",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9839&start=0"
+ },
+ "ironwood enchanter staff of enchantments": {
+  "name": "Ironwood Enchanter Staff of Enchantments",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    13
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030806083224",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9840"
+ },
+ "ironwood enchanter staff of light": {
+  "name": "Ironwood Enchanter Staff of Light",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    7
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    13
+   ]
+  ],
+  "ts": "20030806083610",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9841"
+ },
+ "ironwood enchanter staff of magic": {
+  "name": "Ironwood Enchanter Staff of Magic",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    11
+   ],
+   [
+    "Way of the Moon",
+    11
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030821212014",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9842&start=0"
+ },
+ "ironwood enchanter staff of mana": {
+  "name": "Ironwood Enchanter Staff of Mana",
+  "realm": "Hibernia",
+  "level": 16,
+  "use": [
+   "16",
+   "21"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    7
+   ],
+   [
+    "Way of the Moon",
+    13
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030806085537",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9843"
+ },
+ "oaken enchanter staff of enchantments": {
+  "name": "Oaken Enchanter Staff of Enchantments",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    9
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    5
+   ]
+  ],
+  "ts": "20030806090443",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9844"
+ },
+ "oaken enchanter staff of light": {
+  "name": "Oaken Enchanter Staff of Light",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    5
+   ],
+   [
+    "Way of the Moon",
+    5
+   ],
+   [
+    "Way of the Sun",
+    9
+   ]
+  ],
+  "ts": "20030806091259",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9845"
+ },
+ "oaken enchanter staff of magic": {
+  "name": "Oaken Enchanter Staff of Magic",
+  "realm": "Hibernia",
+  "level": 11,
+  "use": [
+   "11",
+   "16"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    7
+   ],
+   [
+    "Way of the Moon",
+    7
+   ],
+   [
+    "Way of the Sun",
+    7
+   ]
+  ],
+  "ts": "20030806091611",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9846"
+ },
+ "runewood enchanter staff of enchantments": {
+  "name": "Runewood Enchanter Staff of Enchantments",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    21
+   ],
+   [
+    "Way of the Moon",
+    11
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030806092947",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9848"
+ },
+ "runewood enchanter staff of light": {
+  "name": "Runewood Enchanter Staff of Light",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    11
+   ],
+   [
+    "Way of the Moon",
+    11
+   ],
+   [
+    "Way of the Sun",
+    21
+   ]
+  ],
+  "ts": "20030806094132",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9849"
+ },
+ "runewood enchanter staff of mana": {
+  "name": "Runewood Enchanter Staff of Mana",
+  "realm": "Hibernia",
+  "level": 26,
+  "use": [
+   "26",
+   "31"
+  ],
+  "focus": [
+   [
+    "Enchantment",
+    11
+   ],
+   [
+    "Way of the Moon",
+    21
+   ],
+   [
+    "Way of the Sun",
+    11
+   ]
+  ],
+  "ts": "20030806095509",
+  "url": "http://camelot.allakhazam.com:80/item.html?citem=9851"
+ },
+ "elm staff of the underworld": {
+  "name": "Elm Staff of the Underworld",
+  "realm": "Albion",
+  "level": null,
+  "use": null,
+  "focus": [
+   [
+    "Deathsight",
+    4
+   ],
+   [
+    "Painworking",
+    4
+   ],
+   [
+    "Death Servant",
+    4
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=15262"
+ },
+ "ironwood cabalist staff of alteration": {
+  "name": "Ironwood Cabalist Staff of Alteration",
+  "realm": "Albion",
+  "level": null,
+  "use": null,
+  "focus": [
+   [
+    "Matter",
+    11
+   ],
+   [
+    "Body Destruction",
+    11
+   ],
+   [
+    "Essence Manipulation",
+    11
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=2022"
+ },
+ "ironwood staff of the underworld": {
+  "name": "Ironwood Staff of the Underworld",
+  "realm": "Albion",
+  "level": null,
+  "use": null,
+  "focus": [
+   [
+    "Deathsight",
+    11
+   ],
+   [
+    "Painworking",
+    11
+   ],
+   [
+    "Death Servant",
+    11
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=15264"
+ },
+ "oaken staff of the underworld": {
+  "name": "Oaken Staff of the Underworld",
+  "realm": "Albion",
+  "level": null,
+  "use": null,
+  "focus": [
+   [
+    "Deathsight",
+    7
+   ],
+   [
+    "Painworking",
+    7
+   ],
+   [
+    "Death Servant",
+    7
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=15265"
+ },
+ "heartwood bonedancer staff of bones": {
+  "name": "Heartwood Bonedancer Staff of Bones",
+  "realm": "Midgard",
+  "level": 21,
+  "use": null,
+  "focus": [
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Suppression",
+    9
+   ],
+   [
+    "Bone Army",
+    18
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=9776"
+ },
+ "ironwood runemaster staff of suppression": {
+  "name": "Ironwood Runemaster Staff of Suppression",
+  "realm": "Midgard",
+  "level": 16,
+  "use": null,
+  "focus": [
+   [
+    "Darkness",
+    7
+   ],
+   [
+    "Suppression",
+    13
+   ],
+   [
+    "Runecarving",
+    7
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=7974"
+ },
+ "oaken runemaster staff of darkness": {
+  "name": "Oaken Runemaster Staff of Darkness",
+  "realm": "Midgard",
+  "level": 11,
+  "use": null,
+  "focus": [
+   [
+    "Darkness",
+    9
+   ],
+   [
+    "Suppression",
+    5
+   ],
+   [
+    "Runecarving",
+    5
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=7975"
+ },
+ "elm warlock staff of mysticism": {
+  "name": "Elm Warlock Staff of Mysticism",
+  "realm": "Midgard",
+  "level": null,
+  "use": null,
+  "focus": [
+   [
+    "Cursing",
+    4
+   ],
+   [
+    "Hexing",
+    4
+   ],
+   [
+    "Witchcraft",
+    4
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=27421"
+ },
+ "ironwood warlock staff of mysticism": {
+  "name": "Ironwood Warlock Staff of Mysticism",
+  "realm": "Midgard",
+  "level": null,
+  "use": null,
+  "focus": [
+   [
+    "Cursing",
+    11
+   ],
+   [
+    "Hexing",
+    11
+   ],
+   [
+    "Witchcraft",
+    11
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=27423"
+ },
+ "oaken warlock staff of mysticism": {
+  "name": "Oaken Warlock Staff of Mysticism",
+  "realm": "Midgard",
+  "level": null,
+  "use": null,
+  "focus": [
+   [
+    "Cursing",
+    7
+   ],
+   [
+    "Hexing",
+    7
+   ],
+   [
+    "Witchcraft",
+    7
+   ]
+  ],
+  "ts": "",
+  "url": "/item.html?citem=27422"
+ }
+}

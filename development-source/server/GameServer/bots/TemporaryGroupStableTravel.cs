@@ -99,6 +99,10 @@ public static class TemporaryGroupStableTravel
         ushort playerZone) =>
         hasConfirmedPlayerTransfer && isTemporaryHelper && sharesGroup && followsPlayer;
 
+    /// <summary>Who moves with a teleporting player: their /spawn helpers and their hired companions.</summary>
+    public static bool IsTransferCohesionCompanion(bool isTemporaryHelper, bool isHiredCompanion) =>
+        isTemporaryHelper || isHiredCompanion;
+
     public static void MarkAcceptedPlayerTransfer(GamePlayer player)
     {
         if (player != null)
@@ -249,6 +253,7 @@ public static class TemporaryGroupStableTravel
 
         int relocated = 0;
         int ordinal = 0;
+        bool movedHired = false;
         foreach (GameBot bot in player.Group.GetMembersInTheGroup().OfType<GameBot>())
         {
             if (!bot.IsAlive || bot.ObjectState != GameObject.eObjectState.Active)
@@ -257,16 +262,19 @@ public static class TemporaryGroupStableTravel
             // zone point back down lands about 3000 from him, where the raid is still fighting).
             if (bot.CurrentRegionID == player.CurrentRegionID && bot.InCombat && bot.IsWithinRadius(player, 4000))
                 continue;
+            // A player's hired companions go along too (owner 2026-11-01); a persistent gamebot in the group never does.
+            bool hired = HiredCompanions165.IsHired(bot);
+            bool companion = IsTransferCohesionCompanion(bot.IsTemporaryGroupHelper, hired);
             bool needsRelocation = ShouldRelocateForOwnerTransfer(
                     hasConfirmedTransfer,
-                    bot.IsTemporaryGroupHelper,
+                    companion,
                     bot.Group == player.Group,
                     bot.PlayerGroupLeader == player,
                     bot.CurrentRegionID,
                     player.CurrentRegionID,
                     bot.CurrentZone?.ID ?? 0,
                     player.CurrentZone.ID);
-            if (!needsRelocation || !bot.IsTemporaryGroupHelper || bot.Group != player.Group || bot.PlayerGroupLeader != player)
+            if (!needsRelocation || !companion || bot.Group != player.Group || bot.PlayerGroupLeader != player)
                 continue;
 
             bot.CompleteStableMasterRoute();
@@ -285,7 +293,10 @@ public static class TemporaryGroupStableTravel
             if (bot.Brain is BotBrain brain)
                 brain.FSM.SetCurrentState(eFSMStateType.FOLLOW);
             relocated++;
+            movedHired |= hired;
         }
+        if (movedHired)
+            Hire165.SendRosterNumbers(player);   // a region move gives the companion a new object id
         PendingPlayerTransfers.TryRemove(player, out _);
         return relocated;
     }

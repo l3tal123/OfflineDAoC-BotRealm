@@ -1335,7 +1335,7 @@ func effects_list() -> Array:
 		var ic := skill_icon("icon" if bool(e.get("ability", false)) else "spell", int(e.icon))
 		out.append({"icon": int(ic[0]), "border": int(ic[1]), "name": String(e.name), "fx": int(e.icon),
 				"seconds": maxf(0.001, (int(e.until) - now) / 1000.0) if int(e.until) > 0 else 1e9,
-				"disabled": bool(e.get("disabled", false))})
+				"disabled": bool(e.get("disabled", false)), "negative": int(e.get("negative", 0)) != 0})
 	return out
 
 
@@ -1520,12 +1520,13 @@ const VAULT_FIRST := 110
 const VAULT_COUNT := 40
 const ACCOUNT_VAULT_COUNT := 100
 var container_mode := ""                 # "account" while an account vault page is open, else the listing chest's
+var house_vault_at := 0                  # when you last right-clicked a house vault (ServerWorld): its window 4 is one
 
 
 func on_inventory(d: Dictionary) -> void:
 	# True 1.65 Mode: the companion gear window the server fills for the original client (its HouseVault window, slots
 	# 150 and up - plan 17h; there are no houses in 1.65): our own companion window draws it from op 7, so not shown
-	if world_mode == "1.65" and Time.get_ticks_msec() - CompanionNet.asked_gear_at < 600000:
+	if world_mode == "1.65" and Time.get_ticks_msec() - CompanionNet.asked_gear_at < 600000 			and not (int(d.window) == 4 and Time.get_ticks_msec() - house_vault_at < 5000):
 		if int(d.window) == 4:
 			return
 		var keep: Array = (d.get("items", []) as Array).filter(func(it): return int(it.slot) < 150)

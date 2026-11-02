@@ -96,6 +96,8 @@ static func attack_clip(anim: AnimationPlayer, st: String, hand := "") -> String
 ## The weapon's model file ("" none) and the packed scene of one (no cache: NpcManager prepares them on a worker).
 static func path_of(model: int) -> String:
 	var i := info(model)
+	if not i.is_empty() and i.has("file_164") and Server.world_mode == "1.65":
+		return DIR + "/" + String(i.file_164)          # the 1.64 client's own model (the loot bag: build_loot_164.py)
 	return "" if i.is_empty() else DIR + "/" + String(i.get("flex_file", i.file))
 
 

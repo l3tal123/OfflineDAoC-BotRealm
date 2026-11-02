@@ -192,3 +192,7 @@ is the result: the world database and the content files built from it.
 The server is licensed under the [GNU General Public License v3](LICENSE), like the OpenDAoC and Dawn of Light
 code it is based on. Other parts keep their own licenses; see [THIRD_PARTY.md](THIRD_PARTY.md).
 
+## Changes
+
+See the [changelog](CHANGELOG.md), including what's coming in 0.2.
+

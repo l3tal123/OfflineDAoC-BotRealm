@@ -15,6 +15,8 @@ Collision follows the client (game.dll 0x482ba5): EVERY node named "collidee" (a
 holds wall geometry (find_collidees; until 2026-10-29 only the first, which lost 59 models' walls). The client hides that subtree and tests its triangles; it is exported as
 hidden "collision_<n>" nodes, textured or not. Door leaves carry their own "collideeNN" nodes, which the door system
 handles. Other untextured, unmapped shapes are hidden and are not walls.
+convert(..., keep_paths=True) (opt-in, player houses, 2026-11-02) keeps the NIF's node tree instead (KeepPaths);
+without it the output is exactly as before.
 """
 import argparse, base64, json, sys
 from pathlib import Path
@@ -1150,7 +1152,9 @@ class Gltf:
         self.mat_index[key] = len(self.doc['materials']) - 1
         return self.mat_index[key]
 
-    def mesh(self, name, pos, nrm, uvs, col, tri, material, translation=None, targets=None):
+    def mesh(self, name, pos, nrm, uvs, col, tri, material, translation=None, targets=None, scene_root=True):
+        """Add a mesh and its node; returns the node index. scene_root=False (keep_paths): the node is not put at
+        the scene's top - KeepPaths hangs it under its NIF node."""
         attrs = {'POSITION': self.accessor(pos.astype(np.float32), 5126, 'VEC3', 34962),
                  'NORMAL': self.accessor(nrm.astype(np.float32), 5126, 'VEC3', 34962)}
         for k, uv in enumerate(uvs):
@@ -1170,7 +1174,9 @@ class Gltf:
         if translation is not None:
             node['translation'] = [float(v) for v in translation]
         self.doc['nodes'].append(node)
-        self.doc['scenes'][0]['nodes'].append(len(self.doc['nodes']) - 1)
+        if scene_root:
+            self.doc['scenes'][0]['nodes'].append(len(self.doc['nodes']) - 1)
+        return len(self.doc['nodes']) - 1
 
     def save(self, path):
         self.doc['buffers'] = [{'byteLength': len(self.buf),
@@ -1414,11 +1420,135 @@ def particle_systems(nif, textures, warnings, node_anims=False):
     return out
 
 
-def convert(raw, out_path, texture_uri='textures', node_anims=False):
+def _godot_matrix(m):
+    """Row-vector NIF matrix (DAoC axes, units) -> column-vector 4x4 in Godot axes and metres (the same mapping as
+    shape_arrays: basis C A C^T, origin C t x 0.025 - C is a rotation, so node transforms compose as in the NIF)."""
+    out = np.identity(4)
+    out[:3, :3] = DAOC_TO_GODOT @ m[:3, :3].T @ DAOC_TO_GODOT.T
+    out[:3, 3] = DAOC_TO_GODOT @ m[3, :3] * UNITS_TO_METRES
+    return out
+
+
+class KeepPaths:
+    """convert(keep_paths=True), opt-in (build_housing.py, 2026-11-02): the glTF keeps the NIF's node tree instead of
+    the flat list of meshes the zones, items and weapons use. The client's player houses switch textures and parts by
+    node ('roof', 'material', 'door', 'supports', 'shutters', 'porchsupports', 'options/porch', 'banners', 'shields',
+    'Tent') and place things at empty helper nodes (garden GPoint000-255, SmokePoint01, Mpoint / Bpoint / Vpoint /
+    Tpoint, EntryPoint) - all lost when flattened. Rules:
+      - every NIF node reachable from the roots (first occurrence; NaN-transform subtrees dropped as collect does)
+        becomes a glTF node with its own local transform (Godot axes, metres) and its NIF name, lowercased, with
+        . : @ / " % made '_' (Godot's node-name rule) and repeats numbered in depth-first order ('visible',
+        'visible_2', ...): unique in the file, so Godot keeps every name as written (and find_child, depth-first,
+        meets the plain name first). Empty helper
+        nodes, lights and particle nodes stay as empty nodes; a node hidden in the NIF gets extras nif_hidden.
+      - a drawn shape IS its node: the mesh on the shape's own node, vertices in the shape's frame.
+      - collision (every shape under a 'collidee' node), ladder climb walls, and untextured helper shapes outside
+        the collidee nodes (an interior's Floorplane / Wallplane placement surfaces, footprints) hang as a CHILD mesh
+        node of their shape's node, named 'collision_<n>' / 'climb_<n>' / 'helper_<n>', with no material - the
+        names the loaders already treat as not drawn (collision_ / climb_). Morph meshes ('morph_<n>', the name
+        nif_morphs finds) and camera-facing cards are child nodes too (their vertices in the frame the default
+        output uses, the child's transform taking it back to the node's).
+    Not with node_anims (effects keep the flat timeline layout)."""
+
+    def __init__(self, nif):
+        self.nif = nif
+        self.order, self.world, self.parent = [], {}, {}
+        self.self_mesh = {}                                # id(shape) -> its glTF node (a drawn shape)
+        self.kids = {}                                     # id(block) -> [child mesh glTF nodes]
+        self.orphans = []                                  # (never expected) meshes whose node isn't in the tree
+        sp = spec()
+        self.is_shape = lambda b: sp.is_a(b.type, 'NiTriBasedGeom')
+
+        def dfs(b, pm, par):
+            if b is None or id(b) in self.world:
+                return
+            m = local_matrix(b) @ pm
+            if np.isnan(m).any():
+                return
+            self.world[id(b)] = m
+            self.parent[id(b)] = par
+            self.order.append(b)
+            for c in b.get('children') or []:
+                dfs(c, m, b)
+        for r in nif.roots:
+            dfs(r, np.identity(4), None)
+
+    def drawn_here(self, shape, m):
+        """True when the drawn shape can carry its mesh on its own node (its model matrix is the tree's)."""
+        w = self.world.get(id(shape))
+        return w is not None and id(shape) not in self.self_mesh and np.allclose(w, m, atol=1e-4)
+
+    def attach_self(self, shape, node):
+        self.self_mesh[id(shape)] = node
+
+    def attach_child(self, g, owner, node, frame=None):
+        """Mesh node `node` (vertices in the frame `frame`, a Godot 4x4 in model space; None = model space) under
+        owner's node, its transform taking that frame into the owner's."""
+        w = self.world.get(id(owner))
+        f = frame if frame is not None else np.identity(4)
+        if w is None:
+            g.doc['nodes'][node].pop('translation', None)
+            if not np.allclose(f, np.identity(4), atol=1e-7):
+                g.doc['nodes'][node]['matrix'] = [round(float(x), 7) for x in f.T.reshape(-1)]
+            self.orphans.append(node)
+            return
+        local = np.linalg.inv(_godot_matrix(w)) @ f
+        g.doc['nodes'][node].pop('translation', None)
+        if not np.allclose(local, np.identity(4), atol=1e-7):
+            g.doc['nodes'][node]['matrix'] = [round(float(x), 7) for x in local.T.reshape(-1)]
+        self.kids.setdefault(id(owner), []).append(node)
+
+    def finish(self, g):
+        """The tree's nodes added to the glTF, the meshes hung in it, the scene's top nodes set."""
+        bad = str.maketrans({c: '_' for c in '.:@/"%'})
+        used = set()
+
+        def unique(name):
+            n, k = name, 1
+            while n in used:
+                k += 1
+                n = f'{name}_{k}'                         # (Godot's own 'collision01' -> 'collision012' read badly)
+            used.add(n)
+            return n
+        index = {}
+        for b in self.order:
+            i = self.self_mesh.get(id(b))
+            if i is None:
+                g.doc['nodes'].append({})
+                i = len(g.doc['nodes']) - 1
+            node = g.doc['nodes'][i]
+            node.pop('translation', None)
+            node['name'] = unique(((b.get('name') or '').strip().lower().translate(bad)) or b.type.lower())
+            local = _godot_matrix(local_matrix(b))
+            if not np.allclose(local, np.identity(4), atol=1e-7):
+                node['matrix'] = [round(float(x), 7) for x in local.T.reshape(-1)]
+            if int(b.get('flags') or 0) & 1:
+                node.setdefault('extras', {})['nif_hidden'] = True
+            index[id(b)] = i
+        for kid_list in self.kids.values():                # child meshes named after the tree (theirs are unique)
+            for i in kid_list:
+                g.doc['nodes'][i]['name'] = unique(g.doc['nodes'][i]['name'].lower().translate(bad))
+        for b in self.order:
+            ch = [index[id(c)] for c in (b.get('children') or []) if c is not None and id(c) in index
+                  and self.parent.get(id(c)) is b] + self.kids.get(id(b), [])
+            if ch:
+                g.doc['nodes'][index[id(b)]]['children'] = ch
+        g.doc['scenes'][0]['nodes'] = [index[id(r)] for r in self.nif.roots if r is not None and id(r) in index] \
+            + self.orphans
+
+
+def convert(raw, out_path, texture_uri='textures', node_anims=False, keep_paths=False, draw_untextured=False):
     """Write out_path; return texture names, triangle counts, the visible AABB (metres) and any warnings about
-    texture layers or UV sets that could not be carried over (never dropped silently)."""
+    texture layers or UV sets that could not be carried over (never dropped silently).
+    keep_paths (opt-in, player houses): the NIF's node tree is kept - see KeepPaths. Off, the output is unchanged.
+    draw_untextured (opt-in, the housing hookpoint markers: VaultMarker / BindstoneMarker / MerchantMarker /
+    TradeMarker are untextured glowing shapes, emissive material colour only): untextured shapes outside the collidee
+    nodes are drawn in their material's colours instead of being left out as helper geometry."""
+    if keep_paths and node_anims:
+        raise ValueError('keep_paths is for static scenes, not effect timelines (node_anims)')
     nif = read_nif(raw)
     g = Gltf()
+    tree = KeepPaths(nif) if keep_paths else None
     textures, warnings, ntri, ncol = set(), [], 0, 0
     lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
     for b in nif.blocks:
@@ -1429,13 +1559,17 @@ def convert(raw, out_path, texture_uri='textures', node_anims=False):
     for i, (shape, data, m) in enumerate(collidee_shapes(nif)):
         pos, nrm, uv, col, tri = shape_arrays(data, m)
         if len(tri):
-            g.mesh(f'collision_{i}', pos, nrm, [], None, tri, None)
+            node = g.mesh(f'collision_{i}', pos, nrm, [], None, tri, None, scene_root=tree is None)
+            if tree is not None:                           # under its own NIF node (KeepPaths)
+                tree.attach_child(g, shape, node)
             ncol += len(tri)
     nclimb = 0
     for i, (shape, data, m) in enumerate(climb_shapes(nif)):
         pos, nrm, uv, col, tri = shape_arrays(data, m)
         if len(tri):
-            g.mesh(f'climb_{i}', pos, nrm, [], None, tri, None)    # hidden: a ladder's climb wall
+            node = g.mesh(f'climb_{i}', pos, nrm, [], None, tri, None, scene_root=tree is None)   # hidden: a ladder's climb wall
+            if tree is not None:
+                tree.attach_child(g, shape, node)
             nclimb += len(tri)
     hidden = 0
     morph_specs = []
@@ -1450,11 +1584,16 @@ def convert(raw, out_path, texture_uri='textures', node_anims=False):
                 continue
             tp = props.get('NiTexturingProperty')
             if not uv and texture_name(tp) is None:
-                g.mesh(f'doorcol{did}_{i}', pos, nrm, [], None, tri, None)
+                node = g.mesh(f'doorcol{did}_{i}', pos, nrm, [], None, tri, None, scene_root=tree is None)
+                if tree is not None:                       # (KeepPaths: in the leaf's closed pose)
+                    tree.attach_child(g, shape, node, _godot_matrix(m_leaf))
                 continue
             spec, sets, names = material_spec(props, len(uv), col is not None, warnings, shape.get('name') or 'door', shape)
             uvs = [uv[k] for k in sets] or ([uv[0]] if uv else [])
-            g.mesh(f'door{did}_{i}', pos, nrm, uvs, col if spec['vertex_colors'] else None, tri, g.material(spec, texture_uri))
+            node = g.mesh(f'door{did}_{i}', pos, nrm, uvs, col if spec['vertex_colors'] else None, tri, g.material(spec, texture_uri),
+                          scene_root=tree is None)
+            if tree is not None:
+                tree.attach_child(g, shape, node, _godot_matrix(m_leaf))
             textures.update(names)
             continue
         pivot = None
@@ -1522,8 +1661,11 @@ def convert(raw, out_path, texture_uri='textures', node_anims=False):
         mp_ = props.get('NiMaterialProperty')
         keep = node_anims and mp_ is not None and 'collid' not in str(name).lower() and any(
             _controller(mp_, t) is not None for t in ('NiAlphaController', 'NiMaterialColorController'))
+        keep = keep or (draw_untextured and mp_ is not None and 'collid' not in str(name).lower())
         if not uv and texture_name(tp) is None and not keep:
             hidden += len(tri)
+            if tree is not None:                           # KeepPaths: kept, undrawn - an interior's placement planes
+                tree.attach_child(g, shape, g.mesh(f'helper_{i}', pos, nrm, [], None, tri, None, scene_root=False))
             continue
         spec, sets, names = material_spec(props, len(uv), col is not None, warnings, name, shape)
         if drop_billboard:
@@ -1540,13 +1682,28 @@ def convert(raw, out_path, texture_uri='textures', node_anims=False):
             if not name.startswith('morph_'):
                 name = f'anim_{len(anim_specs) - 1}_{i}'
             anim_specs[anim_key]['meshes'].append(name)
-        g.mesh(name, pos, nrm, uvs, col if spec['vertex_colors'] else None, tri, g.material(spec, texture_uri), pivot,
-               targets)
+        if tree is None:
+            g.mesh(name, pos, nrm, uvs, col if spec['vertex_colors'] else None, tri, g.material(spec, texture_uri), pivot,
+                   targets)
+        elif targets is None and pivot is None and tree.drawn_here(shape, m):
+            # KeepPaths: the mesh on the shape's own node, in the shape's frame
+            lpos, lnrm = shape_arrays(data, np.identity(4))[:2]
+            tree.attach_self(shape, g.mesh(name, lpos, lnrm, uvs, col if spec['vertex_colors'] else None, tri,
+                                           g.material(spec, texture_uri), scene_root=False))
+        else:                                              # KeepPaths: a morph / camera-facing card as a child node
+            frame = None
+            if pivot is not None:
+                frame = np.identity(4)
+                frame[:3, 3] = pivot
+            tree.attach_child(g, shape, g.mesh(name, pos, nrm, uvs, col if spec['vertex_colors'] else None, tri,
+                                               g.material(spec, texture_uri), None, targets, scene_root=False), frame)
         textures.update(names)
         ntri += len(tri)
         wpos = pos + pivot if pivot is not None else pos
         lo, hi = np.minimum(lo, wpos.min(0)), np.maximum(hi, wpos.max(0))
-    if hidden:
+    if hidden and tree is not None:
+        warnings.append(f'{hidden} untextured triangles outside the collidee node kept as undrawn helper_ meshes')
+    elif hidden:
         warnings.append(f'{hidden} untextured triangles outside the collidee node left out (door collision etc.)')
     particles = particle_systems(nif, textures, warnings, node_anims)
     if particles:
@@ -1558,6 +1715,8 @@ def convert(raw, out_path, texture_uri='textures', node_anims=False):
     if doors:
         g.doc['extras']['nif_doors'] = doors
     g.doc['extras']['warnings'] = sorted(set(warnings))
+    if tree is not None:
+        tree.finish(g)
     g.save(out_path)
     return {'textures': textures, 'triangles': ntri, 'collision_triangles': ncol, 'climb_triangles': nclimb, 'aabb': (lo.tolist(), hi.tolist()),
             'particles': len(particles), 'morphs': len(morph_specs), 'doors': len(doors),

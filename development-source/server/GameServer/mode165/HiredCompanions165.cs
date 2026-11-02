@@ -67,6 +67,16 @@ namespace DOL.GS
             }
             GameEventMgr.AddHandler(GamePlayerEvent.GameEntered, new DOLEventHandler(OnPlayerEntered));
             GameEventMgr.AddHandler(GamePlayerEvent.Quit, new DOLEventHandler(OnPlayerQuit));
+            GameEventMgr.AddHandler(GamePlayerEvent.RegionChanged, new DOLEventHandler(OnPlayerRegionChanged));
+        }
+
+        /// <summary>A player who teleported to another region (a teleporter, a release to a bind there) takes their hired
+        /// companions along at once, as the /spawn helpers (owner 2026-11-01: they only came after a stuck check moved
+        /// them). Uses the MoveTo transfer marker: an ordinary walk over a region border moves nobody.</summary>
+        private static void OnPlayerRegionChanged(DOLEvent e, object sender, EventArgs args)
+        {
+            if (Classic165Mode.IsOn && sender is GamePlayer player)
+                TemporaryGroupStableTravel.RelocateHelpersAfterPlayerTransfer(player);
         }
 
         [GameServerStoppedEvent]
@@ -74,6 +84,7 @@ namespace DOL.GS
         {
             GameEventMgr.RemoveHandler(GamePlayerEvent.GameEntered, new DOLEventHandler(OnPlayerEntered));
             GameEventMgr.RemoveHandler(GamePlayerEvent.Quit, new DOLEventHandler(OnPlayerQuit));
+            GameEventMgr.RemoveHandler(GamePlayerEvent.RegionChanged, new DOLEventHandler(OnPlayerRegionChanged));
         }
 
         /// <summary>A hired companion's record: the population controller leaves these to their owners.</summary>
@@ -273,7 +284,7 @@ namespace DOL.GS
             if (hired == null)
                 return;
             string name = Record(hired.BotId)?.Name ?? "this companion";
-            player.Out.SendCustomDialog($"Release {name} for good? They leave with everything they carry and cannot be hired back.",
+            player.Out.SendCustomDialog($"Release {name} for good? They leave with everything they carry, quest and no-trade items included, and cannot be hired back.",
                 (p, response) =>
                 {
                     if (response != 0x01 || !Hired.ContainsKey(hired.BotId))
@@ -434,8 +445,14 @@ namespace DOL.GS
             (int x, int y, int z) = ArrivalSpot(owner);
             bot.StopCurrentSpellcast();
             bot.StopMoving();
+            if (bot.IsRecoveryResting)
+                bot.WakeRecoveryRest();
             if (!bot.MoveTo(owner.CurrentRegionID, x, y, z, owner.Heading))
                 return false;
+            // MoveTo stops the brain (WAKING_UP, a state BotBrain doesn't have: no state at all), so the companion stood
+            // there until the stuck check moved it again (owner 2026-11-01): it follows its player again, as TryUnstick does.
+            bot.Follow(owner, BotManager.FOLLOW_DISTANCE, BotManager.MAX_FOLLOW_DISTANCE);
+            (bot.Brain as DOL.AI.Brain.BotBrain)?.FSM?.SetCurrentState(eFSMStateType.FOLLOW);
             bot.Brain?.Start();
             Hire165.SendRosterNumbers(owner);   // it may have a new object id after the move
             return true;

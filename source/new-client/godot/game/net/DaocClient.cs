@@ -513,6 +513,116 @@ public partial class DaocClient : Node
 		Send(0x7B, new Writer());
 	}
 
+	// ---- player housing requests (the server's 168 handlers; spec scratchpad housing\server_protocol.md) ----
+
+	// HouseEnterLeave (0x0B): go into the house (enter 1, within 1000 units of it) or leave it (0).
+	public void HouseEnterLeave(int house, bool enter)
+	{
+		var w = new Writer();
+		w.Short((ushort)SessionId); w.Short((ushort)house); w.Byte((byte)(enter ? 1 : 0));
+		Send(0x0B, w);
+	}
+
+	// HouseMenuRequest (0x00): a housing window (1.127 ids: 0 garden shop, 1 decoration shop, 2 deeds, 3 exterior
+	// options, 4 NPC / 5 vault / 6 craft / 7 bindstone hookpoint lists, 8 interior options, 9 house information).
+	public void HouseMenu(int house, int menu, int flag = 0)
+	{
+		var w = new Writer();
+		w.Short((ushort)house); w.Byte((byte)menu); w.Byte((byte)flag);
+		Send(0x00, w);
+	}
+
+	// HouseEdit (0x01): apply up to 10 exterior / interior choices - each its merchant-list index (page*30 + slot).
+	public void HouseEdit(Godot.Collections.Array indexes)
+	{
+		var w = new Writer();
+		w.Short((ushort)SessionId);
+		for (int i = 0; i < 10; i++)
+		{
+			if (i < indexes.Count) { w.Byte(0); w.Byte((byte)(int)indexes[i]); }
+			else { w.Byte(0xFF); w.Byte(0); }
+		}
+		Send(0x01, w);
+	}
+
+	// HousePlaceItem (0x0C): an item (or coins, slots 245-248, position = amount) onto the house - method 1 garden
+	// (position = spot, rotation), 2 wall / 3 floor (x, y, position), 5 hookpoint (position = its id).
+	public void HousePlace(int slot, int house, int position, int method, int rotation, int x, int y)
+	{
+		var w = new Writer();
+		w.Byte((byte)(slot >= 244 && slot <= 248 ? 1 : 0)); w.Byte((byte)slot); w.Short((ushort)house);
+		w.Byte(0); w.Byte((byte)position); w.Byte((byte)method); w.Byte((byte)rotation);
+		w.Short((ushort)(short)x); w.Short((ushort)(short)y);
+		Send(0x0C, w);
+	}
+
+	// PlayerPickupHouseItem (0x0D): take a garden item (method 1, position = its spot) or a decoration (2 wall /
+	// 3 floor, position = its index) back.
+	public void HousePickup(int house, int position, int method)
+	{
+		var w = new Writer();
+		w.Byte(0); w.Byte((byte)position); w.Short((ushort)house); w.Byte((byte)method);
+		Send(0x0D, w);
+	}
+
+	// HouseDecorationRequest (0x18): ask to turn decoration `index` (the server answers 0x18).
+	public void HouseRotateRequest(int house, int index)
+	{
+		var w = new Writer();
+		w.Short((ushort)house); w.Byte((byte)index); w.Byte(0);
+		Send(0x18, w);
+	}
+
+	// HouseDecorationRotate (0x0E): turn it by `angle` degrees (0..359: the server adds it modulo 360).
+	public void HouseRotate(int house, int index, int angle)
+	{
+		var w = new Writer();
+		w.Byte(0); w.Byte((byte)index); w.Short((ushort)house); w.Short((ushort)(((angle % 360) + 360) % 360)); w.Short(0);
+		Send(0x0E, w);
+	}
+
+	// HousePermissionRequest (0x05) / HouseUserPermissionRequest (0x03): the owner's permission windows.
+	public void HousePermsRequest(int house)
+	{
+		var w = new Writer();
+		w.Short((ushort)SessionId); w.Short((ushort)house);
+		Send(0x05, w);
+	}
+
+	public void HouseUsersRequest(int house)
+	{
+		var w = new Writer();
+		w.Byte(0); w.Byte(0); w.Short((ushort)house);
+		Send(0x03, w);
+	}
+
+	// HousePermissionSet (0x07): one friend level's rights (the 15 bytes in the 0x05 order).
+	public void HousePermsSet(int house, int level, byte[] rights)
+	{
+		var w = new Writer();
+		w.Byte((byte)level); w.Byte(0); w.Short((ushort)house);
+		for (int i = 0; i < 14; i++) w.Byte(i < rights.Length ? rights[i] : (byte)0);
+		w.Byte(0);
+		Send(0x07, w);
+	}
+
+	// HouseUserPermissionSet (0x06): a friend entry's level (1..9), or 100 = remove it.
+	public void HouseUserSet(int house, int slot, int level)
+	{
+		var w = new Writer();
+		w.Byte((byte)slot); w.Byte((byte)level); w.Short((ushort)house);
+		Send(0x06, w);
+	}
+
+	// PlayerCancelsEffectHandler (0xF8): cancel one of your own effects - the effect id UpdateIcons gave it (the
+	// server's TryGetEffectFromEffectId). Shift + right-click on its icon (a player report 2026-11-01).
+	public void CancelEffect(int effectId)
+	{
+		var w = new Writer();
+		w.Short((ushort)effectId);
+		Send(0xF8, w);
+	}
+
 	// RemoveConcentrationEffectHandler: cancel one of your concentration spells (its place in ConcentrationList).
 	public void RemoveConcentration(int index)
 	{
@@ -896,6 +1006,133 @@ public partial class DaocClient : Node
 				d["max_health"] = r.Short(); d["health"] = r.Short(); d["endurance"] = r.Short();
 				d["mana"] = r.Short(); d["conc"] = r.Short();
 				return d;
+			// ---- player housing (1.64 Foundations; the server's PacketLib189 / 1125 writers for 1.127 - the spec is
+			// scratchpad housing\server_protocol.md, 2026-11-02) ----
+			case 0xD1:                                    // HouseCreate (189) - or, short and model 0, a removed house
+			{                                             // (SendRemoveHouse still writes the 168 layout)
+				d["kind"] = "house";
+				d["number"] = r.Short(); d["z"] = r.Short(); d["x"] = (long)r.Int(); d["y"] = (long)r.Int();
+				d["heading"] = r.Short(); d["porch_roof_color"] = r.Short(); int flags = r.Short();
+				d["porch"] = (flags & 1) != 0; d["banner"] = (flags & 2) != 0; d["shield"] = (flags & 4) != 0;
+				int emblem = r.Short();
+				d["emblem"] = emblem | ((flags & 8) != 0 ? 0x10000 : 0);
+				r.Short();                                // (hours to repossession: 0)
+				d["model"] = (int)r.Byte();
+				d["roof"] = (int)r.Byte(); d["wall"] = (int)r.Byte(); d["door"] = (int)r.Byte();
+				d["truss"] = (int)r.Byte(); d["porch_material"] = (int)r.Byte(); d["window"] = (int)r.Byte();
+				r.Byte(); r.Short();
+				d["name"] = r.Left > 0 ? r.Pascal() : "";
+				return d;
+			}
+			case 0xD2:                                    // HouseChangeGarden: the full garden, one item, or occupied
+			{
+				d["number"] = r.Short(); r.Short();
+				int hcount = r.Byte(); int mode = r.Byte();
+				if (hcount == 0 && mode != 0x80)
+				{
+					d["kind"] = "house_occupied";
+					d["occupied"] = mode != 0;
+					return d;
+				}
+				d["kind"] = "garden";
+				d["full"] = mode == 0x80;
+				var items = new Godot.Collections.Array();
+				for (int i = 0; i < hcount && r.Left >= 5; i++)
+					items.Add(new Godot.Collections.Dictionary { ["key"] = (int)r.Byte(), ["model"] = r.Short(),
+							["position"] = (int)r.Byte(), ["rotation"] = (int)r.Byte() });
+				d["items"] = items;
+				return d;
+			}
+			case 0x08:                                    // HouseEnter (189): you are inside this house
+			{
+				d["kind"] = "house_enter";
+				d["number"] = r.Short(); r.Short(); d["x"] = (long)r.Int(); d["y"] = (long)r.Int();
+				d["heading"] = r.Short(); r.Byte();
+				int f = r.Byte();
+				d["banner"] = (f & 1) != 0; d["shield"] = (f & 2) != 0;
+				d["emblem"] = r.Short() | ((f & 4) != 0 ? 0x10000 : 0);
+				r.Byte(); r.Byte();
+				d["model"] = (int)r.Byte(); d["door"] = (int)r.Byte(); r.Byte(); r.Byte();
+				d["rugs"] = new Godot.Collections.Array { (int)r.Byte(), (int)r.Byte(), (int)r.Byte(), (int)r.Byte() };
+				return d;
+			}
+			case 0x0A:                                    // HouseExit
+				d["kind"] = "house_exit";
+				d["number"] = r.Short();
+				return d;
+			case 0x09:                                    // HousingItem (1125, little-endian shorts): the furniture
+			{                                             // inside - the full list or changed ones (model 0 = removed)
+				d["kind"] = "furniture";
+				d["number"] = r.ShortLE();
+				int hcount = r.Byte();
+				d["full"] = r.Byte() == 0x80;
+				var items = new Godot.Collections.Array();
+				for (int i = 0; i < hcount && r.Left > 0; i++)
+				{
+					var e = new Godot.Collections.Dictionary();
+					e["index"] = (int)r.Byte();
+					int type = r.Byte();
+					e["model"] = r.ShortLE();
+					if (type == 0 && (int)e["model"] == 0)   // (the removed-item entry: 11 zero bytes after its index -
+					{                                     // type and model read, 8 left)
+						r.Skip(8);
+						items.Add(e);
+						continue;
+					}
+					if ((type & 1) != 0) e["color"] = (int)r.Byte();
+					if ((type & 6) == 2) e["emblem"] = r.ShortLE();
+					else if ((type & 6) == 6) e["emblem"] = r.ShortLE() | 0x10000;
+					e["x"] = (int)(short)r.ShortLE(); e["y"] = (int)(short)r.ShortLE();
+					e["rotation"] = r.ShortLE();
+					e["size"] = (type & 8) != 0 ? (int)r.Byte() : 100;
+					e["position"] = (int)r.Byte();
+					e["mode"] = (int)r.Byte();          // 0 wall, 1 floor
+					items.Add(e);
+				}
+				d["items"] = items;
+				return d;
+			}
+			case 0x0F:                                    // HouseTogglePoints (/housepoints): the hookpoint markers
+				d["kind"] = "house_points";
+				d["number"] = r.Short();
+				return d;
+			case 0x18:                                    // HouseDecorationRotate: you may turn decoration `index`
+				d["kind"] = "house_rotate_ok";
+				d["number"] = r.Short(); d["index"] = (int)r.Byte();
+				return d;
+			case 0x05:                                    // HousingPermissions: the friend levels' rights (owner)
+			{
+				d["kind"] = "house_perms";
+				r.Byte(); r.Byte(); d["number"] = r.Short();
+				var levels = new Godot.Collections.Array();
+				while (r.Left >= 16)                      // (its hcount byte always says 9: read by length)
+				{
+					var l = new Godot.Collections.Dictionary();
+					l["level"] = (int)r.Byte(); l["enter"] = (int)r.Byte();
+					l["vault1"] = (int)r.Byte(); l["vault2"] = (int)r.Byte(); l["vault3"] = (int)r.Byte(); l["vault4"] = (int)r.Byte();
+					l["appearance"] = (int)r.Byte(); l["interior"] = (int)r.Byte(); l["garden"] = (int)r.Byte();
+					l["banish"] = (int)r.Byte(); l["merchants"] = (int)r.Byte(); l["tools"] = (int)r.Byte();
+					l["bind"] = (int)r.Byte(); l["consignment"] = (int)r.Byte(); l["pay_rent"] = (int)r.Byte(); r.Byte();
+					levels.Add(l);
+				}
+				d["levels"] = levels;
+				return d;
+			}
+			case 0x03:                                    // HouseUserPermissions: who is a friend at which level
+			{
+				d["kind"] = "house_users";
+				int hcount = r.Byte(); r.Byte(); d["number"] = r.Short();
+				var list = new Godot.Collections.Array();
+				for (int i = 0; i < hcount && r.Left > 0; i++)
+				{
+					var e = new Godot.Collections.Dictionary();
+					e["slot"] = (int)r.Byte(); r.Byte(); r.Byte();
+					e["type"] = (int)r.Byte(); e["level"] = (int)r.Byte(); e["name"] = r.Pascal();
+					list.Add(e);
+				}
+				d["users"] = list;
+				return d;
+			}
 			case 0x04:                                    // CharacterJump: the server moved you (same region)
 				d["kind"] = "jump";
 				d["x"] = (long)r.Int(); d["y"] = (long)r.Int(); d["oid"] = r.Short(); d["z"] = r.Short();

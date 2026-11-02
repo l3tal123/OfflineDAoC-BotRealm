@@ -10,7 +10,8 @@ namespace DOL.GS.PacketHandler.Client.v168
 			int unk1 = packet.ReadByte();
 			int position = packet.ReadByte();
 			ushort housenumber = packet.ReadShort();
-			ushort angle = packet.ReadShort();
+			// a turn the other way arrives as a negative short (0xFFF6 = -10): read it signed
+			short angle = (short) packet.ReadShort();
 			ushort unk2 = packet.ReadShort();
 
 			// rotation only works for inside items
@@ -43,7 +44,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 			// adjust the item's roation
 			int old = iitem.Rotation;
-			iitem.Rotation = (iitem.Rotation + angle)%360;
+			iitem.Rotation = ((iitem.Rotation + angle) % 360 + 360) % 360;
 
 			if (iitem.Rotation < 0)
 			{

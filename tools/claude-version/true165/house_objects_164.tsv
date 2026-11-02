@@ -1,0 +1,272 @@
+object_id	name	houseitem_nif_row	nif_name	col43_house	col44_garden	len	wid	xoff	yoff
+1315	Exterior Bench 1	552	ext_bench_01		0	1	1		
+1316	Exterior Bench 2	553	ext_bench_02		0	1	1		
+1317	Exterior Birdbath	554	ext_birdbath_01		0	1	1		
+1318	Exterior Fountain 01	555	ext_fountain_01		0	1	1		
+1319	Exterior Fountain 02	556	ext_fountain_02		0	1	1		
+1320	Exterior Fountain 03	557	ext_fountain_03		0	3	2	0	1
+1321	Exterior Fountain 04	558	ext_fountain_04		0	3	3	1	1
+1322	Exterior Garden 01	559	ext_garden_01		0	1	1		
+1323	Exterior Garden 02	560	ext_garden_02		0	3	2	0	1
+1324	Exterior Garden 03	561	ext_garden_03		0	3	3	1	1
+1325	Exterior Hedge 01	562	ext_hedge_01		0	1	1		
+1326	Exterior Plant 01	563	ext_plant_01		0	1	1		
+1327	Exterior Plant 02	564	ext_plant_02		0	1	1		
+1328	Exterior Sundial	565	ext_sundial_01		0	1	1		
+1329	Long Wall 1	545	ext_wall_1x14		1	1	14		
+1330	Wall 2 (Corner)	546	ext_wall_corner		1	1	1		
+1331	Short Wall 3	547	ext_wall_1x4		1	1	4		
+1338	Barrel	569	int_floor_barrel_01	1	0				
+1339	Bed 01	570	int_floor_bed_01	1	0				
+1340	Bed 02	571	int_floor_bed_02	1	0				
+1341	Bed 03	572	int_floor_bed_03	1	0				
+1342	Bench 01	573	int_floor_bench_01	1	0				
+1343	Bench 02	574	int_floor_bench_02	1	0				
+1344	Bench 03	575	int_floor_bench_03	1	0				
+1345	Bookshelf 01	576	int_floor_bookshelf_01	1	0				
+1346	Bookshelf 02	577	int_floor_bookshelf_02	1	0				
+1347	Box	578	int_floor_box_01	1	0				
+1348	Chair 01	579	int_floor_chair_01	1	0				
+1349	Chair 02	580	int_floor_chair_02	1	0				
+1350	Chair 03	581	int_floor_chair_03	1	0				
+1351	Chair 04	582	int_floor_chair_04	1	0				
+1352	Chair 05	583	int_floor_chair_05	1	0				
+1353	Chair 06	584	int_floor_chair_06	1	0				
+1354	Chest 01	585	int_floor_chest_01	1	0				
+1355	Chest 02	586	int_floor_chest_02	1	0				
+1356	Chest 03	587	int_floor_chest_03	1	0				
+1357	Desk 01	588	int_floor_desk_01	1	0				
+1358	Desk 02	589	int_floor_desk_02	1	0				
+1359	Desk 03	590	int_floor_desk_03	1	0				
+1360	Rnd Table 01	591	int_floor_table_round_01	1	0				
+1361	Rnd Table 02	592	int_floor_table_round_02	1	0				
+1362	Square Table 01	593	int_floor_table_square_01	1	0				
+1363	Square Table 02	594	int_floor_table_square_02	1	0				
+1364	Ant Trophy	595	int_floor_trophy_ant_01	1	0				
+1365	Badger Trophy	596	int_floor_trophy_badger_01	1	0				
+1366	Wolf Trophy	597	int_floor_trophy_black_wolf_01	1	0				
+1367	Boar Trophy	598	int_floor_trophy_boar_01	1	0				
+1368	Cock Trophy	599	int_floor_trophy_cockatrice_01	1	0				
+1369	Frog Trophy	600	int_floor_trophy_frog_01	1	0				
+1370	Lizard Trophy	601	int_floor_trophy_ice_lizard_01	1	0				
+1371	Manta Trophy	602	int_floor_trophy_manta_01	1	0				
+1372	Mantis Trophy	603	int_floor_trophy_mantis_01	1	0				
+1373	Skele Trophy	604	int_floor_trophy_skeleton_01	1	0				
+1374	Cat Trophy	605	int_floor_trophy_snow_cat_01	1	0				
+1375	Spider Trophy	606	int_floor_trophy_spiders_01	1	0				
+1376	Lion Trophy	607	int_floor_trophy_tan_lion_01	1	0				
+1377	Bird Trophy	608	int_floor_trophy_terror_bird_01	1	0				
+1378	Vengo Trophy	609	int_floor_trophy_vengo_warrior_01	1	0				
+1379	Alb Wall Map	610	int_wall_map_alb_01		0				
+1380	Hib Wall Map	611	int_wall_map_hib_01		0				
+1381	Mid Wall Map	612	int_wall_map_mid_01		0				
+1382	Alb Painting 01	613	int_wall_paint_alb_01		0				
+1383	Alb Painting 02	614	int_wall_paint_alb_02		0				
+1384	Alb Painting 03	615	int_wall_paint_alb_03		0				
+1385	Alb Painting 04	616	int_wall_paint_alb_04		0				
+1386	Alb Painting 05	617	int_wall_paint_alb_05		0				
+1387	Alb Painting 06	618	int_wall_paint_alb_06		0				
+1388	Alb Painting 07	619	int_wall_paint_alb_07		0				
+1389	Alb Painting 08	620	int_wall_paint_alb_08		0				
+1390	Alb Painting 09	621	int_wall_paint_alb_09		0				
+1391	Alb Painting 10	622	int_wall_paint_alb_10		0				
+1392	Hib Painting 01	623	int_wall_paint_hib_01		0				
+1393	Hib Painting 02	624	int_wall_paint_hib_02		0				
+1394	Hib Painting 03	625	int_wall_paint_hib_03		0				
+1395	Hib Painting 04	626	int_wall_paint_hib_04		0				
+1396	Hib Painting 05	627	int_wall_paint_hib_05		0				
+1397	Hib Painting 06	628	int_wall_paint_hib_06		0				
+1398	Hib Painting 07	629	int_wall_paint_hib_07		0				
+1399	Hib Painting 08	630	int_wall_paint_hib_08		0				
+1400	Hib Painting 09	631	int_wall_paint_hib_09		0				
+1401	Hib Painting 10	632	int_wall_paint_hib_10		0				
+1402	Mid Painting 01	633	int_wall_paint_mid_01		0				
+1403	Mid Painting 02	634	int_wall_paint_mid_02		0				
+1404	Mid Painting 03	635	int_wall_paint_mid_03		0				
+1405	Mid Painting 04	636	int_wall_paint_mid_04		0				
+1406	Mid Painting 05	637	int_wall_paint_mid_05		0				
+1407	Mid Painting 06	638	int_wall_paint_mid_06		0				
+1408	Mid Painting 07	639	int_wall_paint_mid_07		0				
+1409	Mid Painting 08	640	int_wall_paint_mid_08		0				
+1410	Mid Painting 09	641	int_wall_paint_mid_09		0				
+1411	Mid Painting 10	642	int_wall_paint_mid_10		0				
+1412	Torch 01	643	int_wall_torch_01		0				
+1413	Torch 02	644	int_wall_torch_02		0				
+1414	Torch 03	645	int_wall_torch_03		0				
+1415	Torch 04	646	int_wall_torch_04		0				
+1416	2HDrag Trophy	647	int_wall_trophy_2hdragon_01	1	0				
+1417	Alb Drag Trophy	648	int_wall_trophy_alb_dragon_01	1	0				
+1418	Drak Trophy	649	int_wall_trophy_drakking_01	1	0				
+1419	Fking Trophy	650	int_wall_trophy_fking_01	1	0				
+1420	Griff Trophy	651	int_wall_trophy_griffon_01	1	0				
+1421	Hib Drag Trophy	652	int_wall_trophy_hib_dragon_01	1	0				
+1422	Mantis Trophy	653	int_wall_trophy_mantis_01	1	0				
+1423	Mega Trophy	654	int_wall_trophy_mega_01	1	0				
+1424	MidDrag Trophy	655	int_wall_trophy_mid_dragon_01	1	0				
+1425	Pixie Trophy 01	656	int_wall_trophy_pixie_b_b_b_b	1	0				
+1426	Pixie Trophy 02	657	int_wall_trophy_pixie_b_b_r_r	1	0				
+1427	Pixie Trophy 03	658	int_wall_trophy_pixie_b_b_w_w	1	0				
+1428	Pixie Trophy 04	659	int_wall_trophy_pixie_g_g_b_b	1	0				
+1429	Pixie Trophy 05	660	int_wall_trophy_pixie_g_g_g_g	1	0				
+1430	Pixie Trophy 06	661	int_wall_trophy_pixie_g_g_r_r	1	0				
+1431	Pixie Trophy 07	662	int_wall_trophy_pixie_g_w_b_r	1	0				
+1432	Pixie Trophy 08	663	int_wall_trophy_pixie_r_r_r_r	1	0				
+1433	Pixie Trophy 09	664	int_wall_trophy_pixie_w_w_g_g	1	0				
+1434	Pixie Trophy 10	665	int_wall_trophy_pixie_w_w_r_r	1	0				
+1435	Pixie Trophy 11	666	int_wall_trophy_pixie_w_w_w_w	1	0				
+1436	Saber Trophy	667	int_wall_trophy_saber_01	1	0				
+1437	Wooly Trophy	668	int_wall_trophy_wooly_01	1	0				
+1438	Alb Bindstone	669	APHBindstone		0				
+1439	Alb Vault	670	APHVault		0				
+1440	Hib Bindstone	671	HPHBindstone		0				
+1441	Hib Vault	672	HPHVault		0				
+1442	Mid Bindstone	673	MPHBindstone		0				
+1443	Mid Vault	674	MPHVault		0				
+1444	PlayH Alchemy	675	tool_alchemy		0				
+1445	PlayH Forge	676	tool_forge		0				
+1446	PlayH Lathe	677	tool_lathe		0				
+1447	PlayH Leather	678	tool_leather		0				
+1449	Ext Garden 03A	680	ext_garden_03_01		0	3	3	1	1
+1450	Ext Tile 01	681	ext_tile_01		0	1	1		
+1451	Ext Tile 02	682	ext_tile_02		0	1	1		
+1452	Ext Fount 4A	683	ext_fountain_04_01		0	3	3	1	1
+1453	ext Arch 01	684	ext_arch_01		0	1	4		
+1454	ext hedge 02	685	ext_hedge_02		0	1	1		
+1455	ext hedge 03	686	ext_hedge_03		0	1	1		
+1456	ext hedge 04	687	ext_hedge_04		0	1	1		
+1457	ext flowers 01	688	ext_flowers_01		0	2	2		
+1458	ext flowers 02	689	ext_flowers_02		0	2	2		
+1459	ext flowers 03	690	ext_flowers_03		0	1	1		
+1460	ext flowers 04	691	ext_flowers_04		0	1	1		
+1461	ext urn 01	692	ext_urn_01		0	1	1		
+1462	ext urn 02	693	ext_urn_02		0	1	1		
+1463	ext arch 01 wall	694	ext_arch_01_wall		0	1	14		
+1464	ext arch 02	695	ext_arch_02		0	1	4		
+1465	ext arch 02 wall	696	ext_arch_02_wall		0	1	14		
+1466	ext arch 03	697	ext_arch_03		0	1	3		
+1467	ext arch 03 wall	698	ext_arch_03_wall		0	1	14		
+1468	ext stone 01	699	ext_stone_01		0	1	1		
+1469	ext stone 02	700	ext_stone_02		0	1	1		
+1470	ext stone 03	701	ext_stone_03		0	1	1		
+1471	ext stone 04	702	ext_stone_04		0	2	2		
+1472	ext statue 01	703	ext_statue_01		0	1	1		
+1473	ext tree 01	704	ext_tree_01		0	1	1		
+1474	ext tree 02	705	ext_tree_02		0	1	1		
+1475	ext tree 03	706	ext_tree_03		0	1	1		
+1476	Hedge Wall Long 1	707	ext_hedge_01_14x1		0	1	14		
+1477	Hedge Wall  Short 1	708	ext_hedge_01_4x1		0	1	4		
+1478	Hedge Wall Long 2	709	ext_hedge_02_14x1		0	1	14		
+1479	Hedge Wall  Short 2	710	ext_hedge_02_4x1		0	1	4		
+1480	Hedge Wall Long 3	711	ext_hedge_03_14x1		0	1	14		
+1481	Hedge Wall  Short 3	712	ext_hedge_03_4x1		0	1	4		
+1482	Hedge Wall Long 4	713	ext_hedge_04_14x1		0	1	14		
+1483	Hedge Wall  Short 4	714	ext_hedge_04_4x1		0	1	4		
+1484	Single Pixie Trophie Red	719	int_wall_singletrophy_pixie_Red		0				
+1485	Single Pixie Trophie Blue	720	int_wall_singletrophy_pixie_Blue		0				
+1486	Single Pixie Trophie White	721	int_wall_singletrophy_pixie_White		0				
+1487	Single Pixie Trophie Green	722	int_wall_singletrophy_pixie_Green		0				
+1488	PlayH - Alb Bindstone	669	APHBindstone		0				
+1489	PlayH - Alb Vault	670	APHVault		0				
+1490	PlayH - Hib Bindstone	671	HPHBindstone		0				
+1491	PlayH - Hib Vault	672	HPHVault		0				
+1492	PlayH - Mid Bindstone	673	MPHBindstone		0				
+1493	PlayH - Mid Vault	674	MPHVault		0				
+1494	PlayH Alchemy	675	tool_alchemy		0				
+1495	PlayH Forge	676	tool_forge		0				
+1496	PlayH Lathe	677	tool_lathe		0				
+1497	Sign Siegecraft Use	727	TradeSign_Siegecraft_Use		0	1	1		
+1498	Sign Siegecraft Buy	728	TradeSign_Siegecraft_Buy		0	1	1		
+1499	Sign ClothWork Use	729	TradeSign_ClothWork_Use		0	1	1		
+1500	Sign ClothWork Buy	730	TradeSign_ClothWork_Buy		0	1	1		
+1501	Sign WoodWork Use	731	TradeSign_WoodWork_Use		0	1	1		
+1502	Sign WoodWork Buy	732	TradeSign_WoodWork_Buy		0	1	1		
+1503	Sign WeaponCrafting Use	733	TradeSign_WeaponCrafting_Use		0	1	1		
+1504	Sign WeaponCrafting Buy	734	TradeSign_WeaponCrafting_Buy		0	1	1		
+1505	Sign Tailoring Use	735	TradeSign_Tailoring_Use		0	1	1		
+1506	Sign Tailoring Buy	736	TradeSign_Tailoring_Buy		0	1	1		
+1507	Sign SpellCrafting Use	737	TradeSign_SpellCrafting_Use		0	1	1		
+1508	Sign SpellCrafting Buy	738	TradeSign_SpellCrafting_Buy		0	1	1		
+1509	Sign MetalWork Use	739	TradeSign_MetalWork_Use		0	1	1		
+1510	Sign MetalWork Buy	740	TradeSign_MetalWork_Buy		0	1	1		
+1511	Sign LeatherWork Use	741	TradeSign_LeatherWork_Use		0	1	1		
+1512	Sign LeatherWork Buy	742	TradeSign_LeatherWork_Buy		0	1	1		
+1513	Sign Fletching Use	743	TradeSign_Fletching_Use		0	1	1		
+1514	Sign Fletching Buy	744	TradeSign_Fletching_Buy		0	1	1		
+1515	Sign ArmorCrafting Use	745	TradeSign_ArmorCrafting_Use		0	1	1		
+1516	Sign ArmorCrafting Buy	746	TradeSign_ArmorCrafting_Buy		0	1	1		
+1517	Sign Alchemy Use	747	TradeSign_Alchemy_Use		0	1	1		
+1518	Sign Alchemy Buy	748	TradeSign_Alchemy_Buy		0	1	1		
+1519	int wall trophy orborax	749	int_wall_trophy_orborax	0	0				
+1520	Long Tile 1	750	ext_tile_01_3x1	0	0	1	3		
+1521	Long Tile 2	751	ext_tile_02_3x1	0	0	1	3		
+1522	ext fountain 05(frog)	752	ext_fountain_05	0	0	3	3	1	1
+1523	ext statue 01 01	753	ext_statue_01_01	0	0	1	1		
+1524	ext wishing well	754	ext_wishing_well	0	0	3	3	1	1
+1525	int floor chair 03 blk	755	int_floor_chair_03_blk	0	0				
+1526	int floor chair 03 green	756	int_floor_chair_03_green	0	0				
+1527	int floor chair 03 purp	757	int_floor_chair_03_purp	0	0				
+1528	int floor chair 03 red	758	int_floor_chair_03_red	0	0				
+1529	int floor chair 03 yel	759	int_floor_chair_03_yel	0	0				
+1530	int floor chair 04 blk	760	int_floor_chair_04_blk	0	0				
+1531	int floor chair 04 green	761	int_floor_chair_04_green	0	0				
+1532	int floor chair 04 purp	762	int_floor_chair_04_purp	0	0				
+1533	int floor chair 04 red	763	int_floor_chair_04_red	0	0				
+1534	int floor chair 04 yel	764	int_floor_chair_04_yel	0	0				
+1535	int floor chair 07	765	int_floor_chair_07	0	0				
+1536	int wall bookshelf 01	766	int_wall_bookshelf_01	0	0				
+1537	int wall bookshelf 02	767	int_wall_bookshelf_02	0	0				
+1538	int floor bookshelf 03	768	int_floor_bookshelf_03	0	0				
+1539	ext archery target	769	ext_archery_target	0	0	1	1		
+1540	int wall dartboard	770	int_wall_dartboard	0	0				
+1541	ext barrel 03	771	ext_barrel_03	0	0	1	1		
+1542	ext barrel 01	772	ext_barrel_01	0	0	1	1		
+1543	ext barrel 02	773	ext_barrel_02	0	0	1	1		
+1544	ext garden 04	774	ext_garden_04	0	0	1	3		
+1545	dartboard 02	775	int_wall_dartboard2	0	0				
+1546	ext outhouse alb	776	ext_outhouse_alb	0	0	2	2		
+1547	ext outhouse hib	777	ext_outhouse_hib	0	0	2	2		
+1548	ext outhouse mid	778	ext_outhouse_mid	0	0	2	2		
+1549	Trellis	779	ext_bench_trellis	0	0	1	3		
+1550	int floor foot stool	780	int_floor_foot_stool	0	0				
+1551	int floor table round 02	781	int_floor_table_round_02	0	0				
+1552	picnic bench	782	ext_picnic_bench	0	0	1	2		
+1553	chess table	783	ext_chess_table	0	0	1	1		
+1559	int floor keg stack	784	int_floor_keg_stack	0	0				
+1560	int floor keg	785	int_floor_keg	0	0				
+1561	ext tiki torch	786	ext_tiki_tourch	0	0	1	1		
+1562	int chess table	787	int_chess_table	0	0				
+1563	int floor fur rug 01	788	int_floor_fur_rug_01	0	0				
+1564	int floor fur rug 02	789	int_floor_fur_rug_02	0	0				
+1565	int floor fur rug 03	790	int_floor_fur_rug_03	0	0				
+1566	int floor fur rug 04	791	int_floor_fur_rug_04	0	0				
+1567	int floor fur rug 05	792	int_floor_fur_rug_05	0	0				
+1568	ext hitching post	793	ext_hitching_post	0	0	1	1		
+1569	int fish tank	794	int_floor_fishtank	0	0				
+1570	ext lion statue	795	ext_lion_statue	0	0	1	1		
+1571	int card table	796	int_floor_card_table	0	0				
+1572	int wall tapestry 01	797	int_wall_tapestry_01	0	0				
+1573	int wall tapestry 02	798	int_wall_tapestry_02	0	0				
+1574	int wall tapestry 03	799	int_wall_tapestry_03	0	0				
+1575	ext_rose_trellis	800	ext_rose_trellis	0	0	1	3		
+1576	int_wall_tapestry_01a	801	int_wall_tapestry_01a	0	0				
+1577	int_wall_tapestry_01b	802	int_wall_tapestry_01b	0	0				
+1578	chamber pot	803	int_floor_chamber_pot	0	0				
+1579	Sidewalk 01 6x1	804	ext_tile_01_6x1	0	0	1	6		
+1580	Sidewalk 01 14x1	805	ext_tile_01_14x1	0	0	1	14		
+1581	Sidewalk 01 2x2	806	ext_tile_01_2x2	0	0	2	2		
+1582	Sidewalk 01 3x1	807	ext_tile_01_3x1	0	0	1	3		
+1583	Sidewalk 02 14x1	808	ext_tile_02_14x1	0	0	1	14		
+1584	Sidewalk 02 2x2	809	ext_tile_02_2x2	0	0	2	2		
+1585	Sidewalk 02 3x1	810	ext_tile_02_3x1	0	0	1	3		
+1586	Sidewalk 02 6x1	811	ext_tile_02_6x1	0	0	1	6		
+1587	Wagon Wheel	812	ext_wagon_wheel	0	0	1	1		
+1588	Gazebo	813	ext_Gazebo	0	0	3	3	1	1
+1589	Corn Field	814	ext_corn_field1	0	0	1	3		
+1590	Corn Field 2	815	ext_corn_field2	0	0	1	3		
+1591	Pumpkin Patch	816	ext_pumpkin_patch	0	0	1	3		
+1592	int wall tapestry 02a	817	int_wall_tapestry_02a	0	0				
+1593	int wall tapestry 02b	818	int_wall_tapestry_02b	0	0				
+1594	int floor bar	819	int_floor_bar	0	0				
+1597	ext for sale sign	822	4sale_sign	0	0	1	1		
+1598	ext monster loot sign	823	sign_monster_loot	0	0	1	1		
+1599	ext message board	824	message_brd	0	0				

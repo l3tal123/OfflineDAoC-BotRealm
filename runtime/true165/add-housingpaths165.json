@@ -1,0 +1,203 @@
+{
+ "table": "Path",
+ "key": "PathID",
+ "reason": "True 1.65 housing stable routes: the stable routes between the period housing zones' stable masters (build_housingroutes165.py)",
+ "rows": [
+  {
+   "Path_ID": "p165-housing-path-HH_Alis_Gyrom",
+   "PathID": "HH_Alis_Gyrom",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Gyrom_Alis",
+   "PathID": "HH_Gyrom_Alis",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Alis_Cora",
+   "PathID": "HH_Alis_Cora",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Cora_Alis",
+   "PathID": "HH_Cora_Alis",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Alis_Itis",
+   "PathID": "HH_Alis_Itis",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Itis_Alis",
+   "PathID": "HH_Itis_Alis",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Gyrom_Cora",
+   "PathID": "HH_Gyrom_Cora",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Cora_Gyrom",
+   "PathID": "HH_Cora_Gyrom",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Gyrom_Itis",
+   "PathID": "HH_Gyrom_Itis",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Itis_Gyrom",
+   "PathID": "HH_Itis_Gyrom",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Cora_Itis",
+   "PathID": "HH_Cora_Itis",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Itis_Cora",
+   "PathID": "HH_Itis_Cora",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Alis_Alamdar",
+   "PathID": "HH_Alis_Alamdar",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Alamdar_Alis",
+   "PathID": "HH_Alamdar_Alis",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Alis_Hwithloew",
+   "PathID": "HH_Alis_Hwithloew",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Hwithloew_Alis",
+   "PathID": "HH_Hwithloew_Alis",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Tomaz_Maela",
+   "PathID": "HH_Tomaz_Maela",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Maela_Tomaz",
+   "PathID": "HH_Maela_Tomaz",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Corliss_Hwithloew",
+   "PathID": "HH_Corliss_Hwithloew",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Hwithloew_Corliss",
+   "PathID": "HH_Hwithloew_Corliss",
+   "PathType": 1,
+   "RegionID": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Buri_Haile",
+   "PathID": "HH_Buri_Haile",
+   "PathType": 1,
+   "RegionID": 102,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Haile_Buri",
+   "PathID": "HH_Haile_Buri",
+   "PathType": 1,
+   "RegionID": 102,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Hallbera_Erling",
+   "PathID": "HH_Hallbera_Erling",
+   "PathType": 1,
+   "RegionID": 102,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Erling_Hallbera",
+   "PathID": "HH_Erling_Hallbera",
+   "PathType": 1,
+   "RegionID": 102,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Feldun_Maka",
+   "PathID": "HH_Feldun_Maka",
+   "PathType": 1,
+   "RegionID": 202,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Maka_Feldun",
+   "PathID": "HH_Maka_Feldun",
+   "PathType": 1,
+   "RegionID": 202,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Makenna_Braddan",
+   "PathID": "HH_Makenna_Braddan",
+   "PathType": 1,
+   "RegionID": 202,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "Path_ID": "p165-housing-path-HH_Braddan_Makenna",
+   "PathID": "HH_Braddan_Makenna",
+   "PathType": 1,
+   "RegionID": 202,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  }
+ ]
+}

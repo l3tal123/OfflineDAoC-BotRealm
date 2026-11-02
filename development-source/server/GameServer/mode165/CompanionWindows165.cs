@@ -270,8 +270,8 @@ namespace DOL.GS
             DbInventoryItem item = player.Inventory.GetItem((eInventorySlot)bagSlot);
             if (item == null)
                 return "That backpack slot is empty.";
-            if (!item.IsTradable)
-                return $"{item.Name} can't be given away.";
+            // No-trade and quest items move freely between a player and their own companions (owner 2026-11-01: Leggings
+            // of the Deft "can't be given away"); trading with anyone else keeps its normal rules.
             // what it can't wear goes into its bag (arrows, poisons, potions...); "bag" puts a wearable piece there too
             if (!AutonomousBotEconomy.CanWear(bot, item, out eInventorySlot slot))
                 return PutInBag(player, bot, bagSlot);
@@ -313,8 +313,7 @@ namespace DOL.GS
             DbInventoryItem item = player.Inventory.GetItem((eInventorySlot)bagSlot);
             if (item == null)
                 return "That backpack slot is empty.";
-            if (!item.IsTradable)
-                return $"{item.Name} can't be given away.";
+            // no-trade and quest items too: the companion is the player's own (owner 2026-11-01)
             eInventorySlot target = HiredCompanions165.IsBagSlot(companionBagSlot) && bot.Inventory.GetItem((eInventorySlot)companionBagSlot) == null
                 ? (eInventorySlot)companionBagSlot
                 : bot.Inventory.FindFirstEmptySlot(HiredCompanions165.FirstBagSlot, HiredCompanions165.LastBagSlot);

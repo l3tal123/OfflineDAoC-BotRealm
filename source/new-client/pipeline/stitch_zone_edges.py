@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from daoc_mpk import read_mpk
 from assets_pipeline import CLIENT, ROOT
 import nif_static
+import paths as _paths
 
 M = nif_static.UNITS_TO_METRES
 N = 256                                                    # samples per zone side
@@ -48,11 +49,8 @@ def _zones_dat():
 
 def _raw(zone_id):
     """The zone's 256 x 256 client samples in units (row = y, column = x), or None (no terrain: city / dungeon)."""
-    for base in (CLIENT / 'zones', CLIENT / 'frontiers/zones'):
-        p = base / f'zone{zone_id:03d}/dat{zone_id:03d}.mpk'
-        if p.exists():
-            break
-    else:
+    p = _paths.zone_dir(zone_id) / f'dat{zone_id:03d}.mpk'   # (zones/, frontiers/zones/, the 1.64 housing zones)
+    if not p.exists():
         return None
     dat = read_mpk(str(p))
     if 'terrain.pcx' not in dat or 'offset.pcx' not in dat:

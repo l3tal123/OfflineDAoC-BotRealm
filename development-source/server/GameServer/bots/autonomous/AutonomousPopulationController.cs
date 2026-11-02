@@ -241,6 +241,9 @@ public static class AutonomousPopulationController
 
             if (!bot.AddToWorld())
             {
+                // Logged (owner 2026-11-01: one bot stayed offline 13 minutes after the others and nothing said why).
+                Log.Warn($"AUTONOMOUS_LOGIN_FAILED bot=\"{record.Name}\" id={botId} level={record.Level} region={bot.CurrentRegionID} " +
+                         $"x={bot.X} y={bot.Y} z={bot.Z} saved={record.RegionId}:{record.X},{record.Y},{record.Z} alive={bot.IsAlive}");
                 record.IsOnline = false;
                 record.Activity = "Login attempt failed; waiting to retry";
                 record.LastUpdateUtc = DateTime.UtcNow.ToString("O");

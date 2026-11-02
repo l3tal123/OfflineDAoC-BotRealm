@@ -103,6 +103,10 @@ namespace DOL.DOLServer.Actions
                     continue;
                 }
 
+                // The launcher's "exit" arrived with a UTF-8 byte-order mark before it (U+FEFF), went to the command
+                // handler and was dropped: the Stop button never stopped the server (2026-11-02).
+                line = line.Trim('\uFEFF', ' ', '\t', '\r', '\n');
+
                 switch (line.ToLower())
                 {
                     case "exit":

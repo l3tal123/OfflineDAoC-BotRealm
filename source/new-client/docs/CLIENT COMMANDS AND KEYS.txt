@@ -70,6 +70,9 @@ DEFAULT KEYS (RPG preset)
   Look Down                              Num.
   Camera Reset                           Num5
   Camera Toggle                          F11
+  Mouse Look Toggle                      Right Mouse - only once Options > CONTROLS "MOUSE LOOK TOGGLE" is ON
+                                         (off by default). Then a right click on open ground: on; the next right
+                                         click or Esc: off. Right-click NPCs and objects still uses them.
 [Chat]
   Chat                                   -
   Reply                                  R

@@ -207,13 +207,15 @@ namespace DOL.GS
                 }
             }
 
-            if (IsFlagSet(MovementState.WalkTo))
+            // A stable horse / boat may finish several short route legs in one tick (dense route-floor points, or catching
+            // up after a server stall); every other NPC handles one arrival per tick as before.
+            int legs = 0;
+            while (IsFlagSet(MovementState.WalkTo) && GameServiceUtils.ShouldTick(_walkingToEstimatedArrivalTime))
             {
-                if (GameServiceUtils.ShouldTick(_walkingToEstimatedArrivalTime))
-                {
-                    UnsetFlag(MovementState.WalkTo);
-                    OnArrival();
-                }
+                UnsetFlag(MovementState.WalkTo);
+                OnArrival();
+                if (Owner is not (GameTaxi or GameTaxiBoat) || ++legs >= 64)
+                    break;
             }
 
             if (IsFlagSet(MovementState.AtPathPoint))
@@ -663,7 +665,8 @@ namespace DOL.GS
 
             float distanceToTarget = (_ownerPosition - destination).Length();
 
-            if (distanceToTarget > 25)
+            // A stable horse turns on every route leg; its dense route-floor legs are often 25 or shorter.
+            if (distanceToTarget > 25 || (Owner is (GameTaxi or GameTaxiBoat) && distanceToTarget > 1))
                 TurnTo((int) destination.X, (int) destination.Y);
             else if (!IsFlagSet(MovementState.Pathfinding))
                 TurnTo(FollowTarget);
@@ -1120,7 +1123,7 @@ namespace DOL.GS
                 {
                     if (CurrentPathPoint.WaitTime == 0)
                     {
-                        MoveToNextPathPoint();
+                        MoveToNextPathPoint(justArrived: true);
                         return;
                     }
 
@@ -1144,7 +1147,7 @@ namespace DOL.GS
             }
         }
 
-        private void MoveToNextPathPoint()
+        private void MoveToNextPathPoint(bool justArrived = false)
         {
             PathPoint oldPathPoint = CurrentPathPoint;
             PathPoint nextPathPoint = CurrentPathPoint.Next;
@@ -1180,9 +1183,40 @@ namespace DOL.GS
             oldPathPoint.FiredFlag = !oldPathPoint.FiredFlag;
 
             if (CurrentPathPoint != null)
-                PathTo(new(CurrentPathPoint.X, CurrentPathPoint.Y, CurrentPathPoint.Z), Math.Min(_moveOnPathSpeed, CurrentPathPoint.MaxSpeed));
+            {
+                Vector3 next = new(CurrentPathPoint.X, CurrentPathPoint.Y, CurrentPathPoint.Z);
+                short nextSpeed = Math.Min(_moveOnPathSpeed, CurrentPathPoint.MaxSpeed);
+                if (justArrived && Owner is (GameTaxi or GameTaxiBoat) && IsFlagSet(MovementState.OnPath))
+                    ContinueTaxiLeg(next, nextSpeed);   // taxis never pathfind (Pathfinder.ShouldPath)
+                else
+                    PathTo(next, nextSpeed);
+            }
             else
                 StopMovingOnPath();
+        }
+
+        /// <summary>
+        /// A stable horse / boat starts its next route leg in the same tick it ends the last one, carrying over the time
+        /// past the old leg's arrival. Through PathTo every leg waited for the next tick, so on dense route points (a leg
+        /// every 20-60 units) the horse really moved at about half the speed it told the clients, which then pulled it
+        /// back at every update: the rubber-banding (owner 2026-11-01).
+        /// </summary>
+        private void ContinueTaxiLeg(Vector3 next, short speed)
+        {
+            long arrivedAt = _walkingToEstimatedArrivalTime;   // when the old leg really ended
+            _ownerPosition = _destination;                       // exactly on the reached point
+            WalkToInternal(next, speed);
+            if (!IsFlagSet(MovementState.WalkTo))
+                return;
+            long carried = GameLoop.GameLoopTime - arrivedAt;  // < 0 when the arrival fired up to half a tick early
+            _walkingToEstimatedArrivalTime -= carried;
+            if (carried > 0)
+            {
+                Vector3 step = _velocity * (carried * 0.001f);
+                _ownerPosition = step.LengthSquared() >= (_destination - _ownerPosition).LengthSquared()
+                    ? _destination : _ownerPosition + step;
+            }
+            _lastPositionUpdateTick = GameLoop.GameLoopTime;
         }
 
         private void PrepareValuesForClient(bool wasMoving, double distanceToTarget)

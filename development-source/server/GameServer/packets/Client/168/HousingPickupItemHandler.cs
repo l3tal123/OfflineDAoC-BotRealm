@@ -52,8 +52,9 @@ namespace DOL.GS.PacketHandler.Client.v168
 							InventoryLogging.LogInventoryAction("(HOUSE;" + house.HouseNumber + ")", client.Player, eInventoryActionType.Other, invitem.Template, invitem.Count);
 						house.OutdoorItems.Remove(i);
 
-						// update garden
-						client.Out.SendGarden(house);
+						// update the garden for everyone nearby, as placing does (only the picker was told)
+						foreach (GamePlayer player in WorldMgr.GetPlayersCloseToSpot(house.RegionID, house, WorldMgr.VISIBILITY_DISTANCE))
+							player.Out.SendGarden(house);
 
 						ChatUtil.SendSystemMessage(client, "Garden object removed.");
 						ChatUtil.SendSystemMessage(client, string.Format("You get {0} and put it in your backpack.", invitem.Name));

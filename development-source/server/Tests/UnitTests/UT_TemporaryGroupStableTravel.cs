@@ -47,4 +47,18 @@ public sealed class UT_TemporaryGroupStableTravel
         Assert.That(TemporaryGroupStableTravel.ShouldRelocateForOwnerTransfer(false, true, true, true, 1, 1, 10, 11), Is.False);
         Assert.That(TemporaryGroupStableTravel.ShouldRelocateForOwnerTransfer(false, true, true, true, 1, 2, 10, 10), Is.False);
     }
+
+    // Owner 2026-11-01: hired companions stayed behind after a teleporter or a release to the bind point.
+    [Test]
+    public void TransferCohesionIncludesHiredCompanionsButNotGamebots()
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(TemporaryGroupStableTravel.IsTransferCohesionCompanion(true, false), Is.True, "a /spawn helper");
+            Assert.That(TemporaryGroupStableTravel.IsTransferCohesionCompanion(false, true), Is.True, "a hired companion");
+            Assert.That(TemporaryGroupStableTravel.IsTransferCohesionCompanion(true, true), Is.True);
+            Assert.That(TemporaryGroupStableTravel.IsTransferCohesionCompanion(false, false), Is.False,
+                "a persistent gamebot in a player's group is never moved");
+        });
+    }
 }

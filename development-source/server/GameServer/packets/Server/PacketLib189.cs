@@ -431,6 +431,25 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 
+		/// <summary>
+		/// "No house on this lot": the 1.89+ HouseCreate layout (SendHouse above) with model 0 and nothing else. The
+		/// PacketLib168 version was 3 bytes short of this layout (True 1.65 housing, client chat 2026-11-02).
+		/// </summary>
+		public override void SendRemoveHouse(House house)
+		{
+			using (var pak = PooledObjectFactory.GetForTick<GSTCPPacketOut>().Init(GetPacketCode(eServerPackets.HouseCreate)))
+			{
+				pak.WriteShort((ushort)house.HouseNumber);
+				pak.WriteShort((ushort)house.Z);
+				pak.WriteInt((uint)house.X);
+				pak.WriteInt((uint)house.Y);
+				pak.Fill(0x00, 20);   // heading .. model (0) .. materials .. the two 1.89b shorts
+				pak.WritePascalString("");
+
+				SendTCP(pak);
+			}
+		}
+
 		public override void SendGarden(House house)
 		{
 			using (var pak = PooledObjectFactory.GetForTick<GSTCPPacketOut>().Init(GetPacketCode(eServerPackets.HouseChangeGarden)))

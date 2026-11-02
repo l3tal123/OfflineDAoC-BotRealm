@@ -19,7 +19,14 @@ var closable := true
 var resizable := false
 var min_size := Vector2(160, 64)
 var max_size := Vector2(900, 500)
-var frame: Control                           # the frame bitmap (TextureRect, or a nine-patch when resizable)
+var frame: Control:                          # the frame bitmap (TextureRect, or a nine-patch when resizable)
+	set(v):
+		frame = v
+		if v:
+			v.modulate.a = interface_alpha()
+## The interface's Alpha (the 1.64 client's Options "Alpha: N%", saved as [Panels] Alpha): how solid every window's
+## frame / background is - its text, icons and buttons stay solid (a player report: chat transparency).
+static var _alpha := -1.0
 var frame_name := ""
 var patch := [8, 8, 8, 8]                    # resizable frames: border sizes left / top / right / bottom (art px)
 var _drag := false
@@ -32,9 +39,84 @@ func setup(id: String, frame_bitmap: String, frame_rect := Rect2(), pos := Vecto
 	window_id = id
 	name = id
 	position = pos
+	add_to_group("classic_windows")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_frame(frame_bitmap, frame_rect)
 	return self
+
+
+static func interface_alpha() -> float:
+	if _alpha < 0.0:
+		var cfg := ConfigFile.new()
+		cfg.load(UiArt.settings_path)
+		_alpha = clampf(float(cfg.get_value("interface", "alpha", 100)) / 100.0, 0.1, 1.0)
+	return _alpha
+
+
+## A new Alpha (percent) on every open window's frame and its other backing art.
+static func set_interface_alpha(percent: float, tree: SceneTree) -> void:
+	_alpha = clampf(percent / 100.0, 0.1, 1.0)
+	for w in tree.get_nodes_in_group("classic_windows"):
+		var cw := w as ClassicWindow
+		for f in [cw.frame] + cw.backing:
+			if f and is_instance_valid(f):
+				(f as Control).modulate.a = _alpha
+
+
+## Art inside the window that is its background too (the character panel's sheet bitmap and tab strip): it fades
+## with the frame at the interface's Alpha.
+var backing: Array = []
+
+
+func add_backing(c: Control) -> void:
+	backing.append(c)
+	c.modulate.a = interface_alpha()
+
+
+## The right-click Alpha panel: "ALPHA: N%" between two arrows (10% a click), the same setting as Options' ALPHA;
+## a click anywhere else closes it.
+func _alpha_panel(at: Vector2) -> void:
+	var host := get_parent() as Control
+	if host == null:
+		return
+	var catcher := Control.new()                          # (catches the click that closes it)
+	catcher.set_anchors_preset(Control.PRESET_FULL_RECT)
+	catcher.mouse_filter = Control.MOUSE_FILTER_STOP
+	host.add_child(catcher)
+	var box := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.06, 0.05, 0.04, 0.95)
+	style.border_color = UiArt.GOLD.darkened(0.3)
+	style.set_border_width_all(1)
+	style.set_content_margin_all(3)
+	box.add_theme_stylebox_override("panel", style)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	box.add_child(row)
+	var label := UiArt.label("", 9, UiArt.CREAM)
+	label.custom_minimum_size = Vector2(70, 16)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var show := func(): label.text = "ALPHA: %d%%" % roundi(interface_alpha() * 100.0)
+	for step in [-10, 10]:
+		var b := UiArt.button("<" if step < 0 else ">", Vector2(16, 16), 9)
+		b.pressed.connect(func():
+			var pct := clampf(roundf(interface_alpha() * 10.0) * 10.0 + step, 10.0, 100.0)
+			var cfg := ConfigFile.new()
+			cfg.load(UiArt.settings_path)
+			cfg.set_value("interface", "alpha", pct)
+			cfg.save(UiArt.settings_path)
+			set_interface_alpha(pct, get_tree())
+			show.call())
+		row.add_child(b)
+		if step < 0:
+			row.add_child(label)
+	show.call()
+	catcher.add_child(box)
+	box.position = (at - host.get_global_rect().position) / host.get_global_transform().get_scale() - Vector2(8, 8)
+	catcher.gui_input.connect(func(e: InputEvent):
+		if e is InputEventMouseButton and e.pressed:
+			catcher.queue_free())
 
 
 ## Swap the frame bitmap (the quickbar turning vertical / horizontal); the window takes the bitmap's size.
@@ -96,6 +178,13 @@ func _edge_at(p: Vector2) -> String:
 
 
 func _gui_input(event: InputEvent) -> void:
+	# the 1.64 help: "You can also adjust the transparency of any interface window by right-clicking on it with the
+	# mouse. A panel will be displayed with two arrows that allow you to adjust the alpha" (a player report: chat alpha)
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT \
+			and not event.shift_pressed and not event.ctrl_pressed:
+		_alpha_panel(get_global_mouse_position())
+		accept_event()
+		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			var p: Vector2 = event.position

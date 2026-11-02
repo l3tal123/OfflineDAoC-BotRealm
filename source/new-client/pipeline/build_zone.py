@@ -42,10 +42,42 @@ BOM = '\N{ZERO WIDTH NO-BREAK SPACE}\xef\xbb\xbf'
 
 def zone_local_npks(zone_id):
     """{file name (lower case): path} of the zone's own models (zones/zoneNNN/nifs, any case) - they come before the
-    shared zones/Nifs ones with the same names."""
+    shared zones/Nifs ones with the same names. A period housing zone: the 1.64 models its fixtures place
+    (housing_164_npks), whose phousing/zones folder has no nifs of its own."""
+    if zone_id in _paths.HOUSING_164:
+        return housing_164_npks()
     zd = next((d for d in (CLIENT / 'zones').iterdir() if d.is_dir() and d.name.lower() == f'zone{zone_id:03d}'), None)
     nd = next((d for d in zd.iterdir() if d.is_dir() and d.name.lower() == 'nifs'), None) if zd else None
     return {p.name.lower(): p for p in nd.iterdir() if p.suffix.lower() == '.npk'} if nd else {}
+
+
+# The period housing zones (paths.HOUSING_164, owner 2026-11-02: "i only want the real 1.65 housing areas and models")
+# take their models and textures from the 1.64 client (pipeline/extract_housing_164.py -> paths.WORK_164), before the
+# later client's: the house signs, marketplaces, gates and message boards from phousing/nifs (the later client ships
+# them too, but not the period gate set), the trees / buildings / rocks from the 1.64 zones/Nifs (n-bridge2, raft1,
+# bcliffrock1 and n_trltuskarch differ from the later copies).
+HOUSING_164_TEX = ('zones/Nifs', 'zones/textures', 'phousing/nifs', 'phousing/textures')   # TextureIndex.PREFER order
+
+
+def housing_164_npks():
+    """{file name (lower case): path} of the extracted 1.64 models: zones/Nifs, phousing/nifs over it (the housing
+    gates are in both; the later client's zones/Nifs a_phousegatein is the phousing/nifs one)."""
+    out = {}
+    for d in (_paths.WORK_164 / 'zones/Nifs', _paths.WORK_164 / 'phousing/nifs'):
+        if d.is_dir():
+            out.update({p.name.lower(): p for p in d.iterdir() if p.suffix.lower() == '.npk'})
+    return out
+
+
+def housing_164_textures():
+    """{texture basename (lower case): path} of the extracted 1.64 textures, the first folder of HOUSING_164_TEX wins
+    (many names are in both zones/Nifs and phousing/nifs with different pixels)."""
+    out = {}
+    for d in reversed(HOUSING_164_TEX):
+        if (_paths.WORK_164 / d).is_dir():
+            out.update({p.stem.lower(): p for p in (_paths.WORK_164 / d).iterdir()
+                        if p.suffix.lower() in ('.dds', '.tga', '.bmp')})
+    return out
 
 
 def read_csv(raw):
@@ -84,16 +116,21 @@ def zone_section(zone_id):
 
 
 SI_REGIONS = {51: 'alb', 151: 'mid', 181: 'hib'}           # the Shrouded Isles regions (zones.dat region=)
+HOUSING_REGIONS = {2: 'alb', 102: 'mid', 202: 'hib'}      # the player housing regions (zones.dat [regionNNN] phousing=1)
 
 
 def clutter_realm(zone_id):
     """(realm, expansion) for the ground clutter set: the Shrouded Isles zones use grass_<realm>exp (owner 2026-10-11:
     Isle of Glass / Avalon Isle have the sparse dry grass of the expansion set) - zones.dat has no expansion flag for
-    them, so the region decides; Hibernia's SI zones (181+) are Hibernian, not zone_id // 100's Midgard."""
+    them, so the region decides; Hibernia's SI zones (181+) are Hibernian, not zone_id // 100's Midgard. The housing
+    regions too (their [regionNNN] grasscsv: grass_alb / mid / hib): the later Albion / Midgard housing zones 260-262,
+    266-268 would get zone_id // 100's Hibernian grass."""
     reg = re.search(r'^\s*region\s*=\s*0*(\d+)', zone_section(zone_id), re.M)
     region = int(reg.group(1)) if reg else -1
     if region in SI_REGIONS:
         return SI_REGIONS[region], True
+    if region in HOUSING_REGIONS:
+        return HOUSING_REGIONS[region], False
     exp_match = re.search(r'expansion\s*=\s*(\d+)', zone_section(zone_id))
     return {0: 'alb', 1: 'mid', 2: 'hib'}.get(zone_id // 100), bool(exp_match and int(exp_match.group(1)) == 1)
 
@@ -658,7 +695,11 @@ def city_heights(out, mdir, models, origin, rot_deg):
 # the old DB sends some exits to a second copy of a dungeon (the client ships both with identical dat files: same
 # map, same coordinates) - the copy that is built: Hall of the Corrupt 277 -> 245, Marfach Caverns 276 -> 247
 ZONE_COPIES = {277: 245, 276: 247}
-HOUSING_ZONES = {13, 114, 213}                         # Caerwent / Erikstaad / Meath housing (post-1.65)
+# player housing zones the 1.64 client doesn't have (later additions, never built): no way in. The 12 period ones
+# (paths.HOUSING_164) are built, so the gates in Camelot Hills / Vale of Mularn / Connacht (ZonePoints 111 / 112 / 113)
+# lead in and their exits (108 / 109 / 110) back out (owner 2026-11-02; was {13, 114, 213}, "housing post-1.65" -
+# the 1.64 client ships the housing zones, models and code)
+HOUSING_ZONES = {20, 64, 260, 261, 262, 121, 122, 266, 267, 268, 219, 225, 272, 273, 274}
 
 
 def client_zonejump(zdir, zone_id):
@@ -703,7 +744,7 @@ def zone_exits(dat):
             tx, ty, tz, region, heading, label = row
             zone = zone_of(region, tx, ty)
             if zone and zone[0] in HOUSING_ZONES:
-                continue                                   # player housing came after 1.65: no way in
+                continue                                   # a housing zone added after 1.64: no way in
             if zone:
                 zid, ox, oy = zone
                 zid = ZONE_COPIES.get(zid, zid)
@@ -782,10 +823,22 @@ def zone_lights(dat):
     return lights
 
 
+def borrowed_ground(zone_id, zdir, sector):
+    """(base zone's folder, base zone id, flip x, flip y) when the zone paints its ground with another zone's tiles,
+    else None. sector.dat [terrain] use_texture=NNN (+ flip_x / flip_y) - only zones with no ground archive of their
+    own (9 of the 12 period housing zones; zones 004 / 116 / 216 / 251-253 say use_texture too but ship their own).
+    Any non-zero flip (1 or -1) mirrors that axis, 0 or empty doesn't: checked on the heightmaps (the zone's
+    terrain.pcx against the base zone's in all four mirrorings - the best one matched the flags in 23 of the later
+    client's 24 borrowing housing zones, scratchpad housing/flipcheck.py, 2026-11-01)."""
+    base = sector.get('terrain', 'use_texture', fallback='').strip()
+    if not base.isdigit() or any((zdir / f'{p}{zone_id:03d}.mpk').exists() for p in ('tex', 'lod', 'ter')):
+        return None
+    flip = lambda k: sector.get('terrain', k, fallback='').strip() not in ('', '0')
+    return _paths.zone_dir(int(base)), int(base), flip('flip_x'), flip('flip_y')
+
+
 def build(zone_id, upscale=True):
-    zdir = CLIENT / f'zones/zone{zone_id:03d}'
-    if not zdir.exists():                                  # the Albion epic dungeons (233, 244) ship in frontiers/zones
-        zdir = CLIENT / f'frontiers/zones/zone{zone_id:03d}'
+    zdir = _paths.zone_dir(zone_id)                         # (zones/, frontiers/zones/, or the 1.64 phousing/zones/)
     out = ROOT / f'godot/content/zones/zone{zone_id:03d}'
     out.mkdir(parents=True, exist_ok=True)
     (ROOT / 'godot/content/.gdignore').touch()             # runtime-loaded content: keep it out of the editor import
@@ -811,11 +864,13 @@ def build(zone_id, upscale=True):
     tile_sets = {}
     gdir = out / 'terrain' / 'original'
     gdir.mkdir(parents=True, exist_ok=True)
-    for set_name, archive, prefix, ext in (('tex165', f'tex{zone_id:03d}.mpk', 'tex', 'bmp'),
-                                           ('lod', f'lod{zone_id:03d}.mpk', 'lod', 'dds')):
-        if not (zdir / archive).exists():
+    borrowed = borrowed_ground(zone_id, zdir, sector)     # another zone's ground tiles, mirrored (borrowed_ground)
+    gsrc, gid = (borrowed[0], borrowed[1]) if borrowed else (zdir, zone_id)
+    for set_name, archive, prefix, ext in (('tex165', f'tex{gid:03d}.mpk', 'tex', 'bmp'),
+                                           ('lod', f'lod{gid:03d}.mpk', 'lod', 'dds')):
+        if not (gsrc / archive).exists():
             continue
-        tiles = read_mpk(str(zdir / archive))
+        tiles = read_mpk(str(gsrc / archive))
         if f'{prefix}00-00.{ext}' not in tiles:                # some zones ship the painted ground as .dds
             ext = next((k.rsplit('.', 1)[1] for k in tiles if k.startswith(f'{prefix}00-00.')), ext)
         first = Image.open(io.BytesIO(tiles[f'{prefix}00-00.{ext}']))
@@ -826,8 +881,22 @@ def build(zone_id, upscale=True):
                 raw = tiles.get(f'{prefix}{x:02d}-{y:02d}.{ext}')
                 if raw is not None:
                     mosaic.paste(Image.open(io.BytesIO(raw)).convert('RGB').resize((tw, tw)), (x * tw, y * tw))
+        if borrowed:                                       # the mosaic's columns run east, its rows south
+            mosaic = mosaic.transpose(Image.FLIP_LEFT_RIGHT) if borrowed[2] else mosaic
+            mosaic = mosaic.transpose(Image.FLIP_TOP_BOTTOM) if borrowed[3] else mosaic
         save_if_changed(mosaic, gdir / f'{set_name}.png')
         tile_sets[set_name] = f'terrain/original/{set_name}.png'
+        base_big = ROOT / f'godot/content/zones/zone{gid:03d}/terrain/x4plus/{set_name}.png'
+        own_big = out / 'terrain' / 'x4plus' / f'{set_name}.png'
+        if borrowed and upscale and base_big.exists() and not (own_big.exists() and own_big.stat().st_mtime >= max(
+                base_big.stat().st_mtime, (gdir / f'{set_name}.png').stat().st_mtime)):
+            # the base zone's upscale, mirrored the same way (no second Real-ESRGAN pass over the same picture;
+            # newer than this zone's original, so upscale_dir leaves it)
+            big = Image.open(base_big)
+            big = big.transpose(Image.FLIP_LEFT_RIGHT) if borrowed[2] else big
+            big = big.transpose(Image.FLIP_TOP_BOTTOM) if borrowed[3] else big
+            own_big.parent.mkdir(parents=True, exist_ok=True)
+            big.save(own_big)
         if upscale or (out / 'terrain' / 'x4plus' / f'{set_name}.png').exists():   # --no-upscale keeps earlier ones
             tile_sets[f'{set_name}_x4plus'] = f'terrain/x4plus/{set_name}.png'
         print('terrain', set_name, mosaic.size)
@@ -1001,12 +1070,15 @@ def build(zone_id, upscale=True):
     # textures: the zone's own nifs folder first, as its models (zone_local_npks)
     idx = TextureIndex()
     idx.first = [f'zones/zone{zone_id:03d}/nifs']
+    tex_164 = housing_164_textures() if zone_id in _paths.HOUSING_164 else {}   # (a period housing zone: 1.64 first)
     odir = out / 'textures/original'
     odir.mkdir(parents=True, exist_ok=True)
     missing = []
     for n in sorted(tex_names):
         doubled = n.endswith(('__d2', '__x2'))   # __x2: the raw detail map (detail_x2.py)                       # detail map: modulate-2x baked in (see nif_static)
-        img = idx.image(n[:-4] if doubled else n) or nif_static.EMBEDDED.get(n[:-4] if doubled else n)   # (a NIF's own pixels)
+        key = n[:-4] if doubled else n
+        img = (Image.open(tex_164[key]).convert('RGBA') if key in tex_164 else None) \
+            or idx.image(key) or nif_static.EMBEDDED.get(key)   # (a NIF's own pixels)
         if img is None:
             missing.append(n)
             continue

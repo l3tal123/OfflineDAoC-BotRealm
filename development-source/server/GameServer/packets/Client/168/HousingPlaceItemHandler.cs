@@ -104,7 +104,8 @@ namespace DOL.GS.PacketHandler.Client.v168
 					return;
 				}
 
-				if (orgitem.Id_nb == "house_removal_deed")
+				// HouseTemplateMgr makes the deed as housing_house_removal_deed; the world DB also has house_removal_deed
+				if (orgitem.Id_nb is "house_removal_deed" or "housing_house_removal_deed")
 				{
 					client.Out.SendInventorySlotsUpdate(null);
 
@@ -386,8 +387,8 @@ namespace DOL.GS.PacketHandler.Client.v168
 										};
 
 						// figure out proper rotation for item
-						int properRotation = client.Player.Heading / 10;
-						properRotation = Math.Clamp(properRotation, 0, 360);
+						// the player's heading is 0..4095, the item's rotation 0..359 degrees (it was heading / 10, up to 409)
+						int properRotation = (client.Player.Heading * 360 / 4096) % 360;
 
 						if (method == 2 && IsSuitableForWall(orgitem))
 						{
@@ -417,6 +418,14 @@ namespace DOL.GS.PacketHandler.Client.v168
 							{
 								iitem.BaseItem = GameServer.Database.FindObjectByKey<DbItemTemplate>(orgitem.Id_nb);
 							}
+						}
+						else if (method == 2 && IsSuitableForWall(orgitem))
+						{
+							// A weapon or shield hung on the wall leaves the inventory, and taking it down gives it back
+							// (HousingPickupItemHandler.GetItemBack); it used to stay in the bag as well: a free copy.
+							client.Player.Inventory.RemoveItem(orgitem);
+							InventoryLogging.LogInventoryAction(client.Player, "(HOUSE;" + housenumber + ")", eInventoryActionType.Other, orgitem.Template, orgitem.Count);
+							iitem.BaseItem = orgitem.Template as DbItemTemplate;
 						}
 
 						DbHouseIndoorItem idbitem = iitem.CreateDBIndoorItem(housenumber);

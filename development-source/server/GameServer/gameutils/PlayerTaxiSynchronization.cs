@@ -37,6 +37,7 @@ namespace DOL.GS
             if (relocate)
             {
                 player.X = horse.X; player.Y = horse.Y; player.Z = horse.Z; player.Heading = horse.Heading;
+                player.movementComponent.OnTeleportOrRegionChange();   // a server relocation, not client movement
                 player.Out.SendPlayerJump(false);
             }
             player.Out.SendRiding(player, horse, false);

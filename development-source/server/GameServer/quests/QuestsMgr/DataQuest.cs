@@ -2466,8 +2466,10 @@ namespace DOL.GS.Quests
 			if (item == null || item.OwnerID == null || m_collectItems.Count == 0)
 				return;
 
-			if (QuestNames.Same(TargetName, obj.Name) && (TargetRegion == obj.CurrentRegionID || TargetRegion == 0)
-			   && player.Level >= Level && player.Level <= MaxLevel)
+			// The level range only decides who is offered the quest (CheckQuestQualification). A player who outlevels an
+			// accepted quest can still hand in its items, as kill / interact / search steps never checked the level
+			// (player report 2026-11-01: Inconnu Poison, max level 5 - a level 6 necromancer's vial was refused).
+			if (QuestNames.Same(TargetName, obj.Name) && (TargetRegion == obj.CurrentRegionID || TargetRegion == 0))
 			{
 				if (m_collectItems.Count >= Step &&
 					!string.IsNullOrEmpty(m_collectItems[Step - 1]) &&

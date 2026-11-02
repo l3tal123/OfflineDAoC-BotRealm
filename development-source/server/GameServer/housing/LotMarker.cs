@@ -234,7 +234,7 @@ namespace DOL.GS.Housing
 			          		Y = house.Y,
 			          		Z = house.Z,
 			          		CurrentRegionID = house.RegionID,
-			          		Heading = (ushort) house.Heading,
+			          		Heading = (ushort) (house.Heading % 360 * 4096 / 360),   // DBHouse.Heading is degrees, an object's 0..4095
 			          		Name = "Lot Marker",
 			          		Model = 1308,
 			          		DatabaseItem = house

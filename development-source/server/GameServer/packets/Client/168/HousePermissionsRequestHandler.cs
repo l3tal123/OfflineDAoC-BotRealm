@@ -27,7 +27,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 			using (var pak = PooledObjectFactory.GetForTick<GSTCPPacketOut>().Init(AbstractPacketLib.GetPacketCode(eServerPackets.HousingPermissions)))
 			{
-				pak.WriteByte(HousingConstants.MaxPermissionLevel); // number of permissions ?
+				pak.WriteByte((byte)house.PermissionLevels.Count); // the levels written below (always said 9, even with fewer rows)
 				pak.WriteByte(0x00); // unknown
 				pak.WriteShort((ushort)house.HouseNumber);
 

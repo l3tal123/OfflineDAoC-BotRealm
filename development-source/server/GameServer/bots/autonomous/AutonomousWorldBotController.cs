@@ -190,6 +190,8 @@ namespace DOL.GS
         private long _nextTrainingDecisionTick;
         private string _observedObjectiveAssignmentId = string.Empty;
         private GameNPC _serviceNpc;
+        private GameNPC _readyAtService;
+        private long _readyAtServiceSinceTick;
         private int[] _campLevelScratch = new int[16];
         private readonly AutonomousServiceReachability.ApproachFailures _serviceApproachFailures = new();
         private eWorldServiceKind? _serviceKind;
@@ -1169,6 +1171,26 @@ namespace DOL.GS
                 Log.Info($"AUTONOMOUS_SERVICE_ARRIVED bot={bot.Name} id={bot.DatabaseID} class=\"{bot.ClassName}\" level={bot.Level} " +
                          $"kind={needed.Value} service=\"{_serviceNpc.Name}\" type={_serviceNpc.GetType().Name} " +
                          $"region={_serviceNpc.CurrentRegionID} at={_serviceNpc.X},{_serviceNpc.Y}");
+            }
+            // A shopping trip that stands at its merchant for 90 seconds without being served gives that merchant up and
+            // moves on, instead of waiting for the 15-minute watchdog (2026-11-01 run 3: 850 bots stood "Ready to use").
+            if (_readyAtService != _serviceNpc)
+            {
+                _readyAtService = _serviceNpc;
+                _readyAtServiceSinceTick = GameLoop.GameLoopTime;
+            }
+            else if (needed == eWorldServiceKind.Shop && _serviceNpc is GameMerchant staleShop &&
+                     GameLoop.GameLoopTime - Math.Max(_readyAtServiceSinceTick, (bot.Brain as BotBrain)?.LastMerchantActionTick ?? 0) > 90_000)
+            {
+                Log.Info($"AUTONOMOUS_SHOP_ABANDONED bot={bot.Name} id={bot.DatabaseID} merchant=\"{staleShop.Name}\" " +
+                         $"region={staleShop.CurrentRegionID} plan=\"{ShoppingPlanFor(bot)?.Merchant?.Name}\" " +
+                         $"blocked=\"{(bot.Brain as BotBrain)?.MerchantServiceBlock(staleShop) ?? "nothing - no purchase"}\" " +
+                         $"budget={ShoppingBudget(bot)} planPrice={ShoppingPlanFor(bot)?.Price}");
+                SkipShoppingAt(bot, staleShop);
+                _readyAtService = null;
+                _serviceNpc = null;
+                _nextServiceSearchTick = 0;
+                return true;
             }
             SetStatus(bot, $"Ready to use {_serviceNpc.Name}", ServiceGoal(needed.Value),
                 "Reached the real service; BotBrain will transact only within range", _serviceNpc.Name, destination.ZoneName);

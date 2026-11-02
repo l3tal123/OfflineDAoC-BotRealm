@@ -190,6 +190,9 @@ func _ready() -> void:
 			player.start_track(mode, t, (t.display_name(true) if t else "")))
 		PlayerData.use_skill.connect(_server_use)          # spells, styles, abilities from the sheets and quickbars
 		ui.item_dropped_on_world.connect(_on_item_dropped)   # an item dragged out: onto an NPC (give) or the ground
+		ui.money_dropped_on_world.connect(func(slot: int, amount: int, at: Vector2):   # coins onto a house: rent
+			if npcs is ServerWorld:
+				(npcs as ServerWorld).house_money_drop(slot, amount, player.camera, at))
 		ui.npc_dialog.keyword.connect(_server_keyword)     # a [keyword] in an NPC's words: whispered to it
 		PlayerData.release_requested.connect(_server_release)   # the death window's RELEASE: the server's /release
 		PlayerData.release_to.connect(_server_release_to)       # its CITY / HOUSE / BIND buttons: /release city ...
@@ -241,6 +244,9 @@ func _ready() -> void:
 		cast.cast_progress.connect(ui.show_cast)
 		ui.casting = cast
 		ui.item_dropped_on_world.connect(_on_item_dropped)
+		ui.money_dropped_on_world.connect(func(slot: int, amount: int, at: Vector2):   # coins onto a house: rent
+			if npcs is ServerWorld:
+				(npcs as ServerWorld).house_money_drop(slot, amount, player.camera, at))
 		ui.npc_dialog.keyword.connect(_on_keyword)
 		combat.player_died.connect(ui.show_release.bind(true))
 		var routes := HorseRoutes.new()                   # stable master horse routes (tickets)
@@ -746,7 +752,8 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_click_down = true
-			_click_from = event.position
+			# (mouse look on: the cursor is hidden, so a click picks what is in the middle of the view)
+			_click_from = get_viewport().get_visible_rect().size * 0.5 if player and player.mouse_look else event.position
 			_click_moved = 0.0
 			_click_placed = get_viewport().gui_is_dragging()    # this click puts down what the pointer holds
 		elif _click_down:
@@ -782,19 +789,28 @@ func _input(event: InputEvent) -> void:
 			_rclick_moved = 0.0
 		elif _rclick_down:
 			_rclick_down = false
-			if _rclick_moved < 6.0 and get_viewport().gui_get_hovered_control() == null:
+			if _rclick_moved < 6.0 and player and player.mouse_look:
+				player.set_mouse_look(false)                     # Mouse Look Toggle: the second right click
+			elif _rclick_moved < 6.0 and get_viewport().gui_get_hovered_control() == null:
+				var hit := true
 				var rn: Npc = npcs.pick(player.camera, _rclick_from)
-				if rn:
+				if Input.is_key_pressed(KEY_SHIFT) and npcs is ServerWorld 						and (npcs as ServerWorld).house_shift_click(player.camera, _rclick_from):
+					pass                                         # housing: options / turning a decoration
+				elif rn:
 					npcs.select(rn)
 					_note_interact(rn)
 					npcs.interact(rn)
 				elif npcs is ServerWorld and (npcs as ServerWorld).use_object(player.camera, _rclick_from):
 					pass                                         # a relic taken up, loot picked up (a grave: targeted)
-				elif companions:
-					var rb: Node3D = WorldLink.pick_bot(player.camera, _rclick_from)
+				else:
+					hit = false
+					var rb: Node3D = WorldLink.pick_bot(player.camera, _rclick_from) if companions else null
 					if rb and bool(rb.get("companion")):       # your companion: its window (gear, training, tactics, stance)
+						hit = true
 						WorldLink.target_bot(rb)
 						companions.manage(int(rb.get("bot_id")))
+				if not hit and player and player.mouse_look_on_right():
+					player.set_mouse_look(true)                  # Mouse Look Toggle: a right click on open ground
 	elif event is InputEventMouseMotion and (_click_down or _rclick_down):
 		_click_moved += event.relative.length() if _click_down else 0.0
 		_rclick_moved += event.relative.length() if _rclick_down else 0.0
@@ -899,6 +915,8 @@ func _clicked_self(at: Vector2) -> bool:
 ## {1}. Do you accept?", "You pay {0} {1}.", "{0} says, \"There, {1} is ready for combat.\""), on a merchant a sale.
 func _on_item_dropped(slot: int, screen_pos: Vector2) -> void:
 	var n: Npc = npcs.pick(player.camera, screen_pos) if npcs else null
+	if Server.active and n == null and npcs is ServerWorld and (npcs as ServerWorld).house_drop(slot, player.camera, screen_pos):
+		return                                              # housing: a deed on a lot, an item on a wall / floor
 	if Server.active:                                       # the server: onto an NPC = give it (slot 1000 + its id), else
 		var count := int(PlayerData.entry(slot).get("count", 1))   # onto the ground (slot 1) - PlayerMoveItem
 		Server.client.call("MoveItem", slot, 1000 + int(n.spawn.get("oid", 0)) if n else 1, count)

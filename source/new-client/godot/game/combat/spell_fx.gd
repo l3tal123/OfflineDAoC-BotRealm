@@ -71,9 +71,12 @@ static func _instance(path: String) -> NifScene:
 
 
 ## An effect is done: back to its pool (its bone holder freed), or freed when the pool is full.
-static func release(node: Node) -> void:
-	if not is_instance_valid(node):
+## (Untyped: a handle whose holder was freed - a caster whose view was replaced mid-cast, as a companion revived at a
+## healer - comes here freed; a typed Node argument stopped the script on it before this check.)
+static func release(handle) -> void:
+	if not is_instance_valid(handle):
 		return
+	var node := handle as Node
 	var fx: NifScene = node as NifScene
 	var holder: Node = null
 	if fx == null:

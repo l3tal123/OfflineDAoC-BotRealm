@@ -83,6 +83,19 @@ namespace DOL.GS
 
         public void ValidateMovement()
         {
+            // A rider doesn't move itself: the server moves its steed (stable horse, boat), and PlayerPositionUpdateHandler
+            // keeps the rider on it. The client catching up after a taxi correction is no speed hack, and the punishment (a
+            // same-region MoveTo) dismounted riders mid-route (owner 2026-11-01: West Downs -> Adribard's Retreat, Caer
+            // Gothwaite -> Wearyall; both clients).
+            if (_player.IsRiding)
+            {
+                _violationTimestamps.Clear();
+                _teleport = default;
+                _teleportCount = 0;
+                _accumulatedPauseTime = 0;
+                return;
+            }
+
             // We don't know when the position update was actually received, only when it was processed by the game loop.
             // We account for processing delay uncertainty by adding a small buffer to the time difference, equal to one game loop tick.
             // Ad a side effect, if the server is lagging, the speed hack detection becomes more lenient.

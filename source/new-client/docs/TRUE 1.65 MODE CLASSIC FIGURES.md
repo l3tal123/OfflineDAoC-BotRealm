@@ -34,6 +34,7 @@ This spec describes how the original client builds, dresses and animates the cla
 
 - The files without `_2` (`BInconnuM`, `HSylvanM`, `NValkynM`) aren't used by `monnifs.csv`.
 - Half Ogre, Frostalf and Shar also have classic NIFs (monnifs 449/450, 464/465, 490/491), so NPCs of those races can be classic too.
+  Built 2026-11-02 as `hal_m/f` (`BHalfOgreM/F`, sets 164/165, rows 1008–1019 / 1020–1031), `fro_m/f` (`NSvartalfM/F`, sets 174/29, rows 1051–1062 / 1063–1074) and `sha_m/f` (`HSharM/F`, sets 197/198, rows 1075–1086 / 1087–1098): the prefixes `build_monsters.RACE_FIGURES` gives their NPCs.
 - The 1.64 copies are NetImmerse 4.2.1, the SI-era copies Gamebryo 10.1. The geometry is the same: all 49 HCeltM shapes have equal vertex counts. Use the SI copies, which the pipeline already reads.
 
 **Skeleton.**

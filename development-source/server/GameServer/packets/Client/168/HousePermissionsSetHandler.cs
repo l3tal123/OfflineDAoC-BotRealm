@@ -30,7 +30,9 @@ namespace DOL.GS.PacketHandler.Client.v168
 				return;
 
 			// read in the permission values
-			DbHousePermissions permission = house.PermissionLevels[level];
+			// a level the house has no row for was a KeyNotFound (the packet dropped)
+			if (!house.PermissionLevels.TryGetValue(level, out DbHousePermissions permission))
+				return;
 
 			permission.CanEnterHouse = (packet.ReadByte() != 0);
 			permission.Vault1 = (byte) packet.ReadByte();

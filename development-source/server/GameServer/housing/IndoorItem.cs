@@ -42,7 +42,9 @@ namespace DOL.GS.Housing
 			Emblem = dbitem.Emblem;
 			Position = dbitem.Position;
 			PlacementMode = dbitem.Placemode;
-			BaseItem = GameServer.Database.FindObjectByKey<DbItemTemplate>(dbitem.BaseItemID);
+			// a crafted (unique) weapon hung on a wall is a DbItemUnique
+			BaseItem = GameServer.Database.FindObjectByKey<DbItemTemplate>(dbitem.BaseItemID) ??
+			           GameServer.Database.FindObjectByKey<DbItemUnique>(dbitem.BaseItemID);
 			DatabaseItem = dbitem;
 		}
 

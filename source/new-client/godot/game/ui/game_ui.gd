@@ -63,6 +63,7 @@ var exchange: ExchangeWindow
 var journal: JournalWindow
 var guide: ClassicWindow
 var quest_abandon: Callable                               # QuestEngine.abandon (set by the zone viewer)
+signal money_dropped_on_world(slot: int, amount: int, screen_pos: Vector2)   # housing: coins onto a house (rent)
 signal item_dropped_on_world(slot: int, screen_pos: Vector2)   # zone viewer: an NPC under it (smith repair, sell)
 var map_window: MapWindow
 var casting: Casting
@@ -418,6 +419,8 @@ func _build() -> void:
 	# the tab strip: control.bmp rows of 32 px = normal / hover / dimmed / selected, drawn over every sheet
 	_strip = UiArt.picture("control", Rect2(0, 0, 192, 32))
 	right_panel.add_child(_strip)
+	right_panel.add_backing(_sheet_bg)                     # (both fade with the interface's Alpha)
+	right_panel.add_backing(_strip)
 	for i in TABS.size():
 		var lit := UiArt.picture("control", Rect2(TAB_X[i], 96 + 3, TAB_W[i], 24))
 		lit.position = Vector2(TAB_X[i], 3)
@@ -1183,48 +1186,96 @@ func message(text: String, kind := "system") -> void:
 
 
 ## The information window for an item (shift-click on it).
-## The death window, laid out as the original client's (ui/atlantis/release_window.xml, 285 x 96): the release timer's
-## line and green bar over four buttons - /RELEASE and /RELEASE CITY, /RELEASE HOUSE and /RELEASE BIND - each the
-## server's /release command of that kind (owner 2026-10-16: the new client had one release button, the original four).
+## Destroy Item (its key, Shift+D by default): the selected item, as the 1.64 client - game.dll asks "Do you really
+## wish to / destroy this item?" for the item selected in the backpack or worn, and sends the server's
+## DestroyItemRequest (0x80) on yes (a player report: destroying did nothing - the key had no handler). The server
+## refuses what may not go (indestructible, a relic, an equipped item) with its own message.
+func _destroy_selected() -> void:
+	var slot := PlayerData.selected_slot
+	var it := PlayerData.item_at(slot)
+	if it.is_empty():
+		return
+	UiArt.confirm(root, "", "Do you really wish to\ndestroy this item?", "ACCEPT", "DECLINE", func():
+		if PlayerData.item_at(slot).is_empty():
+			return
+		if Server.active:
+			Server.client.call("DestroyItem", slot)
+		elif PlayerData.is_backpack(slot):
+			PlayerData.inventory.erase(slot)
+			PlayerData.inventory_changed.emit()
+			PlayerData.save_character()
+			PlayerData.message.emit("You destroy the %s." % String(it.get("name", "item")), "system")
+		else:
+			PlayerData.message.emit("You cannot destroy an equipped item!", "system"))
+
+
+## The death window (owner 2026-11-01: ONE window - the release timer and its bar over the buttons, no separate timer
+## window): the release timer's line, the 1.64 green bar (greenbg / greenfull, the endurance bar's art) and /RELEASE,
+## /RELEASE CITY, /RELEASE HOUSE - the server's /release commands of that kind (its /RELEASE BIND dropped: the same as
+## /RELEASE; /release city kept although later than 1.64). The timer is the server's SendTimerWindow "Release Timer"
+## (TimerBarWindow leaves that one to this window) or, offline, PlayerData.release_timer.
 func _build_release() -> void:
 	var w := ClassicWindow.new()
 	w.resizable = true
 	w.patch = [6, 19, 13, 33]
-	w.size = Vector2(285, 118)
+	w.size = Vector2(285, 132)                             # the buttons inside the dark field, above the 33-unit band
 	var at := Vector2(area().x * 0.5 - 142, area().y * 0.32)
 	w.setup("release", "interact", Rect2(), at)
 	w.closable = false
 	root.add_child(w)
 	windows["release"] = w
 	w.visible = false
-	# the old server's "Release Timer" (SendTimerWindow, RELEASE_TIME): the automatic release counting down
 	var timer := UiArt.label("YOU HAVE DIED", 10, UiArt.GOLD_HI)
 	timer.position = Vector2(12, 21)
 	timer.size = Vector2(261, 16)
 	timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	w.add_child(timer)
-	var bar_bg := ColorRect.new()
-	bar_bg.color = Color(0.05, 0.05, 0.05, 0.85)
-	bar_bg.position = Vector2(32, 42)
-	bar_bg.size = Vector2(220, 8)
-	w.add_child(bar_bg)
-	var bar := ColorRect.new()
-	bar.color = Color(0.2, 0.75, 0.25)
-	bar.position = Vector2(1, 1)
-	bar.size = Vector2(0, 6)
-	bar_bg.add_child(bar)
+	var bar := Control.new()                               # shown only while a timer runs
+	bar.position = Vector2(78.5, 40)
+	bar.size = Vector2(128, 10)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.visible = false
+	w.add_child(bar)
+	_bar(bar, "greenbg", Rect2(Vector2.ZERO, bar.size))
+	var clip := Control.new()                              # the lit part: greenfull revealed from the left
+	clip.clip_contents = true
+	clip.size = Vector2(0, bar.size.y)
+	clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(clip)
+	_bar(clip, "greenfull", Rect2(Vector2.ZERO, bar.size))
 	var full := [0.0]                                       # the timer's starting length (the bar's full width)
-	PlayerData.hook(self, PlayerData.release_timer, func(left: float):
+	var show_left := func(left: float):
 		if left < 0.0:
 			timer.text = "YOU HAVE DIED"
-			bar.size.x = 0.0
+			bar.visible = false
 			full[0] = 0.0
 			return
 		full[0] = maxf(full[0], left)
 		timer.text = "RELEASE TIMER  %d:%02d" % [int(left) / 60, int(left) % 60]
-		bar.size.x = 218.0 * clampf(left / maxf(full[0], 1.0), 0.0, 1.0))
-	for spec in [["/RELEASE", "", Vector2(15, 58)], ["/RELEASE CITY", "city", Vector2(150, 58)],
-			["/RELEASE HOUSE", "house", Vector2(15, 84)], ["/RELEASE BIND", "bind", Vector2(150, 84)]]:
+		bar.visible = true
+		clip.size.x = 128.0 * clampf(left / maxf(full[0], 1.0), 0.0, 1.0)
+	PlayerData.hook(self, PlayerData.release_timer, show_left)
+	var ends := [-1.0]                                      # the server's release time (engine msec), -1 = none
+	var tick := Timer.new()
+	tick.wait_time = 0.25
+	w.add_child(tick)
+	tick.timeout.connect(func():
+		if ends[0] < 0.0:
+			tick.stop()
+		else:
+			show_left.call(maxf((ends[0] - Time.get_ticks_msec()) / 1000.0, 0.0)))
+	PlayerData.hook(self, Server.craft_timer, func(secs: int, title: String):
+		if secs >= 0 and TimerBarWindow.is_release(title):
+			full[0] = 0.0
+			ends[0] = Time.get_ticks_msec() + secs * 1000.0
+			show_left.call(float(secs))
+			tick.start()
+		elif secs < 0 and ends[0] >= 0.0:                  # the server closed its timer (released / revived)
+			ends[0] = -1.0
+			tick.stop()
+			show_left.call(-1.0))
+	for spec in [["/RELEASE", "", Vector2(15, 56)], ["/RELEASE CITY", "city", Vector2(150, 56)],
+			["/RELEASE HOUSE", "house", Vector2(82, 80)]]:
 		var b := UiArt.button(String(spec[0]), Vector2(120, 20), 9)
 		b.position = spec[2]
 		var kind := String(spec[1])
@@ -1302,7 +1353,7 @@ func _refresh_effects() -> void:
 	var effs := _player_effects()
 	for i in effs.size():
 		_effect_box(int(effs[i].icon), int(effs[i].border), String(effs[i].name).to_upper(), i, int(effs[i].get("fx", -1)),
-				bool(effs[i].get("disabled", false)))
+				bool(effs[i].get("disabled", false)), Server.active and not bool(effs[i].get("negative", true)))
 	_tick_effects()
 
 
@@ -1321,6 +1372,14 @@ const EFFECT_ICON := 32.0                     # px (the client's 20; owner 2026-
 class EffectBox extends Control:
 	var fx := -1
 	var title := ""
+	var can_cancel := false
+
+	# shift + right-click on one of your own beneficial effects ends it (the server's PlayerCancelsEffect, by its
+	# icon id; a player report 2026-11-01 - the concentration window already cancelled concentration buffs this way)
+	func _gui_input(ev: InputEvent) -> void:
+		if can_cancel and fx > 0 and ev is InputEventMouseButton and ev.pressed and ev.shift_pressed 				and ev.button_index == MOUSE_BUTTON_RIGHT and Server.client:
+			Server.client.call("CancelEffect", fx)
+			accept_event()
 
 	func _notification(what: int) -> void:
 		if what == NOTIFICATION_MOUSE_ENTER and Server.active and fx > 0:
@@ -1338,10 +1397,14 @@ class EffectBox extends Control:
 const EFFECT_DISABLED := Color(255 / 255.0, 35 / 255.0, 97 / 255.0)
 
 
-func _effect_box(icon: int, border: int, tip: String, index: int, fx := -1, disabled := false) -> void:
+func _effect_box(icon: int, border: int, tip: String, index: int, fx := -1, disabled := false, can_cancel := false) -> void:
 	var box := EffectBox.new()
 	box.fx = fx
 	box.title = tip
+	box.can_cancel = can_cancel
+	if can_cancel:
+		tip += "
+SHIFT + RIGHT-CLICK TO CANCEL"
 	box.custom_minimum_size = Vector2(EFFECT_ICON, EFFECT_ICON + 12)
 	box.tooltip_text = tip
 	box.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -1587,9 +1650,18 @@ func show_info(it: Dictionary, full := true) -> void:
 	for b in _info_buttons:
 		b.visible = _info_slot >= 0
 	(w.get_node("Title") as Label).text = String(it.get("name", "")).to_upper()
+	info_title_con(it)
 	var body := w.get_node("Body") as RichTextLabel
 	body.text = "\n".join(ItemDb.delve(it) if full else ItemDb.summary(it))
 	_fit_info(w, body)
+
+
+## The information window's title in the item's con colour to you, as in the lists (owner 2026-11-02: the
+## right-click box too); an item without a level keeps the window's gold.
+func info_title_con(it: Dictionary) -> void:
+	var lv := int(it.get("level", 0))
+	(windows.info.get_node("Title") as Label).add_theme_color_override("font_color",
+			UiArt.GOLD_HI if lv <= 0 else ItemTooltip.con_color(lv, PlayerData.level))
 
 
 ## Lines of text in the information window under a title (the /task snapshot).
@@ -1597,6 +1669,7 @@ func show_lines(title: String, lines: Array) -> void:
 	var w: ClassicWindow = windows.info
 	_hide_info_buttons()
 	(w.get_node("Title") as Label).text = title.to_upper()
+	(w.get_node("Title") as Label).add_theme_color_override("font_color", UiArt.GOLD_HI)
 	var body := w.get_node("Body") as RichTextLabel
 	body.text = "
 ".join(lines)
@@ -1637,6 +1710,7 @@ func show_skill_info(entry: Dictionary) -> void:
 								# showed a buff)
 	var w: ClassicWindow = windows.info
 	(w.get_node("Title") as Label).text = String(entry.get("name", "")).to_upper()
+	(w.get_node("Title") as Label).add_theme_color_override("font_color", UiArt.GOLD_HI)
 	var body := w.get_node("Body") as RichTextLabel
 	body.text = "
 ".join(SkillInfo.lines(entry))
@@ -1913,6 +1987,9 @@ func handle_input(event: InputEvent) -> bool:
 		elif not it.is_empty():
 			PlayerData.message.emit("You can't use the %s." % it.get("name", "item"), "error")
 		return true
+	if Keybinds.pressed(event, "destroy_item") and PlayerData.selected_slot >= 0:
+		_destroy_selected()
+		return true
 	if Keybinds.pressed(event, "show_compass"):
 		windows.compass.toggle_window()
 		return true
@@ -1927,6 +2004,10 @@ func handle_input(event: InputEvent) -> bool:
 		return true
 	if Keybinds.pressed(event, "reply"):
 		chat.start_typing("/r ")
+		return true
+	# Shift+Up with the chat line closed: it opens with your last line, as the 1.64 client (ChatWindow history)
+	if event is InputEventKey and event.pressed and event.shift_pressed and event.keycode == KEY_UP and chat \
+			and chat.open_with_last():
 		return true
 	for sc in [["chat_page_up", -1], ["chat_page_down", 1]]:
 		if Keybinds.pressed(event, sc[0]):
@@ -1969,7 +2050,10 @@ class WorldDrop extends Control:
 			mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _can_drop_data(_pos: Vector2, data: Variant) -> bool:
-		return InventorySheet.is_item(data)
+		return InventorySheet.is_item(data) or (data is Dictionary and String(data.get("kind", "")) == "money")
 
 	func _drop_data(_pos: Vector2, data: Variant) -> void:
+		if data is Dictionary and String(data.get("kind", "")) == "money":   # coins from the Money Selector (rent)
+			ui.money_dropped_on_world.emit(int(data.slot), int(data.amount), get_viewport().get_mouse_position())
+			return
 		ui.item_dropped_on_world.emit(int(data.slot), get_viewport().get_mouse_position())

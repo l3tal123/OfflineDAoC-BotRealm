@@ -90,13 +90,21 @@ namespace DOL.GS
                 HiredCompanions165.IsHired(bot) || bot.Inventory == null || bot.CurrentRegion == null)
                 return null;
             long now = GameLoop.GameLoopTime;
-            if (ShoppingPlans.TryGetValue(bot.DatabaseID, out var cached) && now < cached.Until)
+            if (ShoppingPlans.TryGetValue(bot.DatabaseID, out var cached))
             {
                 ShoppingPlan plan = cached.Plan;
-                if (plan == null)
+                if (now < cached.Until && plan == null)
                     return null;
-                if (plan.Merchant.ObjectState == GameObject.eObjectState.Active && plan.Price <= ShoppingBudget(bot))
-                    return plan;
+                if (plan != null && plan.Merchant.ObjectState == GameObject.eObjectState.Active && plan.Price <= ShoppingBudget(bot))
+                {
+                    // A trip keeps its merchant until it is done there (2026-11-01 run 3: the plan was worked out again
+                    // every two minutes and could name another merchant mid-trip; the bot then stood "Ready to use" at the
+                    // first one, which no longer served it, until the 15-minute watchdog - 850 times in an hour).
+                    if (now >= cached.Until && !ShoppingSkipped(bot, plan.Merchant))
+                        ShoppingPlans[bot.DatabaseID] = (plan, now + ShoppingPlanLifetimeMilliseconds);
+                    if (now < cached.Until || !ShoppingSkipped(bot, plan.Merchant))
+                        return plan;
+                }
             }
             ShoppingPlan fresh = null;
             try
@@ -133,10 +141,16 @@ namespace DOL.GS
                         DbItemTemplate t = entry.Template;
                         if (!ShoppingConsiders(bot, t, budget) || !ShoppingAllowsWhileArmorMissing(bot, t, budget))
                             continue;
-                        int slot = SlotKey(t.Item_Type);
-                        if (!equippedValue.TryGetValue(slot, out int worn))
-                            equippedValue[slot] = worn = WornValue(bot, t.Item_Type);
-                        int gain = TemplateValue(t) - worn;
+                        int gain;
+                        if (BotWeaponStats.IsMeleeWeapon((eObjectType)t.Object_Type))
+                            gain = WeaponGain(bot, t);
+                        else
+                        {
+                            int slot = SlotKey(t.Item_Type);
+                            if (!equippedValue.TryGetValue(slot, out int worn))
+                                equippedValue[slot] = worn = WornValue(bot, t.Item_Type);
+                            gain = TemplateValue(t) - worn;
+                        }
                         if (gain <= AutonomousBotEconomy.MinimumEquipmentUpgrade || !MightWear(bot, t))
                             continue;
                         GameMerchant merchant = entry.Merchant;
@@ -195,6 +209,20 @@ namespace DOL.GS
                     AutonomousBotEconomy.EquipmentValue(bot.Inventory.GetItem(eInventorySlot.RightBracer)));
             // Weapons can go to either hand: TryGetEquipmentUpgrade settles the real slot for the final candidates.
             return AutonomousBotEconomy.EquipmentValue(bot.Inventory.GetItem((eInventorySlot)itemType));
+        }
+
+        /// <summary>
+        /// A vendor melee weapon's gain over the weapon it would replace, with the bot's trained spec counted
+        /// (AutonomousBotEconomy.FitValue): a two-hander against the two-hand slot, anything else against the main hand
+        /// - the hand a player fights with (2026-11-01 run: a same-level axe for a Shadowblade trained in Axe scored no
+        /// gain against its buckler or training sword, so it was never bought). TryGetEquipmentUpgrade still settles the
+        /// hand for the final candidates.
+        /// </summary>
+        private static int WeaponGain(GameBot bot, DbItemTemplate t)
+        {
+            eInventorySlot hand = t.Item_Type == Slot.TWOHAND ? eInventorySlot.TwoHandWeapon : eInventorySlot.RightHandWeapon;
+            return TemplateValue(t) + AutonomousBotEconomy.WeaponSpecBonus(bot, t.Object_Type, hand) -
+                   AutonomousBotEconomy.FitValue(bot, bot.Inventory.GetItem(hand), hand);
         }
 
         /// <summary>AutonomousBotEconomy.EquipmentValue for a vendor template (no item made per bot and template).</summary>

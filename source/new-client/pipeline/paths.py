@@ -9,7 +9,8 @@ layout. A script that needs a missing input stops with need(), saying what is mi
 | OFFLINEDAOC_WORLD_DB| the True 1.65 world database                            | <server>/runtime/data/opendaoc-165.sqlite3.db    |
 | PERIOD_DATA         | the period data archive (Allakhazam, Uthgard, guides)   | not in the repository / <server>/development-source/research/period-data |
 | DAOC_164_ZIP        | the real 1.64 client (DAoC 1.64.zip)                    | not in the repository / ../1.64 real client/DAoC 1.64.zip |
-| TRUE165_WORK        | the 1.65 layouts and extracts (inn layouts, loading)    | not in the repository / ../1.65 MODE CLIENT (local only) |
+| TRUE165_WORK        | the 1.65 layouts and extracts (inn layouts, loading,    | not in the repository / ../1.65 MODE CLIENT (local only) |
+|                     | the 1.64 housing zones: work/164/phousing, zones/Nifs)  |                                                 |
 """
 import os
 from pathlib import Path
@@ -43,6 +44,22 @@ CLIENT = _env('DAOC_CLIENT', None if _REPO else ROOT / 'external/old_project/run
               SERVER / 'runtime/client-opendaoc/app')
 ZIP_164 = _env('DAOC_164_ZIP', _DEV / '1.64 real client' / 'DAoC 1.64.zip')
 TRUE165_WORK = _env('TRUE165_WORK', _DEV / '1.65 MODE CLIENT (local only)')
+# Player housing (owner 2026-11-02: "i only want the real 1.65 housing areas and models"): the 12 housing zones the
+# 1.64 client ships (4 a realm; the later client's other 15 are later additions) are built from the 1.64 client's own
+# files, extracted read-only from DAoC 1.64.zip into TRUE165_WORK/work/164: phousing/zones/zoneNNN (the client keeps a
+# phousing=1 region's zones there, not in zones/), phousing/nifs + textures, and the zones/Nifs models those zones place
+HOUSING_164 = {13, 16, 17, 18, 114, 117, 118, 119, 213, 215, 217, 218}
+WORK_164 = TRUE165_WORK / 'work' / '164'
+
+
+def zone_dir(zone_id):
+    """A zone's client folder: zones/zoneNNN, else frontiers/zones/zoneNNN (the Albion epic dungeons 233, 244); the
+    period housing zones (HOUSING_164) the 1.64 client's phousing/zones/zoneNNN."""
+    if zone_id in HOUSING_164:
+        return WORK_164 / f'phousing/zones/zone{zone_id:03d}'
+    d = CLIENT / f'zones/zone{zone_id:03d}'
+    return d if d.exists() else CLIENT / f'frontiers/zones/zone{zone_id:03d}'
+
 
 _WHAT = {'CLIENT': 'the DAoC client files (set DAOC_CLIENT to the client\'s app folder)',
          'SERVER': 'the True 1.65 server tree (set OFFLINEDAOC_SERVER)',

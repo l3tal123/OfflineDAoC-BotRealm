@@ -1,3 +1,4 @@
+using System;
 using DOL.GS.Housing;
 using DOL.Language;
 
@@ -29,10 +30,17 @@ namespace DOL.GS.Commands
 				return;
 			}
 
-			// check each player, try and find player with the given name (lowercase cmp)
+			if (args.Length < 2 || string.IsNullOrWhiteSpace(args[1]))
+			{
+				DisplaySyntax(client);
+				return;
+			}
+
+			// check each player, try and find player with the given name (lowercase cmp); it booted the first player whose
+			// name did NOT match (housing audit 2026-11-02)
 			foreach (GamePlayer player in house.GetAllPlayersInHouse())
 			{
-				if (player != client.Player && player.Name.ToLower() != args[1].ToLower())
+				if (player != client.Player && player.Name.Equals(args[1], StringComparison.OrdinalIgnoreCase))
 				{
 					ChatUtil.SendSystemMessage(client, "Scripts.Players.Boot.YouRemoved", client.Player.Name);
 					player.LeaveHouse();

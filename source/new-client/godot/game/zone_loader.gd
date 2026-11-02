@@ -883,9 +883,10 @@ func _load_model(path: String, ambient_only := false) -> Dictionary:
 		var raw: PackedVector3Array = mesh_faces[gi] if gi >= 0 and gi < mesh_faces.size() else PackedVector3Array()
 		# door leaves (nif_doors): panels "door<k>_..." and collision "doorcol<k>_..." in the leaf's own frame,
 		# kept apart from the static batches so they can swing open
-		if mi_name.begins_with("door"):
-			var is_col := mi_name.begins_with("doorcol")
-			var k := int(mi_name.trim_prefix("doorcol" if is_col else "door").get_slice("_", 0))
+		var leaf := door_leaf(mi_name)
+		if not leaf.is_empty():
+			var is_col: bool = leaf[0]
+			var k: int = leaf[1]
 			if not out.doors.has(k):
 				out.doors[k] = {"meshes": [], "collision": PackedVector3Array(), "panel_faces": PackedVector3Array()}
 			if is_col:
@@ -924,7 +925,8 @@ func _model_scene(doc: GLTFDocument, state: GLTFState, specs: Array, path: Strin
 			local = (p as Node3D).transform * local
 			p = p.get_parent()
 		var n := String(mi.name)
-		var drawn := not (n.begins_with("doorcol") or n.begins_with("collision_") or n.begins_with("climb_"))
+		var leaf := door_leaf(n)
+		var drawn: bool = not ((not leaf.is_empty() and leaf[0]) or n.begins_with("collision_") or n.begins_with("climb_"))
 		if drawn:
 			var mesh := mi.mesh
 			for i in mesh.get_surface_count():
@@ -934,11 +936,20 @@ func _model_scene(doc: GLTFDocument, state: GLTFState, specs: Array, path: Strin
 					continue
 				if mat_name.begins_with("nifmat:") and int(mat_name.substr(7)) < specs.size():
 					mesh.surface_set_material(i, materials.material(specs[int(mat_name.substr(7))]))
-				elif not n.begins_with("door"):
+				elif leaf.is_empty():
 					push_warning("%s: surface %d has no converted material (%s)" % [path, i, mat_name])
 		made.append([n, local, mi.mesh, int(mesh_of.get(n, -1))])
 	root.free()
 	return made
+
+
+## A door leaf's mesh (nif_static nif_doors): "door<k>_..." its panel, "doorcol<k>_..." its collision -> [collision?, k];
+## [] for anything else. Only those exact names: a static part merely named like a door - Camelot palace's closed
+## double door "doors:20" (cam32) - was taken for leaf 0, which has no spec, and never drawn (GitHub issue #2).
+static var _leaf_re := RegEx.create_from_string("^door(col)?([0-9]+)_")
+static func door_leaf(mesh_name: String) -> Array:
+	var m := _leaf_re.search(mesh_name)
+	return [] if m == null else [m.get_string(1) != "", int(m.get_string(2))]
 
 
 ## A parsed glTF mesh's triangles from its own arrays, as Mesh.get_faces() gives them - without asking the GPU.

@@ -23,6 +23,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from assets_pipeline import CLIENT, ROOT
 from daoc_mpk import read_mpk
+import paths as _paths
 
 SOUND_DIR = CLIENT / 'sounds'
 
@@ -333,9 +334,8 @@ def _find(name):
 def zone_audio(zone_id, used_ids, used_mp3s, used_names=None):
     used_names = set() if used_names is None else used_names
     """Audio block for one zone; records the sound ids / mp3s it needs."""
-    path = CLIENT / f'zones/zone{zone_id:03d}/sounds.dat'
-    if not path.exists():                                  # the Albion epic dungeons ship in frontiers/zones
-        path = CLIENT / f'frontiers/zones/zone{zone_id:03d}/sounds.dat'
+    # zones/, frontiers/zones/ (the Albion epic dungeons), the 1.64 client's phousing/zones/ (the period housing zones)
+    path = _paths.zone_dir(zone_id) / 'sounds.dat'
     regions = parse_sounds_dat(path.read_text(encoding='latin1')) if path.exists() else []
     for reg in regions:
         for s in reg['sounds']:

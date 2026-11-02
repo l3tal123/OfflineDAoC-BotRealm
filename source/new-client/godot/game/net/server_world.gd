@@ -91,7 +91,39 @@ func _zone_pos(zone_id: int, xoff: int, yoff: int, z: int) -> Vector3:
 	return scene_pos(float(zi.x) * 8192.0 + xoff, float(zi.y) * 8192.0 + yoff, float(z))
 
 
+## Player housing's state (made at its first packet): the houses around you, the one you are in (game/housing).
+var housing: Node                             # (game/housing/housing.gd)
+const HousingScript := preload("res://game/housing/housing.gd")
+const HouseViewScript := preload("res://game/housing/house_view.gd")
+var house_view: Node3D                        # the houses drawn (game/housing/house_view.gd)
+const HousingWindowsScript := preload("res://game/housing/housing_windows.gd")
+var housing_windows: Node                     # the 1.64 housing windows (game/housing/housing_windows.gd)
+const HOUSING_KINDS := ["house", "garden", "house_occupied", "house_enter", "house_exit", "furniture", "house_points",
+		"house_rotate_ok", "house_perms", "house_users"]
+
+
+func _ensure_housing() -> void:
+	if housing != null:
+		return
+	housing = HousingScript.new()
+	housing.name = "Housing"
+	add_child(housing)
+	house_view = HouseViewScript.new()
+	house_view.name = "HouseView"
+	add_child(house_view)
+	house_view.setup(self, housing)
+	if viewer and viewer.ui:
+		housing_windows = HousingWindowsScript.new()
+		housing_windows.name = "HousingWindows"
+		add_child(housing_windows)
+		housing_windows.setup(viewer.ui, housing, house_view)
+
+
 func _on_world(kind: String, d: Dictionary) -> void:
+	if kind in HOUSING_KINDS:
+		_ensure_housing()
+		housing.on_packet(kind, d)
+		return
 	match kind:
 		"npc": _add_npc(d)
 		"object": _add_object(d)
@@ -153,6 +185,7 @@ func _on_world(kind: String, d: Dictionary) -> void:
 				else:
 					viewer.ui.show_lines(String(d.caption), d.lines)
 					if Server.info_item_slot >= 0:               # the item you right-clicked: SALVAGE / REPAIR under it
+						viewer.ui.info_title_con(PlayerData.item_at(Server.info_item_slot))   # (its name in its con colour)
 						viewer.ui.show_item_buttons(Server.info_item_slot)
 						Server.info_item_slot = -1
 		"trainer":
@@ -660,6 +693,11 @@ func _move(d: Dictionary) -> void:
 	mv["water"] = (int(d.flags) & 0x10) != 0                    # the server's "underwater" (npc.IsUnderwater)
 	mv["sy"] = p.y                                              # the server's Z: every height is found from it (_ground)
 	mv["speed"] = float(int(d.speed))                           # (before _ground: a mover goes on the ground)
+	mv["dest"] = null                                           # (before _ground too: a ridden steed's leg height)
+	if int(d.tx) != 0 or int(d.ty) != 0:
+		var dp := _zone_pos(int(d.tzone), int(d.tx), int(d.ty), int(d.tz))
+		if dp != Vector3.INF:
+			mv["dest"] = dp
 	_mover[st] = mv
 	var ridden := _ridden(st)
 	# a ridden steed at 37 m/s is a few metres off the server's place at every update: snapping it there (SNAP_M) made
@@ -673,14 +711,23 @@ func _move(d: Dictionary) -> void:
 		pass
 	elif st.pos.distance_to(p) > snap or float(d.speed) == 0.0:
 		st.pos = p
+		mv["err"] = Vector3.ZERO
+	elif ridden:
+		# a ridden steed is never stepped back toward the server's place (server chat 2026-11-01: the route horse moved
+		# at 45-75% of its packet speed on dense route points and stalled ~1.5 s now and then - the 25% lerp jumped it
+		# back 10-15 times a second, up to 5-8 m after a stall: rubber-banding): the gap is kept and _move_ridden
+		# paces it off - slower or up to 50% faster along its way, never backwards
+		var err := p - st.pos
+		err.y = 0.0
+		mv["err"] = err
 	else:
-		st.pos = st.pos.lerp(p, 0.25 if ridden else 0.5)       # close: ease into the server's place
+		st.pos = st.pos.lerp(p, 0.5)                            # close: ease into the server's place
 	if not seated and not (ridden and String(st.info.get("figure", "")).to_lower() in FLIER_FIGURES):
 		_ground(st)
-	if not ridden:
+	if not ridden or float(d.speed) == 0.0:
 		st.yaw = Server.yaw_of(int(d.heading))
-	else:                                                       # (turned smoothly by _move_ridden, never flipped)
-		st.yaw = lerp_angle(st.yaw, Server.yaw_of(int(d.heading)), 0.5)
+	# (a ridden steed on the move is turned by _move_ridden alone: pulling it toward the update's heading, which may be
+	# a stale leg's, fought its steering)
 	mv["target"] = int(d.target)
 	_note_facing(st, int(d.oid), int(d.target), int(d.heading), float(d.speed))
 	# the server's attack state (ObjectUpdate's target: > 0 while it attacks - PacketLib168, "enables the NPC's attack
@@ -692,11 +739,6 @@ func _move(d: Dictionary) -> void:
 	elif bool(mv.get("saw_target", false)):
 		mv["saw_target"] = false
 		st.combat_until = 0
-	mv["dest"] = null
-	if int(d.tx) != 0 or int(d.ty) != 0:
-		var dp := _zone_pos(int(d.tzone), int(d.tx), int(d.ty), int(d.tz))
-		if dp != Vector3.INF:
-			mv["dest"] = dp
 	var hp := int(d.health)
 	_death_note(st, d, p, hp, drawn_before)
 	_set_health(st, hp)
@@ -761,10 +803,21 @@ func _ground(st: NpcState) -> void:
 	if bool(mv.get("flying", false)):
 		return
 	# Every height is found from the server's own Z for it (its last update), never from where it is drawn now
-	# (owner 2026-10-14: bots stood on each other and up in a pine tree): the floor pick looks 1.2 m above the height
-	# it starts from, so starting from the drawn height let a walker that met a tree, a fixture or a rock ratchet up it
-	# 1.2 m at a time, tick after tick - the server's next update only pulled it halfway back.
+	# (owner 2026-10-14: bots stood on each other and up in a pine tree): the floor pick looks 1.6 m (64 units) above the
+	# height it starts from, so starting from the drawn height let a walker that met a tree, a fixture or a rock ratchet up
+	# it 1.6 m at a time, tick after tick - the server's next update only pulled it halfway back.
 	var ref := float(mv.get("sy", st.pos.y))
+	# a ridden steed on the move (server chat 2026-11-01: a route horse gets one update per leg, so the server's Z was
+	# the leg's start for the whole leg - a leg climbing a bridge ramp over 64 units started the pick under the deck,
+	# and the horse dipped to the river bed at Prydwen Bridge): its height follows the leg, from the update's Z to its
+	# destination's by how far along it has come. Still the server's heights, never the drawn one (no ratchet).
+	var dest = mv.get("dest")
+	if dest is Vector3 and float(mv.get("speed", 0.0)) > 0.0 and mv.has("srv_pos") and _ridden(st):
+		var from: Vector3 = mv.srv_pos
+		var leg := Vector2(dest.x - from.x, dest.z - from.z).length()
+		if leg > 0.5:
+			var done := Vector2(st.pos.x - from.x, st.pos.z - from.z).length()
+			ref = lerpf(ref, float(dest.y), clampf(done / leg, 0.0, 1.0))
 	var at := Vector3(st.pos.x, ref, st.pos.z)
 	# in deep water (owner 2026-10-14: companion bots stood on top of the water): the server holds a swimmer at the
 	# surface (AutonomousNavigationSurface) and flags it underwater; it swims there - your own swim height
@@ -956,6 +1009,9 @@ func _drop_stale(delta: float) -> void:
 			gone.append(int(oid))
 	for oid in gone:
 		_remove(oid, true, 1, "no word from the server for %d s (stale drop)" % (STALE_MS / 1000))
+	if housing and player:                                  # the houses the server stopped sending (it never removes
+		var me: Vector3 = Server.to_region(_current_zone(), player.global_position)   # one leaving range)
+		housing.cull(me.x, me.y)
 
 
 func _physics_body(delta: float) -> void:
@@ -1038,7 +1094,17 @@ func _move_ridden(s: NpcState, mv: Dictionary, step: float, delta: float) -> voi
 		if to.length() > step and to.normalized().dot(ahead) > 0.0:
 			aim = atan2(to.x, to.z)                            # still ahead: steer for it
 	s.yaw = lerp_angle(s.yaw, aim, minf(1.0, delta * 6.0))
-	s.pos += Vector3(sin(s.yaw), 0.0, cos(s.yaw)) * step
+	# the gap to the server's place (_move keeps it): the part along its way is paced off (step + up to 1 s of it per
+	# second, never below 0 or above 1.5 steps), the part to the side eased in
+	var ahead := Vector3(sin(s.yaw), 0.0, cos(s.yaw))
+	var err: Vector3 = mv.get("err", Vector3.ZERO)
+	err.y = 0.0
+	var along := err.dot(ahead)
+	var side := err - ahead * along
+	var adv := clampf(step + along * minf(1.0, delta), 0.0, step * 1.5)
+	var fix_side := side * minf(1.0, delta * 3.0)
+	s.pos += ahead * adv + fix_side
+	mv["err"] = ahead * (along - (adv - step)) + (side - fix_side)
 	if String(s.info.get("figure", "")).to_lower() in FLIER_FIGURES:
 		s.pos.y = lerpf(s.pos.y, float(mv.get("sy", s.pos.y)), minf(1.0, delta * 4.0))
 	else:
@@ -1605,8 +1671,11 @@ func _spell_effect(d: Dictionary) -> void:
 	_burst[key] = now
 	var quiet := int(d.get("no_sound", 0)) != 0                 # the server's "no sound" (a song's pulses)
 	var cast_snd: CharacterSounds = null if repeat or quiet else _sounds_of(caster)
+	# (the target held weakly: a view freed before it lands - a companion revived beside you, its old body let go - is
+	# no target, not a freed capture)
+	var target_ref: WeakRef = weakref(target) if target else null
 	var land := func():
-		var t: Node3D = target
+		var t: Node3D = target_ref.get_ref() as Node3D if target_ref else null
 		if t == null and by_oid.has(toid):
 			t = await _view_soon(toid)                     # just created (a summoned pet): its view is still loading
 		if t and is_instance_valid(t):
@@ -1745,6 +1814,11 @@ func _add_object(d: Dictionary) -> void:
 		return                                                     # the zone already has it (baked, with its fixes)
 		# (never a relic: it lies on its pad - a baked world object right under it)
 	var m := WeaponModels.make_world(model)
+	if m == null and model in HOUSE_USE_MODELS and _in_housing_region():
+		# housing's own ground objects only (lot markers, vaults, bindstones, tools) - not any id in the house-item
+		# range: loot whose model number is a house item there (dragon ant carapace = 1575 = a rose trellis) drew as
+		# garden furniture (owner 2026-11-02) - loot keeps the bag
+		m = HouseViewScript.item_model(model)
 	if m == null:
 		m = WeaponModels.make_world(BAG_MODEL)                     # loot without a world model: the brown bag
 	if m == null:
@@ -1784,6 +1858,8 @@ func _add_object(d: Dictionary) -> void:
 ## Campacorentin, "everytime ive seen these floating objects ive been on a horse ride").
 func rebase(d: Vector3) -> void:
 	super.rebase(d)
+	if house_view:
+		house_view.rebase(d)
 	for oid in objects:
 		var o = objects[oid]
 		if o is Node3D and is_instance_valid(o):
@@ -1817,10 +1893,89 @@ func click_object(cam: Camera3D, screen_pos: Vector2) -> bool:
 	var from := cam.project_ray_origin(screen_pos)
 	var q := PhysicsRayQueryParameters3D.create(from, from + cam.project_ray_normal(screen_pos) * 60.0, OBJECT_PICK)
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if not hit.is_empty() and hit.collider.has_meta("house_door") and house_view:
+		house_view.door_clicked(int(hit.collider.get_meta("house_door")))   # a house door: in / out
+		return true
+	for meta in ["house_furniture", "house_garden"]:                 # a placed decoration / garden item (double: up)
+		if not hit.is_empty() and hit.collider.has_meta(meta) and house_view:
+			house_view.item_clicked(meta, hit.collider.get_meta(meta))
+			return true
 	if hit.is_empty() or not hit.collider.has_meta("server_object"):
 		return false
 	_target_ground(int(hit.collider.get_meta("server_object")))
 	return true
+
+
+## Shift + right-click in player housing (1.64 game.dll 0x429a7d / 0x429b11 / 0x4088ee): on a placed decoration, ask
+## to turn it (the Rotate Object window opens on the server's yes); on a house from outside its External Options, on
+## a wall / floor inside its Internal Options. True when it was housing's.
+func house_shift_click(cam: Camera3D, screen_pos: Vector2) -> bool:
+	if house_view == null:
+		return false
+	var from := cam.project_ray_origin(screen_pos)
+	var to := from + cam.project_ray_normal(screen_pos) * 80.0
+	var q := PhysicsRayQueryParameters3D.create(from, to, OBJECT_PICK | ZoneLoader.LAYER_WALL | ZoneLoader.LAYER_FLOOR)
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty():
+		return false
+	var c: Object = hit.collider
+	if c.has_meta("house_furniture"):
+		var f: Dictionary = c.get_meta("house_furniture")
+		Server.client.call("HouseRotateRequest", int(f.house), int(f.index))
+		return true
+	if c.has_meta("house_number") and housing_windows:
+		housing_windows.ask_options(int(c.get_meta("house_number")), bool(c.get_meta("house_inside", false)))
+		return true
+	return false
+
+
+## An item from the backpack let go on the world, housing's part (1.64 game.dll 0x42950a): onto a ground object (a
+## lot marker - a deed builds the house there: the server's give, slot 1000 + its id), onto a house from outside (a
+## deed / banner / porch deed: HousePlaceItem, the server picks the method by the item), or onto a wall / floor inside
+## your house (HouseView.place_inside). True when it was housing's.
+func house_drop(slot: int, cam: Camera3D, screen_pos: Vector2) -> bool:
+	if Server.client == null:
+		return false
+	var from := cam.project_ray_origin(screen_pos)
+	var to := from + cam.project_ray_normal(screen_pos) * 80.0
+	var q := PhysicsRayQueryParameters3D.create(from, to, OBJECT_PICK | ZoneLoader.LAYER_WALL | ZoneLoader.LAYER_FLOOR)
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty():
+		return false
+	var c: Object = hit.collider
+	if c.has_meta("house_hookpoint"):                             # a hookpoint item onto its marker (method 5)
+		var hp: Dictionary = c.get_meta("house_hookpoint")
+		Server.client.call("HousePlace", slot, int(hp.house), int(hp.id), 5, 0, 0, 0)
+		return true
+	if c.has_meta("server_object"):
+		var oid := int(c.get_meta("server_object"))
+		var holder: Node3D = objects.get(oid)
+		if holder and int(holder.get_meta("model", 0)) in [1306, 1307, 1308]:
+			Server.client.call("MoveItem", slot, 1000 + oid, int(PlayerData.entry(slot).get("count", 1)))
+			return true
+		return false
+	if c.has_meta("house_number"):
+		if bool(c.get_meta("house_inside", false)) and house_view:
+			return house_view.place_inside(slot, hit.position, hit.normal)
+		Server.client.call("HousePlace", slot, int(c.get_meta("house_number")), 0, 4, 0, 0, 0)
+		return true
+	return false
+
+
+## Coins from the Money Selector let go on a house from outside (1.64 help: "drop them on to the outside of the house"):
+## HousePlaceItem with the money slot (245 platinum .. 248 copper) and the amount; the server asks "Pay rent with ...?"
+## and puts it in the lockbox on yes.
+func house_money_drop(slot: int, amount: int, cam: Camera3D, screen_pos: Vector2) -> void:
+	if Server.client == null:
+		return
+	var from := cam.project_ray_origin(screen_pos)
+	var q := PhysicsRayQueryParameters3D.create(from, from + cam.project_ray_normal(screen_pos) * 80.0,
+			ZoneLoader.LAYER_WALL | ZoneLoader.LAYER_FLOOR)
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty() or not hit.collider.has_meta("house_number"):
+		PlayerData.message.emit("Drop the coins onto the outside of your house to pay its rent.", "system")
+		return
+	Server.client.call("HousePlace", slot, int(hit.collider.get_meta("house_number")), clampi(amount, 1, 255), 4, 0, 0, 0)
 
 
 ## A right click on a ground object (2026-10-30, owner report: "right-clicking a relic never triggers a pickup
@@ -1830,12 +1985,25 @@ func use_object(cam: Camera3D, screen_pos: Vector2) -> bool:
 	var from := cam.project_ray_origin(screen_pos)
 	var q := PhysicsRayQueryParameters3D.create(from, from + cam.project_ray_normal(screen_pos) * 60.0, OBJECT_PICK)
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if not hit.is_empty() and hit.collider.has_meta("house_door") and house_view:
+		house_view.door_clicked(int(hit.collider.get_meta("house_door")))   # a house door: in / out
+		return true
+	if not hit.is_empty() and hit.collider.has_meta("house_hookpoint"):   # a hookpoint marker: its store (1.64: a
+		var hp: Dictionary = hit.collider.get_meta("house_hookpoint")     # right click, no Shift needed)
+		Server.client.call("HouseMenu", int(hp.house), int(hp.menu), 0)
+		return true
 	if hit.is_empty() or not hit.collider.has_meta("server_object"):
 		return false
 	var oid := int(hit.collider.get_meta("server_object"))
 	_target_ground(oid)
 	var holder: Node3D = objects.get(oid)
 	if holder and String(holder.get_meta("name", "")).contains("'s Grave"):
+		return true
+	if holder and int(holder.get_meta("model", 0)) in HOUSE_USE_MODELS and _in_housing_region():
+		if int(holder.get_meta("model", 0)) in [1489, 1491, 1493]:
+			Server.house_vault_at = Time.get_ticks_msec()        # (its window 4 is the house vault, not companion gear)
+		var r := Server.to_region(_current_zone(), player.global_position)
+		Server.client.call("Interact", oid, int(r.x), int(r.y))
 		return true
 	get_object()
 	return true
@@ -1936,6 +2104,14 @@ func _merchant(d: Dictionary) -> void:
 	var mst: NpcState = by_oid.get(last_interact_oid)
 	if mst:
 		who = String(mst.spawn.get("name", who))                 # (the merchant you right-clicked, whatever you target)
+	var wt := int(d.window)
+	if wt >= 3 and wt <= 11:                                    # player housing's windows (eMerchantWindowType 3-11):
+		_ensure_housing()                                       # the options windows, the garden placement, the stores
+		if housing_windows and housing_windows.merchant(wt, _merchant_pages):
+			return
+		var title := HousingWindowsScript.store_title(wt)
+		if title != "":
+			who = title
 	viewer.ui.merchant.server_oid = last_interact_oid
 	viewer.ui.merchant.open_server(who, _merchant_pages, int(d.window))
 
@@ -2000,6 +2176,17 @@ const RELIC_MODELS := [630, 631, 632, 633, 634, 635]     # objects.csv: the six 
 # ground objects that are used, not picked up (the interact request, as a relic): the Horn of Rallying on each inn's
 # horn platform (objects.csv 3545 "Relic Warhorn", True 1.65 Mode - server protocol, 2026-10-30: right-click opens its window)
 const USE_MODELS := [3545]
+# player housing's ground objects a right click uses (the interact request): the lot markers (buy the lot / its deed
+# list), the house vaults (open), bindstones, tool tables; the Get Item key still picks a hookpoint item up (the owner
+# taking it back, GamePlayer.PickupObject)
+const HOUSE_USE_MODELS := [1306, 1307, 1308, 1488, 1489, 1490, 1491, 1492, 1493, 1494, 1495, 1496]
+
+
+## Housing's objects exist only in the housing regions (2 Albion, 102 Midgard, 202 Hibernia): elsewhere a ground
+## object with one of those model numbers is loot (the quest item Forge Plans is model 1495, the forge) - the bag,
+## picked up on a right click.
+func _in_housing_region() -> bool:
+	return int(Server.zone_info(_current_zone()).get("region", -1)) in [2, 102, 202]
 
 
 ## True 1.65 Mode: the Horn of Rallying's click target. The horn you see is the zone's scenery (ZoneLoader._add_inn_165,

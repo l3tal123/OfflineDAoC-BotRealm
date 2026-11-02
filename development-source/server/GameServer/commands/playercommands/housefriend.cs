@@ -27,6 +27,13 @@ namespace DOL.GS.Commands
                 return;
             }
 
+            // only the house's owner adds friends to it (anyone inside any house could; housing audit 2026-11-02)
+            if (client.Player.CurrentHouse == null || !client.Player.CurrentHouse.HasOwnerPermissions(client.Player))
+            {
+                client.Out.SendMessage("You need to be in your House to use this command", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                return;
+            }
+
             switch (args[1])
             {
                 case "player":

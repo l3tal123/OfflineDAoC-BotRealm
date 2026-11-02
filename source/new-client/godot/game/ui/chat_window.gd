@@ -32,6 +32,17 @@ var role := "main"                            # "main" (with the typing line) or
 var types: Array = []
 var _log: RichTextLabel
 var _input: LineEdit
+# your last lines, as the 1.64 client keeps them (a player request: "in the official client you can shift+up and
+# shift+down to go through the past 5-10 previous messages"; 1.64 game.dll save 0x419b54, recall 0x424ef9 - read by
+# the original-client research): 10 lines, newest first, as typed (commands with their /); /appeal and /report lines
+# are not kept; in memory only. Shift+Up shows _history[_hist_i] and steps older (stops at the oldest), Shift+Down
+# steps newer - past the newest, the line you were typing (1.64 gives an empty line; owner 2026-11-01: "they can do it
+# as a convenience for now"); Shift+Up with the chat line closed opens it with the newest line. The cursor goes to the
+# start of a recalled line.
+const HISTORY_MAX := 10
+var _history: Array[String] = []
+var _hist_i := 0
+var _draft := ""
 
 
 ## The box frame: the upper chatext box for Main, the lower for Combat, stretched as a nine-patch.
@@ -99,6 +110,9 @@ func build() -> void:
 		_input.gui_input.connect(func(e: InputEvent):
 			if e is InputEventKey and e.pressed and e.keycode == KEY_ESCAPE:
 				stop_typing()
+				_input.accept_event()
+			elif e is InputEventKey and e.pressed and e.shift_pressed and e.keycode in [KEY_UP, KEY_DOWN]:
+				_browse_history(e.keycode == KEY_UP)
 				_input.accept_event())
 		UiArt.themed(_input)
 		add_child(_input)
@@ -204,13 +218,7 @@ func _client_command(text: String) -> bool:
 		"craft" when Server.active and rest == "":       # the tradeskill window (the original's own /craft;
 			PlayerData.window_toggle.emit("craft")         # owner 2026-10-30)
 		"qbar":
-			var ui := get_parent().get_parent() as GameUI
-			var args := rest.split(" ", false)
-			if args.size() == 0 or ui == null:
-				PlayerData.message.emit("Usage: /qbar [bank#] [quickbar#(defaults to 1)]", "help")
-			else:
-				var qb := clampi(int(args[1]) if args.size() > 1 else 1, 1, 3)
-				ui.quickbars[qb - 1].set_bank(clampi(int(args[0]), 1, 10) - 1)
+			_qbar(rest, func(t: String): PlayerData.message.emit(t, "help"))
 		"quit", "q", "logout":
 			Server.quit_world(false)
 		"train" when rest == "":                            # the trainer window, anywhere (TrainWindowHandler; owner
@@ -228,11 +236,73 @@ func run_line(text: String) -> void:
 	_send(text)
 
 
+## /qbar: the quickbar's shown bank. True 1.65 Mode keeps the 1.64 client's command exactly (owner 2026-11-01: no /qbind -
+## "its not accurate"): "/qbar N" shows bank N (1-10) of the quickbar, anything else answers its line (game.dll &qbar
+## 0x40d663). Normal mode keeps the later "/qbar bank [quickbar]".
+func _qbar(rest: String, reply: Callable) -> void:
+	var ui := get_parent().get_parent() as GameUI
+	var args := rest.split(" ", false)
+	if Server.world_mode == "1.65":
+		var n := int(args[0]) if args.size() == 1 and String(args[0]).is_valid_int() else 0
+		if n < 1 or n > 10 or ui == null:
+			reply.call("Use: /qbar # (where # is a number between 1 and 10)")
+		else:
+			ui.quickbars[0].set_bank(n - 1)
+		return
+	if args.size() == 0 or ui == null:
+		reply.call("Usage: /qbar [bank#] [quickbar#(defaults to 1)]")
+	else:
+		var qb := clampi(int(args[1]) if args.size() > 1 else 1, 1, 3)
+		ui.quickbars[qb - 1].set_bank(clampi(int(args[0]), 1, 10) - 1)
+
+
+## Shift+Up (older) / Shift+Down (newer) through the lines you sent, the 1.64 client's way (its index already
+## points past the line shown, so the first Shift+Down after Shift+Ups shows that line again).
+func _browse_history(older: bool) -> void:
+	if older:
+		if _hist_i == 0:
+			_draft = _input.text                              # (what you were typing: back past the newest)
+		if _hist_i < _history.size():
+			_set_line(_history[_hist_i])
+			_hist_i = mini(_hist_i + 1, HISTORY_MAX - 1)
+	else:
+		_hist_i -= 1
+		if _hist_i < 0:
+			_hist_i = 0
+			_set_line(_draft)
+			_input.caret_column = _draft.length()
+		elif _hist_i < _history.size():
+			_set_line(_history[_hist_i])
+
+
+func _set_line(t: String) -> void:
+	_input.text = t
+	_input.caret_column = 0
+
+
+## Shift+Up with the chat line closed: it opens with your newest line (1.64 game.dll 0x424ef9).
+func open_with_last() -> bool:
+	if _input == null or _input.visible or _history.is_empty():
+		return false
+	start_typing(_history[0])
+	_input.caret_column = 0
+	_hist_i = 1
+	_draft = ""
+	return true
+
+
 func _send(text: String) -> void:
 	stop_typing()
 	text = text.strip_edges()
+	_hist_i = 0
+	_draft = ""
 	if text == "":
 		return
+	var low := text.to_lower()
+	if not (text.length() >= 6 and (low.begins_with("/appea") or low.begins_with("/repor"))):
+		_history.push_front(text)
+		if _history.size() > HISTORY_MAX:
+			_history.pop_back()
 	if _macro(text):                                       # a client command: never sent to the server
 		return
 	if text.to_lower() == "/loc" or text.to_lower().begins_with("/loc "):
@@ -326,12 +396,7 @@ func _send(text: String) -> void:
 		"stand":
 			PlayerData.sit_requested.emit(false)
 		"qbar":                                            # patch 1.54: "/qbar 2 switches to your second quickbar"
-			var args := rest.split(" ", false)
-			if args.size() == 0 or ui == null:
-				say.call("Usage: /qbar [bank#] [quickbar#(defaults to 1)]", "help")
-			else:
-				var qb := clampi(int(args[1]) if args.size() > 1 else 1, 1, 3)
-				ui.quickbars[qb - 1].set_bank(clampi(int(args[0]), 1, 10) - 1)
+			_qbar(rest, func(t: String): say.call(t, "help"))
 		_:
 			if Combat.emotes().has(cmd):
 				PlayerData.emote_requested.emit(cmd)

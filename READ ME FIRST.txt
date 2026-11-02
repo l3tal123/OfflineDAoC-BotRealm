@@ -42,6 +42,7 @@ or a mod.
 MORE HELP
 docs\PLAY.md                full guide and troubleshooting
 docs\NEW-CLIENT.md          the client: keys, settings, logs
+CHANGELOG.md                what's in this version
 QUICK COMMANDS.txt          handy in-game commands
 ALL SERVER COMMANDS.txt     every command (GM-only ones marked)
 The source code and the guides for developers and AI assistants are on

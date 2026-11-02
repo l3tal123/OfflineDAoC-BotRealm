@@ -171,7 +171,7 @@ namespace DOL.GS;
         if (equipSlot != eInventorySlot.Invalid)
         {
             DbInventoryItem equipped = bot.Inventory.GetItem(equipSlot);
-            int improvement = EquipmentValue(item) - EquipmentValue(equipped);
+            int improvement = FitValue(bot, item, equipSlot) - FitValue(bot, equipped, equipSlot);
             if (bot.CharacterClass?.ID == (int)eCharacterClass.Savage &&
                 BotWeaponStats.IsMeleeWeapon((eObjectType)item.Object_Type))
             {
@@ -266,9 +266,29 @@ namespace DOL.GS;
             if (bot.CharacterClass?.ID == (int)eCharacterClass.Savage &&
                 BotWeaponStats.IsMeleeWeapon((eObjectType)item.Object_Type))
                 return SavageBotWeaponPolicy.IsUpgrade(bot, item, equipSlot);
-            int improvement = EquipmentValue(item) - EquipmentValue(equipped);
+            int improvement = FitValue(bot, item, equipSlot) - FitValue(bot, equipped, equipSlot);
             return equipped == null || improvement > MinimumEquipmentUpgrade;
         }
+
+        /// <summary>
+        /// Value of a point of trained weapon spec, for comparing melee weapons. A player fights with the weapon line he
+        /// trained: an untrained weapon misses more and hits for less, whatever its level (2026-11-01 run: 55% of the
+        /// level 5-9 hybrid and melee bots that died held their starting weapon in a line at spec 0-1 - Shadowblades
+        /// trained in Axe with a training sword, Hunters, Savages, Valewalkers, Bards, Champions - because a weapon was
+        /// valued by level, quality and DPS only, so a same-level weapon of the trained line was never an upgrade).
+        /// </summary>
+        public const int WeaponSpecValue = 30;
+
+        /// <summary>The bot's trained spec for a melee weapon of this type in this hand (left axe in the left hand), times
+        /// <see cref="WeaponSpecValue"/>; 0 for anything else.</summary>
+        public static int WeaponSpecBonus(GameBot bot, int objectType, eInventorySlot slot) =>
+            bot != null && BotWeaponStats.IsMeleeWeapon((eObjectType)objectType)
+                ? WeaponSpecValue * Math.Max(0, bot.TrainedWeaponSpec((eObjectType)objectType, (int)slot))
+                : 0;
+
+        /// <summary>EquipmentValue plus, for a melee weapon, what the bot's training in its line is worth in that hand.</summary>
+        public static int FitValue(GameBot bot, DbInventoryItem item, eInventorySlot slot) =>
+            item == null ? 0 : EquipmentValue(item) + WeaponSpecBonus(bot, item.Object_Type, slot);
 
         /// <summary>
         /// Compares against what the move actually displaces (the idea behind the
@@ -580,6 +600,15 @@ namespace DOL.GS;
                  HiredCompanions165.IsHired(bot) &&
                  (bot.Inventory.GetItem(eInventorySlot.RightHandWeapon) == null || !LeftHandWeaponAllowed(bot, item))))
                 requested = eInventorySlot.RightHandWeapon;
+            // A gamebot that fights with two weapons holds the one it trained more in its main hand (2026-11-01 run:
+            // Shadowblades trained in Axe put a new axe in the left hand and kept fighting with the training sword).
+            // Left-axe builds and Savages keep their own hand rules above.
+            else if (requested == eInventorySlot.LeftHandWeapon && !HiredCompanions165.IsHired(bot) &&
+                     bot.BotSpec?.SpecType != eSpecType.LeftAxe && bot.CharacterClass?.ID != (int)eCharacterClass.Savage &&
+                     bot.Inventory.GetItem(eInventorySlot.RightHandWeapon) is var mainHand &&
+                     (mainHand == null || WeaponSpecBonus(bot, item.Object_Type, eInventorySlot.RightHandWeapon) >
+                                          WeaponSpecBonus(bot, mainHand.Object_Type, eInventorySlot.RightHandWeapon)))
+                requested = eInventorySlot.RightHandWeapon;
             if (!BotWeaponStats.FitsConfiguredSlot(bot, item, requested)) return eInventorySlot.Invalid;
         }
         if (requested is eInventorySlot.LeftRing or eInventorySlot.RightRing)
@@ -650,14 +679,53 @@ namespace DOL.GS;
         /// </summary>
         public static bool MoveStrayOffhandWeapon(GameBot bot)
         {
-            if (bot?.Inventory == null || CanUseOffhandWeapon(bot))
+            if (bot?.Inventory == null)
                 return false;
+            if (CanUseOffhandWeapon(bot))
+                return SwapHandsForTrainedWeapon(bot);
             DbInventoryItem left = bot.Inventory.GetItem(eInventorySlot.LeftHandWeapon);
             if (left == null || !BotWeaponStats.IsMeleeWeapon((eObjectType)left.Object_Type) ||
                 left.Item_Type == Slot.TWOHAND || left.Hand == 1 ||
                 bot.Inventory.GetItem(eInventorySlot.RightHandWeapon) != null)
                 return false;
             if (!bot.Inventory.MoveItem(eInventorySlot.LeftHandWeapon, eInventorySlot.RightHandWeapon, 1))
+                return false;
+            bot.RefreshItemBonuses();
+            if (!bot.IsAttacking && bot.ActiveWeaponSlot == eActiveWeaponSlot.Standard)
+                bot.SwitchWeapon(eActiveWeaponSlot.Standard);
+            bot.MarkAutonomousStateDirty();
+            AutonomousBotStatusPersistence.Queue(bot, true);
+            return true;
+        }
+
+        /// <summary>
+        /// A gamebot that fights with two weapons and holds the one it trained more in its left hand swaps hands, so its
+        /// main hand swings the trained weapon (a player sets his hands himself; a hired companion's hands are its
+        /// player's choice and stay as they are). Left-axe builds and Savages have their own hand rules.
+        /// </summary>
+        private static bool SwapHandsForTrainedWeapon(GameBot bot)
+        {
+            if (HiredCompanions165.IsHired(bot) || bot.BotSpec?.SpecType == eSpecType.LeftAxe ||
+                bot.CharacterClass?.ID == (int)eCharacterClass.Savage)
+                return false;
+            DbInventoryItem left = bot.Inventory.GetItem(eInventorySlot.LeftHandWeapon);
+            DbInventoryItem right = bot.Inventory.GetItem(eInventorySlot.RightHandWeapon);
+            if (left == null || right == null || !BotWeaponStats.IsMeleeWeapon((eObjectType)left.Object_Type) ||
+                !BotWeaponStats.IsMeleeWeapon((eObjectType)right.Object_Type) ||
+                WeaponSpecBonus(bot, left.Object_Type, eInventorySlot.RightHandWeapon) <=
+                WeaponSpecBonus(bot, right.Object_Type, eInventorySlot.RightHandWeapon))
+                return false;
+            // A main-hand-only weapon can't take the left hand: it goes to the backpack (2026-11-01 run 2: a Shadowblade
+            // kept its right-hand training sword because the swap needed the sword to fit the left hand).
+            if ((eInventorySlot)right.Item_Type != eInventorySlot.LeftHandWeapon)
+            {
+                eInventorySlot free = bot.Inventory.FindFirstEmptySlot(eInventorySlot.FirstBackpack, eInventorySlot.LastBackpack);
+                if (free == eInventorySlot.Invalid || !bot.Inventory.MoveItem(eInventorySlot.RightHandWeapon, free, 1))
+                    return false;
+            }
+            if (!bot.Inventory.MoveItem(eInventorySlot.LeftHandWeapon, eInventorySlot.RightHandWeapon, 1))
+                return false;
+            if (bot.Inventory.GetItem(eInventorySlot.RightHandWeapon) != left)
                 return false;
             bot.RefreshItemBonuses();
             if (!bot.IsAttacking && bot.ActiveWeaponSlot == eActiveWeaponSlot.Standard)

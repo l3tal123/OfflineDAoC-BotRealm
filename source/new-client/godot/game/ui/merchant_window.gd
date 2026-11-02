@@ -306,6 +306,7 @@ func _drop_data(_pos: Vector2, data: Variant) -> void:
 class ShopRow extends Control:
 	var window: MerchantWindow
 	var item_id := ""
+	var _hover := false
 	var _icon: TextureRect
 	var _name: Label
 	var _level: Label
@@ -344,8 +345,17 @@ class ShopRow extends Control:
 		queue_redraw()
 
 	func _draw() -> void:
-		if item_id != "" and window and window.selected == item_id:
+		var sel := item_id != "" and window and window.selected == item_id
+		if sel:
 			draw_rect(Rect2(Vector2.ZERO, size), Color(1.0, 0.8, 0.35, 0.18))
+		var c := ItemTooltip.name_color(ItemDb.item(item_id) if item_id != "" else {}, sel or _hover)
+		if _name.get_theme_color("font_color") != c:
+			_name.add_theme_color_override("font_color", c)
+
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_MOUSE_ENTER or what == NOTIFICATION_MOUSE_EXIT:
+			_hover = what == NOTIFICATION_MOUSE_ENTER       # (the name in its con colour while highlighted)
+			queue_redraw()
 
 	func _make_custom_tooltip(_for_text: String) -> Object:          # weapons / armour: the mini delve box
 		return ItemTooltip.make(ItemDb.item(item_id)) if item_id != "" else null

@@ -34,7 +34,7 @@ from pathlib import Path
 
 PART_BUDGET = 1_900_000_000          # bytes of files per part (GitHub's limit is 2 GiB per asset)
 # The player docs every install gets, from the repository, at the same paths in the game folder.
-PLAYER_DOCS = ["READ ME FIRST.txt", "QUICK COMMANDS.txt", "ALL SERVER COMMANDS.txt", "LICENSE",
+PLAYER_DOCS = ["READ ME FIRST.txt", "QUICK COMMANDS.txt", "ALL SERVER COMMANDS.txt", "CHANGELOG.md", "LICENSE",
                "THIRD_PARTY.md", "docs/PLAY.md", "docs/NEW-CLIENT.md"]
 # Already-compressed formats are stored, not deflated again.
 STORED = {".png", ".jpg", ".jpeg", ".ogg", ".mp3", ".zip", ".7z", ".webp", ".ctex", ".scn", ".res", ".pck"}

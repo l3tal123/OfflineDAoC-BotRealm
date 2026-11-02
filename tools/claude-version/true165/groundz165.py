@@ -27,13 +27,17 @@ def _mesh(zone):
     return _meshes[zone]
 
 
-def ground_z(region, x, y, near_z):
-    """The walkable floor at (x, y) closest to near_z (outdoors that is the ground, not a roof or bridge above it);
-    None when no navmesh covers the spot."""
+import functools
+
+
+@functools.lru_cache(maxsize=4_000_000)
+def floors(region, x, y):
+    """Every walkable floor height at (x, y) (a bridge deck and the river bed under it are two), sorted; cached, as the
+    route builders ask about the same spots many times (2026-11-01: the horse-route deck pass ran for hours)."""
     global _zones
     if _zones is None:
         _zones = load_zones(ZONES_DAT)
-    best = None
+    hs = set()
     for zid, z in _zones.items():
         if z['region'] != region or not (z['x'] <= x < z['x'] + z['w'] and z['y'] <= y < z['y'] + z['h']):
             continue
@@ -44,10 +48,15 @@ def ground_z(region, x, y, near_z):
             _, pts, bb, _, om = m.polys[i]
             if om or not (bb[0] <= x <= bb[2] and bb[1] <= y <= bb[3]) or not _inside(pts, x, y):
                 continue
-            h = m.height(i, x, y)
-            if best is None or abs(h - near_z) < abs(best - near_z):
-                best = h
-    return None if best is None else int(round(best))
+            hs.add(int(round(m.height(i, x, y))))
+    return tuple(sorted(hs))
+
+
+def ground_z(region, x, y, near_z):
+    """The walkable floor at (x, y) closest to near_z (outdoors that is the ground, not a roof or bridge above it);
+    None when no navmesh covers the spot."""
+    hs = floors(region, int(round(x)), int(round(y)))
+    return min(hs, key=lambda h: abs(h - near_z)) if hs else None
 
 
 def nearest_ground(region, x, y, near_z, search=400, step=50):

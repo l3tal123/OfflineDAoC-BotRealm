@@ -1,0 +1,231 @@
+{
+ "table": "MerchantItem",
+ "key": "MerchantItem_ID",
+ "reason": "True 1.65 housing stable routes: the stable routes between the period housing zones' stable masters (build_housingroutes165.py)",
+ "rows": [
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Alis_Gyrom",
+   "ItemListID": "p165_housing_stable_Alis",
+   "ItemTemplateID": "HH_Alis_Gyrom",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Alis_Cora",
+   "ItemListID": "p165_housing_stable_Alis",
+   "ItemTemplateID": "HH_Alis_Cora",
+   "PageNumber": 0,
+   "SlotPosition": 1,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Alis_Itis",
+   "ItemListID": "p165_housing_stable_Alis",
+   "ItemTemplateID": "HH_Alis_Itis",
+   "PageNumber": 0,
+   "SlotPosition": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Alis_Alamdar",
+   "ItemListID": "p165_housing_stable_Alis",
+   "ItemTemplateID": "HH_Alis_Alamdar",
+   "PageNumber": 0,
+   "SlotPosition": 3,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Alis_Hwithloew",
+   "ItemListID": "p165_housing_stable_Alis",
+   "ItemTemplateID": "HH_Alis_Hwithloew",
+   "PageNumber": 0,
+   "SlotPosition": 4,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Gyrom_Alis",
+   "ItemListID": "p165_housing_stable_Gyrom",
+   "ItemTemplateID": "HH_Gyrom_Alis",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Gyrom_Cora",
+   "ItemListID": "p165_housing_stable_Gyrom",
+   "ItemTemplateID": "HH_Gyrom_Cora",
+   "PageNumber": 0,
+   "SlotPosition": 1,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Gyrom_Itis",
+   "ItemListID": "p165_housing_stable_Gyrom",
+   "ItemTemplateID": "HH_Gyrom_Itis",
+   "PageNumber": 0,
+   "SlotPosition": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Cora_Alis",
+   "ItemListID": "p165_housing_stable_Cora",
+   "ItemTemplateID": "HH_Cora_Alis",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Cora_Gyrom",
+   "ItemListID": "p165_housing_stable_Cora",
+   "ItemTemplateID": "HH_Cora_Gyrom",
+   "PageNumber": 0,
+   "SlotPosition": 1,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Cora_Itis",
+   "ItemListID": "p165_housing_stable_Cora",
+   "ItemTemplateID": "HH_Cora_Itis",
+   "PageNumber": 0,
+   "SlotPosition": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Itis_Alis",
+   "ItemListID": "p165_housing_stable_Itis",
+   "ItemTemplateID": "HH_Itis_Alis",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Itis_Gyrom",
+   "ItemListID": "p165_housing_stable_Itis",
+   "ItemTemplateID": "HH_Itis_Gyrom",
+   "PageNumber": 0,
+   "SlotPosition": 1,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Itis_Cora",
+   "ItemListID": "p165_housing_stable_Itis",
+   "ItemTemplateID": "HH_Itis_Cora",
+   "PageNumber": 0,
+   "SlotPosition": 2,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Alamdar_Alis",
+   "ItemListID": "p165_housing_stable_Alamdar",
+   "ItemTemplateID": "HH_Alamdar_Alis",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Hwithloew_Alis",
+   "ItemListID": "p165_housing_stable_Hwithloew",
+   "ItemTemplateID": "HH_Hwithloew_Alis",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Hwithloew_Corliss",
+   "ItemListID": "p165_housing_stable_Hwithloew",
+   "ItemTemplateID": "HH_Hwithloew_Corliss",
+   "PageNumber": 0,
+   "SlotPosition": 1,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Tomaz_Maela",
+   "ItemListID": "p165_housing_stable_Tomaz",
+   "ItemTemplateID": "HH_Tomaz_Maela",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Maela_Tomaz",
+   "ItemListID": "p165_housing_stable_Maela",
+   "ItemTemplateID": "HH_Maela_Tomaz",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Corliss_Hwithloew",
+   "ItemListID": "p165_housing_stable_Corliss",
+   "ItemTemplateID": "HH_Corliss_Hwithloew",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Buri_Haile",
+   "ItemListID": "p165_housing_stable_Buri",
+   "ItemTemplateID": "HH_Buri_Haile",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Haile_Buri",
+   "ItemListID": "p165_housing_stable_Haile",
+   "ItemTemplateID": "HH_Haile_Buri",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Hallbera_Erling",
+   "ItemListID": "p165_housing_stable_Hallbera",
+   "ItemTemplateID": "HH_Hallbera_Erling",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Erling_Hallbera",
+   "ItemListID": "p165_housing_stable_Erling",
+   "ItemTemplateID": "HH_Erling_Hallbera",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Feldun_Maka",
+   "ItemListID": "p165_housing_stable_Feldun",
+   "ItemTemplateID": "HH_Feldun_Maka",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Maka_Feldun",
+   "ItemListID": "p165_housing_stable_Maka",
+   "ItemTemplateID": "HH_Maka_Feldun",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Makenna_Braddan",
+   "ItemListID": "p165_housing_stable_Makenna",
+   "ItemTemplateID": "HH_Makenna_Braddan",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  },
+  {
+   "MerchantItem_ID": "p165-housing-mi-HH_Braddan_Makenna",
+   "ItemListID": "p165_housing_stable_Braddan",
+   "ItemTemplateID": "HH_Braddan_Makenna",
+   "PageNumber": 0,
+   "SlotPosition": 0,
+   "LastTimeRowUpdated": "2026-11-02 12:00:00"
+  }
+ ]
+}

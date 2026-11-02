@@ -264,7 +264,8 @@ public static class AutonomousObjectiveAssignments
                                                           // True 1.65 Mode: at level 5 a base-class bot ends its hunt and goes to be
                                                           // promoted like a player (run 1b: 182 waited at level 5+ on hour-long hunts)
                                                           (!HasActivePveAssignment(bot.PersistentRecord, utcNow) ||
-                                                           BaseClassBots165.NeedsPromotion(bot) && bot.Group == null))
+                                                           BaseClassBots165.NeedsPromotion(bot) && bot.Group == null ||
+                                                           GoesShoppingAfterDefeat165(bot)))
                 .ToArray();
             foreach (GameBot bot in completedPve)
             {
@@ -614,6 +615,17 @@ public static class AutonomousObjectiveAssignments
     {
         return AutonomousBotGoalPolicy.Choose(50, random);
     }
+
+    /// <summary>
+    /// True 1.65 Mode: a solo bot killed in the last ten minutes that can afford a gear upgrade ends its hunt and goes
+    /// shopping, as a player would after dying with poor gear (2026-11-01 runs: bots died every 3-4 minutes and never
+    /// finished a hunt, and shopping only happens between hunts, so a Shadowblade trained in Axe kept its training
+    /// sword all hour with 18 silver in its purse while an axe sold for 4s50c).
+    /// </summary>
+    private static bool GoesShoppingAfterDefeat165(GameBot bot) =>
+        Classic165Mode.IsOn && bot.Group == null && bot.IsAlive && bot.LastDeathTick165 > 0 &&
+        GameLoop.GameLoopTime - bot.LastDeathTick165 < 10 * 60_000 &&
+        AutonomousWorldBotController.ShoppingPlanFor(bot) != null;
 
     public static void MarkPveTaskCompleted(GameBot bot)
     {

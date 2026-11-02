@@ -49,6 +49,12 @@ func _ready() -> void:
 	# "Modifier - None", Quickbar 2 "Modifier - Alt", Quickbar 3 "Modifier - Ctrl"; keyboard.dat AltModifier /
 	# CtrlModifier): bar 1 on 1-0, bar 2 on Alt+1-0, bar 3 on Ctrl+1-0. Shift+1-0 picks quickbar 1's bank (patch
 	# 1.54: "/qbar 2 switches to your second quickbar, the same as pressing Shift-2"). All rebindable.
+	# Mouse Look Toggle (game.dll's key list; keyboard.dat puts it on a mouse button in all three presets - the right
+	# button, owner 2026-11-01): a right click on open ground switches mouse look on, the next right click switches it
+	# off (Player.set_mouse_look). True 1.65 Mode; it works only once Options > CONTROLS "MOUSE LOOK TOGGLE" is on (off
+	# by default, owner 2026-11-01).
+	actions.append({"id": "mouse_look", "label": "Mouse Look Toggle", "category": "Camera", "client_name": "Mouse Look Toggle",
+			"presets": {"rpg": ["Right Mouse"], "fps": ["Right Mouse"], "mmo": ["Right Mouse"]}})
 	# the unseen-characters report (owner 2026-10-17: invisible gamebots / pets): F12, free in every preset
 	actions.append({"id": "bot_report", "label": "Report Unseen Characters (log)", "category": "Misc",
 			"presets": {"rpg": ["F12"], "fps": ["F12"], "mmo": ["F12"]}})

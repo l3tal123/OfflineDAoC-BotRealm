@@ -771,6 +771,7 @@ namespace DOL.GS
             var mount = ticket?.Color > 0
                 ? new GameBotTaxi(this, NpcTemplateMgr.GetTemplate(ticket.Color))
                 : new GameBotTaxi(this);
+            mount.Size = GameTaxi.SizeForRace(Race);   // the same race-sized horse a player of this race gets
             mount.Realm = Realm;
             mount.X = route.X;
             mount.Y = route.Y;
@@ -1125,8 +1126,11 @@ namespace DOL.GS
                          $"maxhp={MaxHealth} con={GetModified(eProperty.Constitution)} con_lost={TotalConstitutionLostAtDeath} " +
                          $"eff={Effectiveness:0.00} eff_tracked={_effectiveness165:0.00} armor={armorPieces}/6 " +
                          $"weapon=\"{weapon?.Name}\" wskill={(weapon == null ? 0 : GetWeaponSkill(weapon)):0} " +
-                         $"spec={(weapon == null ? 0 : WeaponSpecLevel(weapon))} region={CurrentRegionID} at={X},{Y}" +
-                         (string.IsNullOrEmpty(diagnostics) ? string.Empty : " " + diagnostics));
+                         $"spec={(weapon == null ? 0 : WeaponSpecLevel(weapon))} " +
+                         // how close the fight was and how it was fought (2026-11-01 run: casters and healers died to single
+                         // green monsters as often as fighters)
+                         $"killer_hp={source?.HealthPercent ?? 0}% power={ManaPercent}% slot={ActiveWeaponSlot} casting={IsCasting} " +
+                         $"region={CurrentRegionID} at={X},{Y} trace=[{FightTrace165()}]");
             }
             catch (Exception e)
             {
@@ -1139,6 +1143,7 @@ namespace DOL.GS
             SetSeatedForClients(false);
             AutonomousPetSupport.CancelPendingCharm(this);
             _deathTick = GameLoop.GameLoopTime;
+            LastDeathTick165 = _deathTick;
             _deathRegionId = CurrentRegionID;
             _deathLocation = new Point3D(X, Y, Z);
             (_lastDeathRvR165, _pendingConLoss165) = DeathPenalty165.OnDeath(this, killer, ref _deathsLevel165, ref _deathsThisLevel165);
@@ -1169,10 +1174,56 @@ namespace DOL.GS
             if (IsAutonomousWorldBot)
                 AutonomousBotStatusPersistence.Queue(this);
             StartDeathRecoveryTimer();
+            // its player's companion roster shows it DEAD now, not only after a revive (2026-11-01 live test: the row
+            // stayed "WITH YOU" until the companion was raised; the roster was re-sent only on summon / recall / revive)
+            if (HiredCompanions165.IsHired(this) && HiredCompanions165.OwnerOf(this) is { } owner)
+                Hire165.SendRosterNumbers(owner);
         }
 
         /// <summary>Where the bot last died (region and spot), for the camp planner's no-go memory.</summary>
         public (ushort Region, int X, int Y) LastDeathSpot => (_deathRegionId, _deathLocation?.X ?? 0, _deathLocation?.Y ?? 0);
+
+        /// <summary>Game time of the bot's last death (0 = none this session); kept after it is raised.</summary>
+        public long LastDeathTick165 { get; private set; }
+
+        // True 1.65 Mode run diagnostics: the last few combat events of a gamebot, printed with BOT_DEATH_165 (2026-11-01:
+        // casters died with most of their power left and fighters with their killer barely hurt).
+        private readonly Queue<(long Tick, string What)> _fightTrace165 = new();
+        private long _lastHitTrace165;
+
+        internal void Trace165(string what)
+        {
+            if (!Classic165Mode.IsOn || !IsAutonomousWorldBot)
+                return;
+            lock (_fightTrace165)
+            {
+                if (_fightTrace165.Count > 0 && _fightTrace165.Last().What == what)
+                    return;   // the same event again (an attack restarted every pulse) adds nothing
+                if (_fightTrace165.Count >= 16)
+                    _fightTrace165.Dequeue();
+                _fightTrace165.Enqueue((GameLoop.GameLoopTime, what));
+            }
+        }
+
+        private string FightTrace165()
+        {
+            long now = GameLoop.GameLoopTime;
+            lock (_fightTrace165)
+            {
+                string trace = string.Join(" | ", _fightTrace165.Select(e => $"-{(now - e.Tick) / 1000.0:0.0}s {e.What}"));
+                _fightTrace165.Clear();
+                return trace;
+            }
+        }
+
+        private int TraceDistance165() => TargetObject == null || TargetObject.CurrentRegion != CurrentRegion ? -1 : (int)GetDistanceTo(TargetObject);
+
+        public override void StartInterruptTimer(int duration, AttackData.eAttackType attackType, GameLiving attacker)
+        {
+            if (IsCasting)
+                Trace165($"interrupted by {attacker?.Name}");
+            base.StartInterruptTimer(duration, attackType, attacker);
+        }
 
         private bool _lastDeathRvR165;
         private int _pendingConLoss165;
@@ -1814,6 +1865,10 @@ namespace DOL.GS
         public override int WeaponSpecLevel(DbInventoryItem weapon) =>
             weapon == null ? 0 : WeaponSpecLevel((eObjectType)weapon.Object_Type, weapon.SlotPosition);
 
+        /// <summary>WeaponSpecLevel for gear comparisons; 0 while the bot has no specializations loaded yet.</summary>
+        internal int TrainedWeaponSpec(eObjectType objectType, int slotPosition) =>
+            m_specialization == null ? 0 : WeaponSpecLevel(objectType, slotPosition);
+
         #endregion
 
         #region IGamePlayer — XP / Realm Points
@@ -2009,6 +2064,14 @@ namespace DOL.GS
                 Health = MaxHealth;
                 Mana = MaxMana;
                 Endurance = MaxEndurance;
+                // Players around see the new level (its con colour comes from it) and the group window shows it (player
+                // report 2026-11-01: a levelled bot stayed grey, and group members' levels never changed in the window).
+                if (ObjectState == eObjectState.Active)
+                {
+                    ClientService.CreateObjectForPlayers(this);
+                    BroadcastLivingEquipmentUpdate();
+                }
+                Group?.UpdateMember(this, false, true);
                 AutonomousBotStatusPersistence.Queue(this, true);
                 LogCompanionSkills($"level {Level}");
             }
@@ -2962,6 +3025,8 @@ namespace DOL.GS
                 castingComponent.HasPendingSkillRequests ||
                 BotSpellPower.IsOffensiveCaster(this) && castingComponent.IsCasting && !castingComponent.IsFocusChanneling)
             {
+                if (spell?.IsHarmful == true && Mana < BotSpellPower.Cost(this, spell, line))
+                    Trace165($"no power for {spell.Name}");
                 LogCompanionCast165(spell, !CanAffordConcentration(spell) ? "no-concentration" : "power-or-busy");
                 CabalistRestDiagnostics.Attempt(this, spell, false);
                 return false;
@@ -2992,6 +3057,8 @@ namespace DOL.GS
             if (_seatedForClients)
                 SetSeatedForClients(false);
             bool started = base.CastSpell(spell, line, spellCastingAbilityHandler, checkLos);
+            if (spell.IsHarmful || spell.IsHealing)
+                Trace165($"{(started ? "cast" : "refused")} {spell.Name} d={TraceDistance165()}");
             LogCompanionCast165(spell, started ? "cast" : "refused");
             CabalistRestDiagnostics.Attempt(this, spell, started);
             if (started && CharacterClass?.ID == (int)eCharacterClass.Animist)
@@ -3023,6 +3090,8 @@ namespace DOL.GS
                 (TargetObject == target || rangeAttackComponent.AutoFireTarget == target))
                 return;
 
+            if (target != null && (!attackComponent.AttackState || TargetObject != target))
+                Trace165($"attack {target.Name} {ActiveWeaponSlot} d={(target.CurrentRegion == CurrentRegion ? (int)GetDistanceTo(target) : -1)}");
             base.StartAttack(target);
         }
 
@@ -3241,6 +3310,11 @@ namespace DOL.GS
 
         public override void OnAttackedByEnemy(AttackData ad)
         {
+            if (ad?.Attacker != null && GameLoop.GameLoopTime - _lastHitTrace165 > 4_000)
+            {
+                _lastHitTrace165 = GameLoop.GameLoopTime;
+                Trace165($"hit by {ad.Attacker.Name} {ad.AttackResult} {ad.Damage + ad.CriticalDamage} hp={HealthPercent}% pow={ManaPercent}%");
+            }
             // Notify BotBrain of the attack so it can add aggro and transition to combat state
             if (Brain is BotBrain botBrain)
                 botBrain.OnAttackedByEnemy(ad);

@@ -157,75 +157,7 @@ namespace DOL.GS
                             }
 						}
 						
-						switch ((eRace)player.Race)
-						{
-							case eRace.Lurikeen:
-								mount.Size = 38;
-								break;
-							case eRace.Kobold:
-								mount.Size = 38;
-								break;
-							case eRace.Dwarf:
-								mount.Size = 42;
-								break;
-							case eRace.Inconnu:
-								mount.Size = 45;
-								break;
-							case eRace.Frostalf:
-								mount.Size = 48;
-								break;
-							case eRace.Shar:
-								mount.Size = 48;
-								break;
-							case eRace.Briton:
-								mount.Size = 50;
-								break;
-							case eRace.Saracen:
-								mount.Size = 48;
-								break;
-							case eRace.Celt:
-								mount.Size = 50;
-								break;
-							case eRace.Valkyn:
-								mount.Size = 52;
-								break;
-							case eRace.Avalonian:
-								mount.Size = 52;
-								break;
-							case eRace.Highlander:
-								mount.Size = 55;
-								break;
-							case eRace.Norseman:
-								mount.Size = 50;
-								break;
-							case eRace.Elf:
-								mount.Size = 52;
-								break;
-							case eRace.Sylvan:
-								mount.Size = 55;
-								break;
-							case eRace.Firbolg:
-								mount.Size = 62;
-								break;
-							case eRace.HalfOgre:
-								mount.Size = 62;
-								break;
-							case eRace.AlbionMinotaur:
-								mount.Size = 65;
-								break;
-							case eRace.MidgardMinotaur:
-								mount.Size = 65;
-								break;
-							case eRace.HiberniaMinotaur:
-								mount.Size = 65;
-								break;
-							case eRace.Troll:
-								mount.Size = 67;
-								break;
-							default:
-								mount.Size = 50;
-								break;
-						}
+						mount.Size = GameTaxi.SizeForRace(player.Race);
 
 						mount.Realm = source.Realm;
 						mount.X = path.X;

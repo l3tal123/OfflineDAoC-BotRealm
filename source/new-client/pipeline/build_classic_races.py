@@ -43,7 +43,12 @@ FIGURES = {
     'elf_m': (11, 0, 252, 334, 341), 'elf_f': (11, 1, 253, 342, 349), 'lur_m': (12, 0, 256, 318, 325),
     'lur_f': (12, 1, 257, 326, 333), 'inc_m': (13, 0, 348, 716, 723), 'inc_f': (13, 1, 349, 724, 731),
     'val_m': (14, 0, 351, 773, 780), 'val_f': (14, 1, 352, 781, 788), 'syl_m': (15, 0, 346, 700, 707),
-    'syl_f': (15, 1, 347, 708, 715)}
+    'syl_f': (15, 1, 347, 708, 715),
+    # the Shrouded Isles races: no player race in True 1.65 Mode, but the world's NPCs of them (build_monsters
+    # RACE_FIGURES bhalfogrem -> hal_m, nsvartalfm -> fro_m, hsharm -> sha_m ...) are drawn with these prefixes, and
+    # without a classic figure ~155 of them drew broken (2026-11-02). Each has its own classic NIF and 12 rows per sex
+    'hal_m': (16, 0, 449, 1008, 1019), 'hal_f': (16, 1, 450, 1020, 1031), 'fro_m': (17, 0, 464, 1051, 1062),
+    'fro_f': (17, 1, 465, 1063, 1074), 'sha_m': (18, 0, 490, 1075, 1086), 'sha_f': (18, 1, 491, 1087, 1098)}
 SLOT_COLS = {'body': 3, 'arms': 5, 'gloves': 6, 'lbody': 7, 'legs': 8, 'boots': 9, 'cloak': 10}
 PART_SLOT = (('Body', 'body'), ('Arms', 'arms'), ('Gloves', 'gloves'), ('LBody', 'lbody'), ('Legs', 'legs'),
              ('Boots', 'boots'), ('Cloak', 'cloak'), ('Head', 'head'))
@@ -75,7 +80,7 @@ def num(v, default=0.0):
 # figtofig3main.csv's row names per figure: "<RACE> <MALE|FEMALE> n"
 F2F_RACE = {'bri': 'BRITON', 'ava': 'AVALONIAN', 'hig': 'HIGHLANDER', 'sar': 'SARACEN', 'nor': 'NORSE', 'tro': 'TROLL',
             'dwa': 'DWARF', 'kob': 'KOBOLD', 'cel': 'CELT', 'fir': 'FIRBOLG', 'elf': 'ELF', 'lur': 'LURIKEEN',
-            'inc': 'INCONNU', 'val': 'VALKYN', 'syl': 'SYLVAN'}
+            'inc': 'INCONNU', 'val': 'VALKYN', 'syl': 'SYLVAN', 'hal': 'HALF_OGRE', 'fro': 'FROSTALF', 'sha': 'SHAR'}
 
 
 def player_looks_of(t, prefix):

@@ -10,7 +10,7 @@ namespace OfflineDaoc.Launcher;
 internal sealed partial class MainForm : Form
 {
     // v0.1 (owner 2026-10-31): early in development, not a 1.0.
-    internal const string DisplayVersion = "0.1";
+    internal const string DisplayVersion = "0.2";
     // OfflineDAoC True 1.65 (owner 2026-10-31): a separate version with True 1.65 Mode only - no normal mode, no switch.
     internal const string AppTitle = "OfflineDAoC True 1.65";
     internal const int AutoRefreshMilliseconds = 5 * 60 * 1000;
@@ -2490,6 +2490,8 @@ internal sealed partial class MainForm : Form
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                // No byte-order mark before "exit" (the server took that mark + "exit" for a command and kept running)
+                StandardInputEncoding = new System.Text.UTF8Encoding(false),
             };
             _serverProcess = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
             _serverProcess.OutputDataReceived += (_, args) => { try { if (args.Data is not null) _serverLog?.WriteLine(args.Data); } catch (Exception) { } };

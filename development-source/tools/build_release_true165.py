@@ -105,6 +105,7 @@ def main():
     parser.add_argument("--install", type=Path, required=True)
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--version", help='writes VERSION.txt = "Offline DAoC True 1.65 v<version>" (the downloader reads it)')
     args = parser.parse_args()
     install, repo, out = args.install.resolve(), args.repo.resolve(), args.out.resolve()
     if out.exists():
@@ -162,6 +163,9 @@ def main():
         "set \"DOTNET_MULTILEVEL_LOOKUP=0\"\r\n"
         "start \"\" /d \"%~dp0runtime\" \"%~dp0runtime\\OfflineDAoC.exe\"\r\n"
         "exit /b 0\r\n").encode("ascii"))
+
+    if args.version:
+        (out / "VERSION.txt").write_bytes(f"Offline DAoC True 1.65 v{args.version}".encode("ascii"))
 
     print("Checking the package...", flush=True)
     bad = [p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file() and (

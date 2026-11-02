@@ -193,6 +193,7 @@ func _drop_data(_pos: Vector2, data: Variant) -> void:
 class VaultRow extends Control:
 	var window: VaultWindow
 	var index := 0
+	var _hover := false
 	var _icon: TextureRect
 	var _name: Label
 	var _hi: ColorRect
@@ -230,6 +231,7 @@ class VaultRow extends Control:
 			n += " (%d)" % int(e.count)
 		_name.text = n
 		_hi.visible = PlayerData.selected_slot == slot() and not e.is_empty()
+		_name.add_theme_color_override("font_color", ItemTooltip.name_color(it, _hover or PlayerData.selected_slot == slot()))
 		tooltip_text = String(it.get("name", "")).to_upper()
 
 	func _get_drag_data(_p: Vector2) -> Variant:
@@ -251,7 +253,10 @@ class VaultRow extends Control:
 		PlayerData.move(int(data.slot), slot())
 
 	func _notification(what: int) -> void:
-		if what == NOTIFICATION_MOUSE_EXIT or what == NOTIFICATION_DRAG_END:
+		if what == NOTIFICATION_MOUSE_ENTER or what == NOTIFICATION_MOUSE_EXIT:
+			_hover = what == NOTIFICATION_MOUSE_ENTER       # (the name in its con colour while highlighted)
+			refresh()
+		elif what == NOTIFICATION_DRAG_END:
 			refresh()
 
 	func _make_custom_tooltip(_for_text: String) -> Object:      # weapons / armour: the mini delve box

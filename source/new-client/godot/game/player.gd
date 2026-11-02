@@ -120,6 +120,8 @@ var invert_mouse := false
 var _lmb_world := false                # mouse buttons pressed on the world (not on an interface window)
 var _rmb_world := false
 var _cursor_at := Vector2.ZERO          # where the cursor was when a mouse-look drag began
+var mouse_look := false                 # the client's Mouse Look Toggle is on: the mouse turns you, no button held
+var mouse_look_allowed := false         # Options > CONTROLS "MOUSE LOOK TOGGLE" (off by default - owner 2026-11-01)
 var grounded := false
 var _air_time := 0.0                   # seconds off the ground (the falling pose waits a moment)
 var hold_frames := 12                   # after a spawn / teleport: stand still until the floors are in the physics world
@@ -172,6 +174,7 @@ func _ready() -> void:
 	set_torch(bool(cfg.get_value("player", "torch", true)))
 	mouse_sensitivity = float(cfg.get_value("player", "mouse_sensitivity", 1.0))
 	invert_mouse = bool(cfg.get_value("player", "invert_mouse", false))
+	mouse_look_allowed = bool(cfg.get_value("player", "mouse_look_toggle", false))
 	_register_torch.call_deferred()
 
 	_pivot = Node3D.new()
@@ -721,6 +724,31 @@ func _over_window() -> bool:
 	return false
 
 
+## The client's Mouse Look Toggle (True 1.65 Mode): on, the cursor hides and moving the mouse turns the view and
+## the character, as a held right button does; off, the cursor comes back where it was.
+func set_mouse_look(on: bool) -> void:
+	if on and (not input_enabled or dead or not mouse_look_allowed or Server.world_mode != "1.65"):
+		on = false
+	if on == mouse_look:
+		return
+	mouse_look = on
+	if on:
+		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+			_cursor_at = get_viewport().get_mouse_position()
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		if not no_turn:
+			char_yaw = cam_yaw
+	elif not (_lmb_world or _rmb_world) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		get_viewport().warp_mouse(_cursor_at)
+
+
+## Mouse Look Toggle is on the right mouse button (its default): the world's right click toggles it (zone_viewer).
+func mouse_look_on_right() -> bool:
+	return mouse_look_allowed and Server.world_mode == "1.65" \
+			and "Right Mouse" in (Keybinds.bindings.get("mouse_look", []) as Array)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not input_enabled:
 		return
@@ -731,14 +759,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		_rmb_world = event.pressed
 	var rmb := _rmb_world and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
 	var lmb := _lmb_world and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	if event is InputEventMouseMotion and (rmb or lmb):
+	if event is InputEventMouseMotion and (rmb or lmb or mouse_look):
 		var dy: float = event.relative.y * (-1.0 if invert_mouse else 1.0) * mouse_sensitivity
 		cam_yaw -= event.relative.x * MOUSE_TURN * mouse_sensitivity
 		if free_camera:
 			cam_pitch = clampf(cam_pitch - dy * 0.004, -1.35, 0.6)
 		else:
 			cam_pitch = clampf(cam_pitch - dy * 0.004, -CAM_PITCH, CAM_PITCH)
-		if rmb and not no_turn:
+		if (rmb or (mouse_look and not lmb)) and not no_turn:
 			char_yaw = cam_yaw                          # steering: the character follows the camera
 	elif event is InputEventMouseButton:
 		if event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]:
@@ -747,7 +775,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if (rmb or lmb) and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 				_cursor_at = get_viewport().get_mouse_position()
 				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-			elif not (rmb or lmb) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			elif not (rmb or lmb) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not mouse_look:
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 				get_viewport().warp_mouse(_cursor_at)
 			if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT and not no_turn:
@@ -771,6 +799,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			cfg.save("user://settings.cfg")
 		elif Keybinds.pressed(event, "walk"):
 			walking = not walking
+		elif Keybinds.pressed(event, "mouse_look") and not (event is InputEventMouseButton
+				and event.button_index == MOUSE_BUTTON_RIGHT):   # (on the right button the world's click toggles it)
+			set_mouse_look(not mouse_look)
 		elif Keybinds.pressed(event, "move_forward") or Keybinds.pressed(event, "move_back"):
 			autorun = false
 
@@ -816,7 +847,9 @@ func _physics_step(delta: float) -> void:
 		_lmb_world = false
 	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 		_rmb_world = false
-	if not (_lmb_world or _rmb_world) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and input_enabled:
+	if mouse_look and (not input_enabled or dead):
+		set_mouse_look(false)                                   # a menu opened (Esc) or you died: the cursor back
+	if not (_lmb_world or _rmb_world) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and input_enabled and not mouse_look:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE              # a release the world never saw (over a window)
 		get_viewport().warp_mouse(_cursor_at)
 	var rmb := input_enabled and _rmb_world and not dead       # a dead character doesn't move (both buttons either)

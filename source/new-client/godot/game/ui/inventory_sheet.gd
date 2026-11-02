@@ -86,6 +86,10 @@ static func build(parent: Control, ui: GameUI) -> void:
 		l.size = Vector2(28, 11)
 		l.mouse_filter = Control.MOUSE_FILTER_STOP
 		l.tooltip_text = COINS[i].to_upper()
+		var coin: String = COINS[i]
+		l.gui_input.connect(func(e: InputEvent):             # (housing: a click clicks coins out - the Money Selector)
+			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and Server.active:
+				preload("res://game/housing/housing_windows.gd").open_money(coin))
 		parent.add_child(l)
 	var weight := UiArt.label("", 8, UiArt.CREAM)         # the weight box under the doll: carried / capacity
 	weight.name = "weight"
@@ -282,6 +286,7 @@ class EquipSlot extends Control:
 ## One backpack row: a small icon in the art's round box and the item's name (stack count after it).
 class BackpackRow extends Control:
 	var row := 0
+	var _hover := false
 	var _icon: TextureRect
 	var _name: Label
 	var _hi: ColorRect
@@ -320,6 +325,7 @@ class BackpackRow extends Control:
 			n += " (%d)" % int(e.count)
 		_name.text = n
 		_hi.visible = PlayerData.selected_slot == slot() and not e.is_empty()
+		_name.add_theme_color_override("font_color", ItemTooltip.name_color(it, _hover or PlayerData.selected_slot == slot()))
 		tooltip_text = String(it.get("name", "")).to_upper()
 
 	var _dragged_slot := -1                     # the slot this row started a drag from (its drop on the world, below)
@@ -349,6 +355,10 @@ class BackpackRow extends Control:
 	func _notification(what: int) -> void:
 		if what == NOTIFICATION_MOUSE_ENTER and Server.active:
 			Server.prefetch_item(slot())                   # the server's delve text, ready for the hover box
+		if what == NOTIFICATION_MOUSE_ENTER or what == NOTIFICATION_MOUSE_EXIT:
+			_hover = what == NOTIFICATION_MOUSE_ENTER       # (the name in its con colour while highlighted)
+			var it := PlayerData.item_at(slot())
+			_name.add_theme_color_override("font_color", ItemTooltip.name_color(it, _hover or PlayerData.selected_slot == slot()))
 		if what == NOTIFICATION_MOUSE_EXIT or what == NOTIFICATION_DRAG_END:
 			_hi.visible = false
 		if what == NOTIFICATION_DRAG_END and _dragged_slot >= 0:

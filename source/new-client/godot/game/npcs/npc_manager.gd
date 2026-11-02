@@ -231,11 +231,15 @@ func _water_at(p: Vector3) -> float:
 
 ## The floor under a walker that goes indoors (a spawn flagged "floors" - the roadside inns' adventurers): the highest
 ## floor at most 1.2 m above it (house floors, porches, bridges), else the ground. The player's floor pick, for NPCs.
+## The surface an NPC stands on: the first floor casting down from FLOOR_PICK_UP over its height, as the 1.64 client
+## draws a walker (64 units over the server's Z - the original-client research; GitHub issue #4: Gothwaite Harbor's
+## dye merchants are stored 61 units under their floor and stood sunk to the neck with the old 1.2 m), or the ground.
+const FLOOR_PICK_UP := 64 * 0.025
 func floor_at(p: Vector3) -> float:
 	var g := ground_at(p)
 	if zone == null or not zone.is_inside_tree():
 		return g
-	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, p.y + 1.2, p.z), Vector3(p.x, p.y - 6.0, p.z), ZoneLoader.LAYER_FLOOR)
+	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, p.y + FLOOR_PICK_UP, p.z), Vector3(p.x, p.y - 6.0, p.z), ZoneLoader.LAYER_FLOOR)
 	var hit := zone.get_world_3d().direct_space_state.intersect_ray(q)
 	return maxf(g, float(hit.position.y)) if not hit.is_empty() else g
 

@@ -12,6 +12,17 @@ var _root: Control
 var _tip: Label
 var _tips: Array = []
 var _tip_time := 0.0
+# True 1.65 Mode: the 1.64 client's loading screen (owner 2026-11-01: "use the classic loading bar") - read from the
+# 1.64 game.dll by the original-client research: the picture centred at its own size (800 x 600), the bar (LOADBAR1
+# empty, LOADBAR2 full, 82 x 19) 10 px in from its bottom right corner, filled by revealing LOADBAR2 left to right, and
+# one line "Loading..." (1.64 builds "Loading %s..." from a name buffer it never fills) in fonts/stone20 row 0, ending
+# 20 px left of the bar, top aligned with it. No title, no tips. Scaled with the picture to the window.
+const PIC_W := 800.0
+const PIC_H := 600.0
+const BAR := Vector2(82, 19)
+var _classic := false
+var _art: TextureRect
+var _line: StoneText
 
 
 ## True 1.65 Mode: the real 1.64 loading pictures of the region (pipeline/build_loading_165.py from the
@@ -49,6 +60,9 @@ func _init(zone_name: String, region := -1) -> void:
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED if pic_tex else TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_root.add_child(art)
+	_art = art
+	if Server.world_mode == "1.65" and _classic_bar(zone_name):
+		return
 	var shade := TextureRect.new()
 	var grad := Gradient.new()
 	grad.set_color(0, Color(0, 0, 0, 0))
@@ -112,6 +126,96 @@ func _init(zone_name: String, region := -1) -> void:
 	_next_tip()
 
 
+## The 1.64 bar and its line (True 1.65 Mode); false when the bar's pictures aren't built (build_loadbar_164.py).
+func _classic_bar(zone_name: String) -> bool:
+	var empty := _bar_tex("loadbar1")
+	var full := _bar_tex("loadbar2")
+	if empty == null or full == null:
+		return false
+	_classic = true
+	_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED      # (the picture at its own 4:3, as the 1.64 client)
+	_bar = TextureProgressBar.new()
+	_bar.texture_under = empty
+	_bar.texture_progress = full
+	_bar.fill_mode = TextureProgressBar.FILL_LEFT_TO_RIGHT           # (revealed, never stretched)
+	_bar.max_value = 1.0
+	_bar.step = 0.0
+	_bar.size = empty.get_size()
+	_bar.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_root.add_child(_bar)
+	_line = StoneText.make("Loading...")
+	if _line:
+		_root.add_child(_line)
+	_place_classic()
+	return true
+
+
+func _bar_tex(name: String) -> Texture2D:
+	for set_name in ["x4plus", "original"]:
+		var img := Image.load_from_file(ProjectSettings.globalize_path("%s/loading165/bar/%s/%s.png" % [UI, set_name, name]))
+		if img:
+			return ImageTexture.create_from_image(img)
+	return null
+
+
+## Where the 800 x 600 picture is drawn in the window, and the bar and line on it, as the 1.64 client placed them.
+func _place_classic() -> void:
+	var vp := _root.get_viewport_rect().size if _root.is_inside_tree() else Vector2(PIC_W, PIC_H)
+	var k := minf(vp.x / PIC_W, vp.y / PIC_H)
+	var origin := (vp - Vector2(PIC_W, PIC_H) * k) * 0.5
+	var bar_at := origin + Vector2(PIC_W - BAR.x - 10.0, PIC_H - BAR.y - 10.0) * k
+	_bar.position = bar_at
+	_bar.scale = Vector2.ONE * (BAR.x * k / _bar.size.x)
+	if _line:
+		_line.scale = Vector2.ONE * k
+		_line.position = Vector2(bar_at.x - (20.0 + _line.width) * k, bar_at.y)
+
+
+## A line in the 1.64 client's stone bitmap font (fonts/stone20.bmp row 0, pipeline/build_loadbar_164.py): each glyph
+## its own run of columns, no letter spacing; drawn at the font's own 20 px (scaled by its node).
+class StoneText extends Control:
+	var text := ""
+	var width := 0.0
+	var _tex: Texture2D
+	var _cells := {}
+	var _k := 1.0                                       # the texture's size over the font's own (x4plus: 4)
+
+	static func make(t: String) -> StoneText:
+		var dir := "res://content/ui/loading165/bar"
+		var info = JSON.parse_string(FileAccess.get_file_as_string(dir + "/stone20.json")) \
+				if FileAccess.file_exists(dir + "/stone20.json") else null
+		if not info is Dictionary:
+			return null
+		var st := StoneText.new()
+		for set_name in ["x4plus", "original"]:
+			var img := Image.load_from_file(ProjectSettings.globalize_path("%s/%s/stone20.png" % [dir, set_name]))
+			if img:
+				st._tex = ImageTexture.create_from_image(img)
+				st._k = float(img.get_height()) / float(info.get("height", 20))
+				break
+		if st._tex == null:
+			return null
+		st._cells = info.cells
+		st.text = t
+		for c in t:
+			var cell = st._cells.get(c, st._cells.get("*"))
+			st.width += float(cell[1]) - float(cell[0])
+		st.size = Vector2(st.width, float(info.get("height", 20)))
+		st.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		st.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		return st
+
+	func _draw() -> void:
+		var x := 0.0
+		var h := size.y
+		for c in text:
+			var cell = _cells.get(c, _cells.get("*"))
+			var w := float(cell[1]) - float(cell[0])
+			if c != " ":
+				draw_texture_rect_region(_tex, Rect2(x, 0, w, h), Rect2(float(cell[0]) * _k, 0, w * _k, h * _k))
+			x += w
+
+
 func _tex(name: String) -> Texture2D:
 	var img := Image.load_from_file(ProjectSettings.globalize_path("%s/x4plus/%s.png" % [UI, name]))
 	if img == null:
@@ -128,6 +232,9 @@ func _next_tip() -> void:
 
 
 func _process(delta: float) -> void:
+	if _classic:
+		_place_classic()                               # (the window may be resized while loading)
+		return
 	_tip_time += delta
 	if _tip_time > 8.0:
 		_tip_time = 0.0
