@@ -24,7 +24,6 @@
   "bot_use_town_teleporters": "False",
   "startup_ramp_minutes": "2",
   "starting_money": "10000",
-  "disabled_regions": "27;165;233-242;244"
   "disabled_regions": "27;165;233-242;244",
   "housing_rent_cottage": "200000",
   "housing_rent_house": "2000000",
