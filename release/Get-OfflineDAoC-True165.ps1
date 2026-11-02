@@ -18,7 +18,11 @@ param(
     [switch]$Yes,
     [ValidateSet('ask','install','update')]
     [string]$Mode = 'ask',
-    [switch]$NoShortcut
+    [switch]$NoShortcut,
+    # Fork installs: update in place even where files were changed on this PC (the fork's own launcher, server and
+    # content builds), after backing them up. The fork's builds have to be put back after the update; without the
+    # switch the update stops and touches nothing.
+    [switch]$AllowLocalChanges
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -302,6 +306,19 @@ function Update-Game([string]$game) {
     foreach ($r in @($patch.Remove)) {
         $path = Join-Path $game $r.Path
         if ((Test-Path -LiteralPath $path -PathType Leaf) -and (@($r.From) -contains (Get-Sha $path))) { $removes += $r }
+    }
+    if ($changed.Count -gt 0 -and $AllowLocalChanges) {
+        # Fork installs (fork addition): the fork replaces the launcher and server builds, so those files never match a
+        # released version. Treat them like ordinary files to replace - they are backed up and can be put back - and
+        # carry on with the update.
+        Say ''
+        Say "$($changed.Count) file(s) this update replaces were changed on this PC (the fork's own builds):"
+        $changed | ForEach-Object { Say "  $($_.File.Path)" }
+        Say 'Replacing them after backing them up, because -AllowLocalChanges was given.'
+        Say 'The fork builds have to be put back afterwards; without that, the game runs the released versions.'
+        foreach ($item in $changed) { $item.Action = 'replace' }
+        $changed = @()
+        $work = @($plan | Where-Object { $_.Action -eq 'replace' -or $_.Action -eq 'add' })
     }
     if ($changed.Count -gt 0) {
         $list = Join-Path $game 'UPDATE-CHANGED-FILES.txt'
