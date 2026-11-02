@@ -57,7 +57,10 @@
       Groups
       <span class="badge" v-if="groups.length > 0">{{ groups.length }}</span>
     </button>
-    <button role="tab" class="tab" :class="{ active: tab === 'rvr' }" @click="openRvr()">RvR</button>
+    <button role="tab" class="tab" :class="{ active: tab === 'rvr' }" @click="openRvr()">
+      RvR
+      <span class="badge" v-if="rvrBots.length > 0">{{ rvrBots.length }}</span>
+    </button>
     <button role="tab" class="tab" :class="{ active: tab === 'battlegrounds' }" @click="openBattlegrounds()">Battlegrounds</button>
     <button role="tab" class="tab" :class="{ active: tab === 'events' }" @click="openEvents()">Events</button>
     <button role="tab" class="tab" :class="{ active: tab === 'records' }" @click="openRecords()">Records</button>
@@ -101,7 +104,7 @@
     </div>
 
     <div class="table-wrap">
-      <table class="bots">
+      <table class="bots population-table">
         <thead>
           <tr>
             <th class="sortable" @click="sortBy('name')">Bot <span class="arrow">{{ arrow('name') }}</span></th>
@@ -206,14 +209,17 @@
       <button class="ghost-button" @click="loadGroups()">Refresh</button>
     </div>
     <div class="group-grid">
-      <section class="group-card" v-for="group in groups" :key="group.groupId">
-        <header>
+      <section class="group-card" v-for="(group, index) in groups" :key="group.groupId">
+        <header class="group-head">
+          <span class="group-number" :class="'group-number-' + group.realm">Group {{ index + 1 }}</span>
           <strong>{{ group.leader }}</strong>
           <span class="realm" :class="'realm-' + group.realm"><i></i>{{ group.realmName }}</span>
           <span class="badge">{{ group.members.length }} members</span>
+          <span class="badge">levels {{ levelRange(group) }}</span>
         </header>
         <p class="group-goal">{{ group.goal || group.phase || 'No shared goal published' }}</p>
         <p class="option-note">{{ group.status }}<template v-if="group.rendezvous"> · rendezvous {{ group.rendezvous }}</template><template v-if="group.puller"> · puller {{ group.puller }}</template></p>
+        <p class="group-clock" v-if="groupTimerText(group)">{{ groupTimerText(group) }}</p>
         <simple-table :columns="groupMemberColumns" :rows="group.members" compact />
       </section>
       <div v-if="groups.length === 0" class="empty-state">
@@ -226,25 +232,52 @@
   <main v-show="tab === 'rvr'" class="panel world-panel">
     <div class="toolbar">
       <label class="select-label">Realm
-        <select v-model="eventRealm">
-          <option value="">All realms</option>
-          <option v-for="realm in eventRealms" :key="realm" :value="realm">{{ realm }}</option>
+        <select v-model.number="rvrRealm" aria-label="Realm">
+          <option :value="0">All realms</option>
+          <option v-for="realm in realms" :key="realm.id" :value="realm.id">{{ realm.name }}</option>
         </select>
       </label>
-      <label class="select-label">Type
-        <select v-model="eventKind">
-          <option value="">All types</option>
-          <option v-for="kind in eventKinds" :key="kind" :value="kind">{{ kind }}</option>
-        </select>
-      </label>
-      <label class="toggle"><input type="checkbox" v-model="eventActiveOnly" /> <span>Active only</span></label>
-      <input class="search-input" v-model="eventSearch" placeholder="Search objective or zone" />
-      <span class="toolbar-count" v-if="rvrUpdated">snapshot {{ rvrUpdated.toLocaleTimeString() }}</span>
+      <input class="search-input" v-model="rvrSearch" placeholder="Search bot, class, zone or task" />
+      <span class="toolbar-count">{{ filteredRvrBots.length }} of {{ rvrBots.length }} bots in RvR</span>
     </div>
-    <simple-table :columns="objectivesColumns" :rows="filteredEvents" selectable :selected="objectiveSelected"
-                  @row-click="selectObjective" empty="No objective matches these filters." />
-    <div class="section-title">Bots on the selected objective<span v-if="selectedObjective"> — {{ selectedObjective.Name }}</span></div>
-    <simple-table :columns="participantColumns" :rows="eventParticipants" empty="No bot is assigned to that objective right now." />
+    <p class="option-note">Roaming bots and warbands out in the frontiers and battlegrounds. Keeps, relics and sieges are in Events.</p>
+    <div class="table-wrap">
+      <table class="bots rvr-table">
+        <thead>
+          <tr>
+            <th class="sortable" @click="sortRvr('name')">Name / meet-up <span class="arrow">{{ rvrArrow('name') }}</span></th>
+            <th class="sortable" @click="sortRvr('realm')">Realm <span class="arrow">{{ rvrArrow('realm') }}</span></th>
+            <th class="sortable" @click="sortRvr('className')">Class <span class="arrow">{{ rvrArrow('className') }}</span></th>
+            <th class="sortable num" @click="sortRvr('level')">Lvl <span class="arrow">{{ rvrArrow('level') }}</span></th>
+            <th class="sortable" @click="sortRvr('zone')">Zone <span class="arrow">{{ rvrArrow('zone') }}</span></th>
+            <th class="sortable" @click="sortRvr('formation')">Formation <span class="arrow">{{ rvrArrow('formation') }}</span></th>
+            <th class="sortable" @click="sortRvr('phase')">Phase <span class="arrow">{{ rvrArrow('phase') }}</span></th>
+            <th class="sortable" @click="sortRvr('taskLeft')">Task left <span class="arrow">{{ rvrArrow('taskLeft') }}</span></th>
+            <th class="sortable activity-col" @click="sortRvr('activity')">Current objective <span class="arrow">{{ rvrArrow('activity') }}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="bot in filteredRvrBots" :key="bot.id">
+            <td><span class="bot-name">{{ botNameWithMeetUp(bot) }}</span></td>
+            <td><span class="realm" :class="'realm-' + bot.realm"><i></i>{{ bot.realmName }}</span></td>
+            <td>{{ bot.className }}</td>
+            <td class="num level">{{ bot.level }}</td>
+            <td>{{ bot.zone || '—' }}</td>
+            <td>{{ botFormation(bot) }}</td>
+            <td>{{ bot.objectivePhase || '—' }}</td>
+            <td class="timer-cell">{{ botTaskRemaining(bot) }}</td>
+            <td class="activity-col" :title="bot.activity">{{ bot.activity }}</td>
+          </tr>
+          <tr v-if="filteredRvrBots.length === 0">
+            <td colspan="9" class="empty">
+              {{ rvrBots.length === 0
+                  ? (serverUp ? 'No bot is doing RvR right now.' : 'The server is stopped: RvR bots appear while it runs.')
+                  : 'No bot matches this realm and search.' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 
   <!-- ------------------------------------------------------------------ battlegrounds -->

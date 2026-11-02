@@ -26,13 +26,25 @@ internal sealed class WorldReader
         using SQLiteConnection connection = Open();
         connection.Open();
         bool hasCompanions = TableExists(connection, "offline_hired_companions");
+        // The objective columns arrived with the autonomous RvR goals; an older world database still opens, showing
+        // an empty task for every bot instead of failing the whole roster read.
+        bool hasObjectiveColumns = ColumnExists(connection, "offline_world_bots", "ObjectiveKind") &&
+                                   ColumnExists(connection, "offline_world_bots", "ObjectiveAssignmentId") &&
+                                   ColumnExists(connection, "offline_world_bots", "ObjectiveAssignedUtc") &&
+                                   ColumnExists(connection, "offline_world_bots", "ObjectivePhase");
+        string objectiveColumns = hasObjectiveColumns
+            ? "ObjectiveKind, ObjectiveAssignmentId, ObjectiveAssignedUtc, ObjectivePhase"
+            : "'' AS ObjectiveKind, '' AS ObjectiveAssignmentId, '' AS ObjectiveAssignedUtc, '' AS ObjectivePhase";
+        objectiveColumns += ColumnExists(connection, "offline_world_bots", "ObjectiveExpiresUtc")
+            ? ", COALESCE(ObjectiveExpiresUtc, '')"
+            : ", '' AS ObjectiveExpiresUtc";
         using SQLiteCommand command = connection.CreateCommand();
         command.CommandText =
             "SELECT BotId, Name, Realm, COALESCE(RaceName, ''), Gender, COALESCE(ClassName, ''), Level, " +
             "COALESCE(ZoneName, ''), COALESCE(Activity, ''), COALESCE(CurrentGoal, ''), COALESCE(TargetName, ''), " +
             "COALESCE(TravelDestination, ''), COALESCE(ObjectiveProgress, ''), IsOnline, IsRetired, " +
-            "COALESCE(ItineraryJson, '') " +
-            "FROM offline_world_bots WHERE 1=1" +
+            "COALESCE(ItineraryJson, ''), " + objectiveColumns +
+            " FROM offline_world_bots WHERE 1=1" +
             (hasCompanions ? " AND BotId NOT IN (SELECT BotId FROM offline_hired_companions)" : string.Empty) +
             " ORDER BY Realm, Level DESC, Name";
         using SQLiteDataReader reader = command.ExecuteReader();
@@ -54,7 +66,12 @@ internal sealed class WorldReader
                 reader.GetString(12),
                 reader.GetBoolean(13),
                 reader.GetBoolean(14),
-                reader.GetString(15)));
+                reader.GetString(15),
+                reader.GetString(16),
+                reader.GetString(17),
+                reader.GetString(18),
+                reader.GetString(19),
+                reader.GetString(20)));
         }
 
         return rows;
@@ -117,9 +134,22 @@ internal sealed class WorldReader
         return command.ExecuteScalar() != null;
     }
 
+    private static bool ColumnExists(SQLiteConnection connection, string table, string column)
+    {
+        using SQLiteCommand command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA table_info(\"{table}\")";
+        using SQLiteDataReader reader = command.ExecuteReader();
+        while (reader.Read())
+            if (string.Equals(reader.GetString(1), column, StringComparison.OrdinalIgnoreCase))
+                return true;
+        return false;
+    }
+
     internal sealed record RosterRow(long Id, string Name, int Realm, string Race, int Gender, string ClassName, int Level,
         string Zone, string Activity, string Goal, string Target, string Destination, string Progress,
-        bool IsOnline, bool IsRetired, string Itinerary);
+        bool IsOnline, bool IsRetired, string Itinerary,
+        string ObjectiveKind, string ObjectiveAssignmentId, string ObjectiveAssignedUtc, string ObjectivePhase,
+        string ObjectiveExpiresUtc);
 
     internal sealed class ZoneRow
     {

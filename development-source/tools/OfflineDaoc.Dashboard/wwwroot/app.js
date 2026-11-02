@@ -160,11 +160,15 @@
       const rvrLoaded = ref(false);
       const stats = ref(null);
       const statsLoaded = ref(false);
-      const eventRealm = ref(0);
+      const eventRealm = ref("");
       const eventKind = ref("");
       const eventActiveOnly = ref(false);
       const eventSearch = ref("");
       const selectedObjectiveId = ref("");
+      const rvrRealm = ref(0);
+      const rvrSearch = ref("");
+      const rvrSortKey = ref("default");
+      const rvrSortDir = ref("asc");
       const inspector = ref(null);
       const inspectorLoading = ref(false);
       const inspectorSection = ref("Stats");
@@ -460,7 +464,8 @@
       }
 
       function openGroups() { tab.value = "groups"; loadGroups(); }
-      function openRvr() { tab.value = "rvr"; loadRvr(); }
+      // Active RvR is a view of the roster (same poll as Active Population): no separate snapshot to fetch.
+      function openRvr() { tab.value = "rvr"; }
       function openBattlegrounds() { tab.value = "battlegrounds"; loadRvr(); }
       function openEvents() { tab.value = "events"; loadRvr(); }
       function openStats() { tab.value = "stats"; loadStats(); }
@@ -490,13 +495,176 @@
         { key: "Activity", label: "Current activity" },
       ];
 
+      // The desktop launcher's card roster: who is in the party, their level, class and where they are. The card
+      // itself already carries the group's shared goal, status and clock, so the per-bot activity is not repeated.
       const groupMemberColumns = [
-        { key: "name", label: "Member" },
+        { key: "name", label: "Member", format: (value, row) => memberLabel(row) },
         { key: "level", label: "Level", className: "num" },
         { key: "className", label: "Class" },
         { key: "zone", label: "Zone" },
-        { key: "activity", label: "Activity" },
       ];
+
+      /**
+       * Group and RvR task clocks, ported from the desktop launcher's BotRow (TaskTimerDisplay is a display-only
+       * clock: minutes and seconds, never a new read). The deadlines come with the roster; the ticking is local.
+       */
+      function parseDeadline(value) {
+        if (!value) return null;
+        // The server writes ISO-8601 with up to seven fractional digits; Date.parse expects at most three.
+        const time = Date.parse(String(value).replace(/\.(\d{3})\d+/, ".$1"));
+        return Number.isFinite(time) ? time : null;
+      }
+
+      function remainingMilliseconds(deadline) {
+        const time = parseDeadline(deadline);
+        return time === null ? null : Math.max(0, Math.ceil(time - now.value));
+      }
+
+      function timerClock(milliseconds) {
+        const seconds = Math.ceil(Math.max(0, Number(milliseconds) || 0) / 1000);
+        return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+      }
+
+      /** The meet-up deadline only exists while a group is still assembling. */
+      function assemblyRemaining(bot) {
+        if (!bot || !bot.online) return null;
+        return bot.groupPhase === "Leader staging" || bot.groupPhase === "Meeting up"
+          ? remainingMilliseconds(bot.meetUpDeadlineUtc) : null;
+      }
+
+      /** The task clock: the assembly clock while a group forms, the group's own task clock, else the objective's. */
+      function botRemaining(bot) {
+        if (!bot || !bot.online || bot.retired || bot.groupPhase === "Player-led") return null;
+        const assembly = assemblyRemaining(bot);
+        if (assembly !== null) return assembly;
+        if (bot.hasGroupTaskClock && bot.taskTimerPaused) return Number(bot.taskRemainingMilliseconds) || 0;
+        return remainingMilliseconds(bot.hasGroupTaskClock ? bot.groupTaskExpiresUtc : bot.objectiveExpiresUtc);
+      }
+
+      function botTaskRemaining(bot) {
+        if (!bot || !bot.online) return "Offline";
+        if (bot.groupPhase === "Player-led") return "Player-led";
+        const staging = bot.groupPhase === "Leader staging" ? assemblyRemaining(bot) : null;
+        if (staging !== null) return timerClock(staging) + " (staging)";
+        const meetup = bot.groupPhase === "Meeting up" ? assemblyRemaining(bot) : null;
+        if (meetup !== null) return timerClock(meetup) + " (meetup)";
+        const remaining = botRemaining(bot);
+        if (remaining === null) return "—";
+        if (String(bot.objectiveAssignmentId || "").startsWith("between-pve-services-"))
+          return "Town " + timerClock(remaining);
+        return timerClock(remaining) + (bot.hasGroupTaskClock && bot.taskTimerPaused ? " (paused)" : "");
+      }
+
+      function botNameWithMeetUp(bot) {
+        if (bot && bot.online && bot.groupPhase === "Meeting up") {
+          const remaining = remainingMilliseconds(bot.meetUpDeadlineUtc);
+          if (remaining !== null) return `${bot.name} (${timerClock(remaining)})`;
+        }
+        return bot ? bot.name : "";
+      }
+
+      function botFormation(bot) {
+        return bot && bot.groupId ? `Warband ${bot.groupId}` : "Solo roamer";
+      }
+
+      function botGroupTimerText(bot) {
+        if (!bot) return "";
+        if (bot.groupPhase === "Leader staging") return "Leader staging: " + timerClock(assemblyRemaining(bot) ?? 0);
+        if (bot.groupPhase === "Meeting up") return "Meet-up left: " + timerClock(assemblyRemaining(bot) ?? 0);
+        const task = botTaskRemaining(bot);
+        return task === "—" || task === "Offline" ? "" : "Task left: " + task;
+      }
+
+      function memberLabel(member) {
+        const badges = [];
+        if (member.groupRole) badges.push(String(member.groupRole).toUpperCase());
+        const name = String(member.name || "").toLowerCase();
+        if (name && name === String(member.groupLeader || "").toLowerCase()) badges.push("LEADER");
+        if (name && name === String(member.groupPuller || "").toLowerCase()) badges.push("PULLER");
+        const suffix = badges.length > 0 ? " [" + badges.join(" ") + "]" : "";
+        return botNameWithMeetUp(member) + suffix;
+      }
+
+      function levelRange(group) {
+        if (!group.members || group.members.length === 0) return "—";
+        const levels = group.members.map((member) => Number(member.level) || 0);
+        const low = Math.min(...levels);
+        const high = Math.max(...levels);
+        return low === high ? String(low) : `${low}–${high}`;
+      }
+
+      /** The card's clock belongs to the member who still has the longest meet-up deadline, as in the desktop launcher. */
+      function groupTimerText(group) {
+        const members = group.members || [];
+        let owner = null;
+        if (group.phase === "Meeting up") {
+          const assembling = members.filter((member) => assemblyRemaining(member) !== null);
+          owner = assembling.sort((a, b) => assemblyRemaining(b) - assemblyRemaining(a))[0] || null;
+        } else {
+          owner = members[0] || null;
+        }
+        return owner ? botGroupTimerText(owner) : "";
+      }
+
+      // Active RvR: the bots whose current objective is RvR, in the desktop launcher's wording and columns.
+      const rvrBots = computed(() => bots.value.filter((bot) => bot.online && !bot.retired &&
+        String(bot.objectiveKind || "").toLowerCase() === "rvr"));
+
+      const filteredRvrBots = computed(() => {
+        const tokens = rvrSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        let list = rvrBots.value;
+        if (rvrRealm.value) list = list.filter((bot) => bot.realm === rvrRealm.value);
+        if (tokens.length > 0) {
+          list = list.filter((bot) => {
+            const haystack = `${bot.name} ${bot.className} ${bot.zone} ${bot.activity} ${bot.objectivePhase} ${bot.groupId}`.toLowerCase();
+            return tokens.every((token) => haystack.includes(token));
+          });
+        }
+        if (rvrSortKey.value === "default") {
+          // Realm, then warband, then level (highest first), then name: the order the desktop launcher opens with.
+          return [...list].sort((a, b) => (a.realm - b.realm)
+            || compareText(a.groupId || "~", b.groupId || "~")
+            || (b.level - a.level)
+            || compareText(a.name, b.name));
+        }
+        const direction = rvrSortDir.value === "asc" ? 1 : -1;
+        const value = (bot) => {
+          switch (rvrSortKey.value) {
+            case "realm": return bot.realm;
+            case "level": return bot.level;
+            case "formation": return botFormation(bot);
+            case "phase": return bot.objectivePhase || "";
+            case "taskLeft": {
+              const remaining = botRemaining(bot);
+              return remaining === null ? Number.MAX_SAFE_INTEGER : remaining;
+            }
+            case "className": return bot.className || "";
+            case "zone": return bot.zone || "";
+            case "activity": return bot.activity || "";
+            default: return bot.name || "";
+          }
+        };
+        return [...list].sort((a, b) => {
+          const first = value(a);
+          const second = value(b);
+          const result = typeof first === "number" && typeof second === "number"
+            ? first - second : compareText(first, second);
+          return (result || compareText(a.name, b.name)) * direction;
+        });
+      });
+
+      function sortRvr(key) {
+        if (rvrSortKey.value === key) rvrSortDir.value = rvrSortDir.value === "asc" ? "desc" : "asc";
+        else {
+          rvrSortKey.value = key;
+          rvrSortDir.value = "asc";
+        }
+      }
+
+      function rvrArrow(key) {
+        if (rvrSortKey.value !== key) return "";
+        return rvrSortDir.value === "asc" ? "▲" : "▼";
+      }
 
       function objectiveSelected(row) {
         return (row.Id || row.Name) === selectedObjectiveId.value;
@@ -1179,7 +1347,7 @@
           const hash = "#" + value;
           if (location.hash !== hash) history.replaceState(null, "", hash);
           if (value === "groups") loadGroups();
-          else if (value === "rvr" || value === "battlegrounds" || value === "events") loadRvr();
+          else if (value === "battlegrounds" || value === "events") loadRvr();
           else if (value === "stats") loadStats();
           else if (value === "exchange") loadExchange();
           else if (value === "records") loadRecords(records.page);
@@ -1212,7 +1380,7 @@
         window.setInterval(() => {
           if (document.hidden) return;
           if (tab.value === "groups") loadGroups();
-          else if (tab.value === "rvr" || tab.value === "battlegrounds" || tab.value === "events") loadRvr();
+          else if (tab.value === "battlegrounds" || tab.value === "events") loadRvr();
         }, 4000);
         window.setInterval(() => {
           if (!document.hidden && tab.value === "stats") loadStats();
@@ -1253,6 +1421,8 @@
         selectedObjective, selectedObjectiveId, eventParticipants, participantColumns, selectObjective,
         groupMemberColumns, objectiveSelected, loadGroups, loadRvr, loadStats, loadExchange, loadRecords, loadInspector,
         eventRealm, eventKind, eventActiveOnly, eventSearch, eventKinds, eventRealms, filteredEvents,
+        rvrBots, filteredRvrBots, rvrRealm, rvrSearch, sortRvr, rvrArrow,
+        botNameWithMeetUp, botTaskRemaining, botFormation, groupTimerText, levelRange, memberLabel, timerClock,
         battlegroundRows, battlegroundColumns,
         stats, statsLoaded, statsTotals, statsBoards, statsBoardColumns, worldMoney,
         exchange, exchangeRows, exchangePageRows, exchangePageCount, exchangeColumns, exchangeListingColumns,

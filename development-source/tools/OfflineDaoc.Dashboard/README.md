@@ -65,6 +65,14 @@ Ported in phase 3 (read-only screens, all fed by the server's published snapshot
 - Groups, RvR, Battlegrounds, Realm Events, Realm Records, Realm Exchange, Server Stats and the Bot Inspector.
   The snapshots are fetched through the same state-165 file broker the launcher uses; the exchange is a read-only
   query on the world database; the records come from the separate event ledger.
+- Active RvR is the desktop launcher's screen, not a second realm-events page: it lists the bots whose current
+  objective is RvR (name / meet-up clock, realm, class, level, zone, formation, phase, task left, current objective)
+  with realm and text filters and sortable headings. Keeps, relics and sieges stay in Realm Events.
+- Groups is the desktop launcher's card list, rebuilt as a responsive grid: one card per active party with its
+  leader, realm, size, level range, shared goal, route status, the group's task or meet-up clock, and the member
+  roster with roles and per-member meet-up clocks. The cards have no inner scrollbars, so nothing is clipped.
+  The clocks (meet-up, task, staging) are the launcher's own display clock: milliseconds from the roster, ticked
+  locally once a second, with no extra database or server reads.
 
 Still to come (end of the migration):
 

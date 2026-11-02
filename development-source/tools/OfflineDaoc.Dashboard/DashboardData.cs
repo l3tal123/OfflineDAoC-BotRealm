@@ -118,6 +118,21 @@ internal sealed class DashboardData
                 x = bot.X,
                 y = bot.Y,
                 z = bot.Z,
+                objectiveKind = bot.ObjectiveKind,
+                objectivePhase = bot.ObjectivePhase,
+                objectiveAssignmentId = bot.ObjectiveAssignmentId,
+                objectiveExpiresUtc = bot.ObjectiveExpiresUtc,
+                groupId = bot.GroupId,
+                groupPhase = bot.GroupPhase,
+                groupRole = bot.GroupRole,
+                groupLeader = bot.GroupLeader,
+                groupRendezvous = bot.GroupRendezvous,
+                groupPuller = bot.GroupPuller,
+                hasGroupTaskClock = bot.HasGroupTaskClock,
+                taskTimerPaused = bot.TaskTimerPaused,
+                taskRemainingMilliseconds = bot.TaskRemainingMilliseconds,
+                groupTaskExpiresUtc = bot.GroupTaskExpiresUtc,
+                meetUpDeadlineUtc = bot.MeetUpDeadlineUtc,
             }).ToList(),
         };
     }
@@ -226,7 +241,7 @@ internal sealed class DashboardData
                 hasLive ? status!.X : 0,
                 hasLive ? status!.Y : 0,
                 hasLive ? status!.Z : 0,
-                hasLive ? status!.ObjectiveKind ?? string.Empty : string.Empty,
+                hasLive ? status!.ObjectiveKind ?? string.Empty : row.ObjectiveKind,
                 hasLive ? status!.TargetName ?? string.Empty : row.Target,
                 hasLive ? status!.IsAlive : false)
             {
@@ -237,6 +252,15 @@ internal sealed class DashboardData
                 GroupLeader = group?.LeaderName ?? string.Empty,
                 GroupRendezvous = group?.RendezvousName ?? string.Empty,
                 GroupPuller = group?.PullerName ?? string.Empty,
+                GroupRole = group?.MemberRole ?? string.Empty,
+                ObjectiveAssignmentId = hasLive ? status!.ObjectiveAssignmentId ?? string.Empty : row.ObjectiveAssignmentId,
+                ObjectivePhase = hasLive ? status!.ObjectivePhase ?? string.Empty : row.ObjectivePhase,
+                ObjectiveExpiresUtc = hasLive ? status!.ObjectiveExpiresUtc ?? string.Empty : row.ObjectiveExpiresUtc,
+                HasGroupTaskClock = group?.HasTaskClock == true,
+                TaskTimerPaused = group?.TaskTimerPaused == true,
+                TaskRemainingMilliseconds = group?.TaskRemainingMilliseconds ?? 0,
+                GroupTaskExpiresUtc = group?.TaskExpiresUtc ?? string.Empty,
+                MeetUpDeadlineUtc = group?.MeetUpDeadlineUtc ?? string.Empty,
             });
         }
 
@@ -292,6 +316,18 @@ internal sealed class DashboardData
                     realmName = RealmName(member.Realm),
                     zone = member.Zone,
                     activity = member.Activity,
+                    online = member.Online,
+                    groupPhase = member.GroupPhase,
+                    groupRole = member.GroupRole,
+                    groupLeader = member.GroupLeader,
+                    groupPuller = member.GroupPuller,
+                    objectiveAssignmentId = member.ObjectiveAssignmentId,
+                    objectiveExpiresUtc = member.ObjectiveExpiresUtc,
+                    hasGroupTaskClock = member.HasGroupTaskClock,
+                    taskTimerPaused = member.TaskTimerPaused,
+                    taskRemainingMilliseconds = member.TaskRemainingMilliseconds,
+                    groupTaskExpiresUtc = member.GroupTaskExpiresUtc,
+                    meetUpDeadlineUtc = member.MeetUpDeadlineUtc,
                 }).ToList(),
             }).ToList(),
         };
@@ -322,9 +358,15 @@ internal sealed class DashboardData
         public string Phase { get; set; } = string.Empty;
         public string SharedGoal { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
+        public bool HasTaskClock { get; set; }
+        public bool TaskTimerPaused { get; set; }
+        public long TaskRemainingMilliseconds { get; set; }
+        public string TaskExpiresUtc { get; set; } = string.Empty;
+        public string MeetUpDeadlineUtc { get; set; } = string.Empty;
         public string LeaderName { get; set; } = string.Empty;
         public string RendezvousName { get; set; } = string.Empty;
         public string PullerName { get; set; } = string.Empty;
+        public string MemberRole { get; set; } = string.Empty;
     }
 
     private static object Counts(State state) => new
@@ -443,7 +485,17 @@ internal sealed class DashboardData
         string Zone, string Activity, bool Online, bool Retired, int RegionId, int X, int Y, int Z,
         string ObjectiveKind, string Target, bool Alive,
         string GroupId = "", string GroupPhase = "", string GroupGoal = "", string GroupStatus = "",
-        string GroupLeader = "", string GroupRendezvous = "", string GroupPuller = "");
+        string GroupLeader = "", string GroupRendezvous = "", string GroupPuller = "", string GroupRole = "")
+    {
+        public string ObjectiveAssignmentId { get; init; } = string.Empty;
+        public string ObjectivePhase { get; init; } = string.Empty;
+        public string ObjectiveExpiresUtc { get; init; } = string.Empty;
+        public bool HasGroupTaskClock { get; init; }
+        public bool TaskTimerPaused { get; init; }
+        public long TaskRemainingMilliseconds { get; init; }
+        public string GroupTaskExpiresUtc { get; init; } = string.Empty;
+        public string MeetUpDeadlineUtc { get; init; } = string.Empty;
+    }
 }
 
 /// <summary>Is the game server listening? The launcher uses the same test: TCP port 10300.</summary>

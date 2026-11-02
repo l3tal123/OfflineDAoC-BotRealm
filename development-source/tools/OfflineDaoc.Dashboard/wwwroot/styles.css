@@ -508,10 +508,10 @@ select:focus { outline: none; border-color: var(--gold-soft); }
 
 @media (max-width: 860px) {
   #app { padding: 0 10px; }
-  table.bots thead th:nth-child(3),
-  table.bots tbody td:nth-child(3),
-  table.bots thead th:nth-child(5),
-  table.bots tbody td:nth-child(5) { display: none; }
+  table.population-table thead th:nth-child(3),
+  table.population-table tbody td:nth-child(3),
+  table.population-table thead th:nth-child(5),
+  table.population-table tbody td:nth-child(5) { display: none; }
   .toolbar-count { margin-left: 0; }
   .selection { display: none; }
 }
@@ -751,11 +751,12 @@ tbody tr.row-selected { cursor: pointer; }
 
 .group-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 620px), 1fr));
   gap: 12px;
   overflow: auto;
   flex: 1;
   align-content: start;
+  align-items: start;
 }
 
 .group-card {
@@ -763,15 +764,48 @@ tbody tr.row-selected { cursor: pointer; }
   border-radius: var(--radius);
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
   box-shadow: var(--shadow);
-  padding: 12px 14px;
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-height: 0;
+  gap: 7px;
+  min-width: 0;
 }
-.group-card header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.group-card header strong { font-size: 14px; color: var(--text); }
-.group-goal { margin: 0; font-size: 12px; color: var(--text-dim); }
+
+.group-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.group-head strong { font-size: 14px; color: var(--text); }
+
+.group-number {
+  font-size: 10px;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--gold);
+  border: 1px solid var(--gold-soft);
+  border-radius: 5px;
+  padding: 2px 7px;
+  background: rgba(201, 168, 106, .08);
+}
+
+.group-number-1 { color: #e0918a; border-color: rgba(208, 87, 79, .55); background: rgba(208, 87, 79, .1); }
+.group-number-2 { color: #9dbbec; border-color: rgba(91, 141, 214, .55); background: rgba(91, 141, 214, .1); }
+.group-number-3 { color: #8fd9ae; border-color: rgba(76, 175, 125, .55); background: rgba(76, 175, 125, .1); }
+
+.group-goal { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--text-dim); }
+.group-clock { margin: 0; font-size: 12px; font-weight: 600; color: var(--gold); font-variant-numeric: tabular-nums; }
+
+/* The member list belongs to the card: it grows with its rows and never scrolls inside it. */
+.group-card .table-wrap.compact-table {
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.group-card table.bots thead th { position: static; }
+.group-card table.bots tbody td { white-space: nowrap; }
+
+.timer-cell { color: var(--gold); font-variant-numeric: tabular-nums; }
 
 .stats-boards {
   display: grid;
