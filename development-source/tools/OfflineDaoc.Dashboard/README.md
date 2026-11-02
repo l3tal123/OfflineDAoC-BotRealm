@@ -54,14 +54,18 @@ when the exe sits in `<playable>\runtime`.
 Ported: start server (mode check + content refresh + log), stop server, server state/readiness, ENTER REALM,
 single instance, the live roster and the live world map.
 
+Ported in phase 2 (all of them keep the server-stopped gate, enforced by the host):
+
+- Options: XP rate, Make Me a GM, RvR/PvE announcement switches.
+- Bots: generate 1/10/100 at level 1 or 50, delete one bot, delete every bot, teleport to a bot (GM + server running).
+- Bot Goals Setting: the three level bands, 100% validation per row, save/undo/defaults.
+
 Not ported yet — these still exist only in the WinForms launcher, and are the next steps:
 
-- Options: XP rate, Make Me a GM, announcements, "open folder" helpers.
-- Bots: generate, delete/queue delete, delete all, teleport to bot, bulk generation.
-- Bot Goals Setting (percentages, save/undo/defaults, server-stopped gate).
-- Keep and relic reset.
 - Realm Exchange, Server Stats, Bot Inspector detail, Active Groups, Active RvR, Battlegrounds, Realm Events,
   Realm Records screens (the server-side data for all of them is already published or readable).
+- The "open folder" helpers and the WinForms window itself (retired at the end of the migration).
+- Keep and relic reset is deliberately absent: the current launcher no longer offers it to players either.
 
 ## Removing the launcher
 
