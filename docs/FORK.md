@@ -28,20 +28,14 @@ upstream  https://github.com/shadowofze/OfflineDAoC-True165.git  (parent: fetch 
 - **`main`** mirrors the upstream release line plus the fork's merged work. It is the branch that gets synced.
 - **Feature branches** (`feat/bots-...`, `fix/bot-...`, `docs/...`) for each change; merge them into `main` when
   they are tested. Keeping `main` close to upstream is what keeps syncing painless.
-- Upstream is **fetch-only**. Pushing to `upstream` is not possible with the fork's permissions and is not intended.
+- **Upstream is fetch-only.** Pushing to `upstream` is not possible with the fork's permissions and is not intended.
 - The fork's `main` is only ever moved forward by a merge or fast-forward. **Never force-push `main`** and never
   rebase published fork commits; both make future upstream merges and anyone else's clone harder.
 
-The checkout is already configured. To reproduce or repair it (for example after unpacking a ZIP export, which has
-no `.git` folder, or after moving the folder):
-
-```
-scripts\setup-fork.cmd
-```
-
-`scripts/bootstrap-fork.ps1` is idempotent: it initialises git if needed, attaches the extracted working tree to
-`origin/main` without touching any file, adds/repairs both remotes, applies the repo-local git settings, fetches
-both branches and prints the state. For reference, the "attach a ZIP export" procedure it performs is:
+This checkout is already configured: both remotes, `core.longpaths=true` (Windows' 260-character path limit),
+`http.sslBackend=openssl` (Git for Windows' own TLS, which works where Windows' schannel does not), and
+`rerere.enabled=true` (see 2.2). To reproduce or repair it - for example after unpacking a ZIP export, which has no
+`.git` folder, or after moving the folder - run these by hand:
 
 ```
 git init -b main
@@ -53,51 +47,73 @@ git update-ref refs/heads/main refs/remotes/origin/main   # no worktree files ar
 git symbolic-ref HEAD refs/heads/main
 git reset --mixed                                         # index only; extracted files stay as they are
 git branch --set-upstream-to=origin/main main
+git config --local core.longpaths true
+git config --local http.sslBackend openssl
+git config --local rerere.enabled true
+```
+
+Then create the git-ignored build config the server needs (a fresh clone or ZIP export does not have it):
+
+```
+copy development-source\server\CoreServer\config\serverconfig.example.xml development-source\server\CoreServer\config\serverconfig.xml
 ```
 
 ## 2. Syncing the fork with upstream
 
-Upstream sync is **manual on purpose**: nothing merges or pushes to this fork automatically, and no scheduled task or
-CI job is set up to do it. The fork's owner decides when upstream changes land in `main`, so upstream work can never
-merge while a development branch or an untested change is in progress. Run the sync yourself when you want it:
+Upstream sync is **manual on purpose**: nothing merges or pushes to this fork automatically. The fork's owner decides
+when upstream changes land in `main`, so upstream work can never merge while a development branch or an untested
+change is in progress.
+
+The fork used to carry `scripts\sync-fork.cmd` and `scripts\sync-upstream.ps1`; they were removed on 2026-11-02
+because the merge is only a few commands and the part that needs a human is the conflict and test work. The commands
+are:
 
 | What | How |
 |---|---|
-| Preview what upstream has | `scripts\sync-fork.cmd -DryRun` |
-| Sync now (merge + push) | `scripts\sync-fork.cmd` |
-| Merge locally, push later | `scripts\sync-fork.cmd -NoPush` |
+| Preview what upstream has | `git fetch upstream` then `git log --oneline main..upstream/main` and `git diff --stat main..upstream/main` |
+| Sync now (merge + push) | the five steps below |
+| Merge locally, push later | the five steps below, without the last one |
 
-The scripts run on the **Windows PowerShell 5.1** that ships with Windows 10/11 (`powershell.exe`), so nothing has to
-be installed first. The `.cmd` wrappers call them with `-ExecutionPolicy Bypass`; if you run a `.ps1` directly, use
-`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\sync-upstream.ps1 ...`. If you have PowerShell 7, `pwsh`
-works as well.
+1. `git status` must be clean (commit or stash tracked changes; untracked files are left alone). `git fetch upstream`.
+2. `git switch -c upstream-sync` (or reuse an existing `upstream-sync` branch) and `git merge upstream/main`.
+3. Resolve conflicts as described in 2.2.
+4. Build, test and (for gameplay changes) check in game - section 3 - before `main` moves.
+5. `git switch main && git merge --ff-only upstream-sync && git push origin main`, then delete the branch.
 
-### 2.1 The sync script
+Merging into a scratch branch first (step 2) keeps `main` unchanged until the merge compiles and the tests pass.
+If a merge is already in progress and you want to start over: `git merge --abort`.
 
-`scripts/sync-upstream.ps1` refuses to run on a dirty tracked working tree (untracked files are left alone),
-refuses to run on a branch other than `main`, fetches `upstream/main`, prints the incoming commits, merges with
-`--no-edit`, and pushes `HEAD:main` to `origin`. On a merge conflict it **aborts the merge and pushes nothing**,
-exits with code 2 and lists the conflicted files. Other exit codes: 1 = precondition/setup error, 3 = push failed
-(for example not signed in).
+### 2.1 What upstream sync looks like here
 
-It never force-pushes and never rewrites history.
+Upstream `main` carries the released line and the unreleased development that follows it: on 2026-11-02 it had the
+`v0.2` release plus the 0.3 work in progress. So:
+
+- Merging `upstream/main` brings the newest upstream code, but the fork's builds may then be **ahead of the last
+  release** - the launcher shows the development version while the playable client (which comes from the release -
+  see 3.2) is the released one.
+- To match a release exactly, merge the release tag instead: `git fetch upstream --tags` and merge `v0.2`.
+
+The fork keeps upstream's release tooling in `release/` (the v0.2 line added the patch builder and its tests), so
+matching a released version and building the update patch both work here; `release/README.md` explains how a release
+and its update patch are built and published.
 
 ### 2.2 Conflict handling (merge policy)
 
-Conflicts should be rare because the fork adds **new files** and keeps edits to upstream files small and focused.
-When one happens:
+Conflicts should be rare because the fork adds **new files** and keeps edits to upstream files small and focused -
+but they do happen, and one kind is expected: upstream and the fork both work on the bot layer. For example, the
+`v0.2` merge touched `development-source/server/GameServer/bots/GameBot.cs` on both sides (weapon and shopping
+behaviour, horse sizing, companion teleport/death handling, death logging). When one happens:
 
-1. `git switch main` (on a clean tree) and `git merge upstream/main`.
-2. Resolve each conflicted file **keeping both sides**: upstream's correctness/compatibility changes plus the
-   fork's bot work. Never accept one side wholesale to "get past" a conflict.
+1. On the scratch branch from section 2 (a clean tree), `git merge upstream/main`.
+2. Resolve each conflicted file **keeping both sides' intent**: upstream's correctness/compatibility changes plus the
+   fork's bot work. Never accept one side wholesale to "get past" a conflict, and do not silently drop one of two
+   implementations of the same feature - pick the newer/cleaner one and say so in the commit message.
 3. For content files (`runtime/true165/*.json`, `tools/claude-version/true165` outputs), prefer the generator:
    regenerate from the merged generator sources rather than hand-merging thousands of JSON rows, and keep the two
    copies of each content file identical (AGENTS.md rule 7).
 4. Build and test before committing (section 3), then `git add` the resolved files, `git commit --no-edit`,
    `git push origin main`.
 5. `git rerere` is enabled in this checkout, so repeated upstream conflicts are recorded and replayable.
-
-If a merge is already in progress and you want to start over: `git merge --abort`.
 
 ## 3. Development environment
 
@@ -122,14 +138,13 @@ dotnet build "Dawn of Light.sln" -c Release
 dotnet test Tests/Tests.csproj -c Release --no-build
 ```
 
-Verified in this checkout (2026-11-01, see [docs/DEV-ENVIRONMENT.md](DEV-ENVIRONMENT.md)): the server builds with the
-current .NET 10 SDK (0 errors), the NUnit suite passes (3006 tests: 2937 passed, 0 failed, 69 skipped `Explicit`), and
-the launcher builds. Two prerequisites/build notes that are not obvious from the upstream docs:
+Verified in this checkout (2026-11-02, after merging upstream `v0.2`/0.3 development): the server builds with 0
+errors, the NUnit suite passes (3,222 tests: 3,153 passed, 0 failed, 69 skipped `Explicit`), and the launcher builds.
+Two prerequisites/build notes that are not obvious from the upstream docs:
 
 - **`CoreServer/config/serverconfig.xml` must exist before the server solution builds.** It is git-ignored (a local
   config), so a fresh clone or ZIP export does not have it and the build stops with `MSB3030: Could not copy the file
-  ...serverconfig.xml because it was not found`. `scripts\setup-fork.cmd` creates it from
-  `CoreServer/config/serverconfig.example.xml` when missing; do it by hand if you skip the script.
+  ...serverconfig.xml because it was not found`. Create it from `serverconfig.example.xml` as in section 1.
 - **Inside the AI harness sandbox** only: the documented plain build can fail with `Build FAILED. 0 Warning(s)
   0 Error(s)` and `dotnet test` can fail with `Win32Exception (5): Access is denied` because the sandbox blocks
   MSBuild worker nodes and VSTest process handles. That is an environment limit, not a repo defect; in a normal
@@ -152,13 +167,61 @@ Keep them separate, as [docs/LLM-QUICKSTART.md](LLM-QUICKSTART.md) recommends:
 - **this folder** - the source checkout; commit here;
 - **a playable folder** - a copy of the release install where you deploy tested builds and play.
 
-`runtime/data/`, `runtime/server/state-165/`, logs, the client's `godot/content/` and `.godot/`, and a release
-downloader's multi-GB part cache (`release/.downloads/`) are all git-ignored. Never commit a played database,
-`account.txt`, test characters, logs, bot rosters, backups or credentials (AGENTS.md rule 8).
+`runtime/data/`, `runtime/server/state-165/`, logs, the client's `godot/content/` and `.godot/`, a release
+downloader's multi-GB part cache (`release/.downloads/`), and the playable folder itself are all git-ignored. Never
+commit a played database, `account.txt`, test characters, logs, bot rosters, backups or credentials (AGENTS.md
+rule 8).
+
+### 3.2 Updating the playable folder to a new upstream release
+
+The playable folder is updated with the release downloader that ships with the fork, `release\GET-OFFLINE-DAOC-TRUE165.cmd`
+(its current release version is in `release\Get-OfflineDAoC-True165.ps1`). It is the player-facing installer:
+verified parts, SHA-256 checks, `patch-backups\` before replacing anything, an undo on failure, and it never touches
+`runtime/data`, `runtime/account.txt`, the logs, `runtime/server/state-165` or `new-client/save`. It has one
+fork-specific addition: **`-AllowLocalChanges`** (see step 3). Use this checkout's copy, not the downloader zip from
+the release page (that one is the stock script, without the switch); sync `release/` from upstream first so it knows
+the newest release.
+
+1. Quit the game, click **STOP SERVER**, close the launcher. Nothing may be running from the folder.
+2. Sync and rebuild first (section 2): the update puts the *released* launcher, server and content into the folder,
+   and the fork's builds only go back on top in step 4.
+3. Run the updater against the folder:
+
+   ```
+   release\GET-OFFLINE-DAOC-TRUE165.cmd -Mode update -Update "<playable folder>" -AllowLocalChanges
+   ```
+
+   Without `-AllowLocalChanges` the updater refuses a fork install: it checks every file it would replace against the
+   released versions, and the fork's own launcher, server and content files never match, so it stops and changes
+   nothing (it then offers a fresh install with the save copied over). With the switch it treats those files like any
+   other replacement - it backs them up and replaces them - and prints which files those were. It is a fork addition
+   in `release/Get-OfflineDAoC-True165.ps1`; keep it when merging upstream.
+4. Put the fork's builds back over the updated folder, after backing up what is replaced in
+   `deployment-backups\<change>-<date>-\`:
+   - launcher: `runtime\OfflineDAoC.exe`, `runtime\OfflineDAoC.dll`, `runtime\OfflineDAoC.pdb`;
+   - server: `GameServer`, `CoreServer`, `CoreDatabase` and `CoreBase` (DLL and PDB) in `runtime\server`,
+     `runtime\server\lib` and, where the install has it, `runtime\server\win-x64`;
+   - content: the merged `runtime\true165\*.json`;
+   - any other changed content under `runtime\server` (for example `serverconfig.xml`).
+   Back up `runtime\data\opendaoc-165.sqlite3.db` (with `-wal`/`-shm` if present) before the first START SERVER after
+   an update, because the new server can migrate the save.
+5. Start the game as usual. The first **START SERVER** after an update applies the new content and can take a few
+   minutes.
+
+- **Do not start the game between steps 3 and 4.** At that point the folder has the released launcher and server, and
+  playing it would ignore the fork's bot work (and could start the new server on the old save).
+- **A failed or stopped update** is safe: run it again and it continues, or undoes what it did. `patch-backups\` and
+  `deployment-backups\` can be deleted once the new version runs well.
+- **Alternative:** let the updater stop on the changed files and answer yes to its fresh install (`<folder>-v0.2`):
+  it copies the save (database, `account.txt`, `runtime\server\state-165`, `new-client\save`) into the new folder,
+  and the fork's builds are deployed there in the same way. The old folder is only read.
+- **Version pairing:** the release gives the released client; the fork's launcher/server are built from the source
+  checkout. If `main` is on upstream's development line (2.1), the fork builds can be newer than the released client.
+  Merge the release tag instead if client and server must match the release exactly.
 
 ## 4. Day-to-day git workflow
 
-1. `git switch main && scripts\sync-fork.cmd` - start from an up-to-date fork.
+1. `git fetch upstream` and sync (section 2) - start from an up-to-date fork.
 2. `git switch -c feat/bots-<short-name>` - one change per branch.
 3. Make the change; follow the project rules and the bot plan. Keep fork-specific docs and notes in new files.
 4. Build, run the tests, and (for gameplay changes) verify in game on a copy of the playable folder. Report
@@ -171,19 +234,20 @@ downloader's multi-GB part cache (`release/.downloads/`) are all git-ignored. Ne
 
 Keep upstream edits focused: every changed line in an upstream-owned file is a potential sync conflict, while a new
 file almost never conflicts. Put fork documentation in `docs/` new files and link it from the fork note at the end
-of [AGENTS.md](../AGENTS.md). Fork-specific scripts belong in `scripts/`.
+of [AGENTS.md](../AGENTS.md). Fork-specific scripts belong in `scripts/`; there are none at the moment - the sync is
+the commands in section 2.
 
-### 4.1 What the fork changed at setup time
+### 4.1 Fork files and tooling
 
-Setup only added tooling; no gameplay code or content was changed, and **no automatic sync was added**:
-
-- `scripts/bootstrap-fork.ps1` + `scripts/setup-fork.cmd` - attach/repair this checkout (remotes, config, fetches,
-  creates the git-ignored `CoreServer/config/serverconfig.xml` the build needs);
-- `scripts/sync-upstream.ps1` + `scripts/sync-fork.cmd` - on-demand sync: merge upstream into the fork and push;
 - `docs/FORK.md` (this page), `docs/BOT-DEVELOPMENT.md`, `docs/DEV-ENVIRONMENT.md`, `docs/WORLD-MAP.md` (the
-  launcher dashboard's live world map, a fork feature);
-- a fork note appended to `AGENTS.md`; git-ignored local material: the release downloader cache (`release/.downloads/`)
-  and reference repositories (`references/`).
+  launcher dashboard's live world map);
+- `release/Get-OfflineDAoC-True165.ps1`: the `-AllowLocalChanges` switch for updating a fork install (3.2);
+- a fork note appended to `AGENTS.md`;
+- git-ignored local material: the release downloader cache (`release/.downloads/`), reference repositories
+  (`references/`) and the playable folder.
+
+The fork's old setup/sync scripts (`scripts/setup-fork.cmd`, `scripts/bootstrap-fork.ps1`, `scripts/sync-fork.cmd`,
+`scripts/sync-upstream.ps1`) were removed on 2026-11-02; sections 1 and 2 are the replacement.
 
 ## 5. Troubleshooting
 
@@ -191,8 +255,13 @@ Setup only added tooling; no gameplay code or content was changed, and **no auto
 |---|---|
 | `schannel: ... SEC_E_NO_CREDENTIALS` on fetch/push | This checkout sets `http.sslBackend=openssl` (Git for Windows bundles OpenSSL). If it was reset: `git config --local http.sslBackend openssl`. |
 | `Filename too long` | `git config --local core.longpaths true` (already set; a future fresh clone needs `git config --global core.longpaths true` before cloning). |
-| `sync-upstream.ps1` says the tree is dirty | Commit or stash tracked changes; untracked files are fine and left alone. |
+| `git status` is not clean before a sync | Commit or stash tracked changes; untracked files are fine and left alone. |
+| A merge conflict in a bot file | Keep both sides' intent (2.2); the fork and upstream both touch the bot layer. |
 | Push asks for credentials every time | Sign in once interactively; Git Credential Manager stores it in Windows Credential Manager for later pushes. |
-| `git push` fails after a script run | The merge is already committed locally; run `git push origin main` once interactively to sign in, then push again. Exit code 3 from the sync script means exactly this. |
-| CRLF / line-ending noise in `git diff` | The repo stores LF; `core.autocrlf=true` (this machine's system setting) checks out CRLF for text files and normalises on commit. Keep a file's existing line endings when editing (AGENTS.md rule 15). |
+| `git push` fails after a merge | The merge is already committed locally; run `git push origin main` once interactively to sign in, then push again. |
+| CRLF / line-ending noise in `git diff` | The repo stores LF; `core.autocrlf=true` (on machines that set it) checks out CRLF for text files and normalises on commit. Keep a file's existing line endings when editing (AGENTS.md rule 15). |
 | The upstream merge wants to delete a fork file | Upstream never had the file; a delete/modify conflict means upstream renamed/moved something the fork extended. Resolve by moving the fork code onto upstream's new location, not by dropping upstream's change. |
+| The downloader says "files ... were changed on this PC" | It is a fork install: run it with `-AllowLocalChanges` (3.2), then put the fork builds back. |
+| The update stopped or the PC turned off | Run the downloader again: it continues where it stopped, or puts the files it replaced back. |
+| After an update the game has no bot features / dashboard | Steps 3.2.4-5 were not done yet: the folder is running the released launcher and server. Deploy the fork builds and content. |
+| The launcher and the client show different versions | Expected when `main` is on upstream's development line (2.1); merge the release tag for an exact pairing. |
