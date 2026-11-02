@@ -5,6 +5,8 @@
 #  - Update (from v0.2 on): updates an installed game in the folder it is in, with a small patch. Every file it would
 #    replace is checked against the released versions first; nothing is touched if any was changed. Everything it
 #    replaces is backed up in patch-backups\, and a failed update is undone. Saves are never touched.
+#  -Update can be narrowed to the client (-ClientOnly), which leaves the server, the launcher and runtime\true165 as
+#    they are; fork installs use that to take upstream's client without rebuilding or redownloading the whole game.
 param(
     # New install: where the game goes (a new folder). Default: OfflineDAoC-True165 next to this downloader's folder,
     # or <drive>:\Games\OfflineDAoC-True165 when that path would be too long.
@@ -22,7 +24,10 @@ param(
     # Fork installs: update in place even where files were changed on this PC (the fork's own launcher, server and
     # content builds), after backing them up. The fork's builds have to be put back after the update; without the
     # switch the update stops and touches nothing.
-    [switch]$AllowLocalChanges
+    [switch]$AllowLocalChanges,
+    # Update only the new-client files from the patch. The server, the launcher and runtime\true165 are not planned at
+    # all, so nothing under runtime\ is replaced and no fork build has to be put back.
+    [switch]$ClientOnly
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -251,6 +256,9 @@ function Get-Plan([string]$game) {
     $plan = @()
     foreach ($f in @($patch.Files)) {
         if (Test-NeverTouch $f.Path) { Stop-Install 'The update list has an invalid entry.' }
+        # -ClientOnly (fork addition): the client moves with upstream's releases, the server/launcher/content are the
+        # fork's own and are not planned at all.
+        if ($ClientOnly -and $f.Path -notlike 'new-client/*') { continue }
         $path = Join-Path $game $f.Path
         if (!(Test-Path -LiteralPath $path -PathType Leaf)) { $plan += [pscustomobject]@{ File = $f; Action = 'add' }; continue }
         $have = Get-Sha $path
@@ -304,6 +312,7 @@ function Update-Game([string]$game) {
     $work = @($plan | Where-Object { $_.Action -eq 'replace' -or $_.Action -eq 'add' })
     $removes = @()
     foreach ($r in @($patch.Remove)) {
+        if ($ClientOnly -and $r.Path -notlike 'new-client/*') { continue }
         $path = Join-Path $game $r.Path
         if ((Test-Path -LiteralPath $path -PathType Leaf) -and (@($r.From) -contains (Get-Sha $path))) { $removes += $r }
     }
@@ -343,7 +352,12 @@ function Update-Game([string]$game) {
     if ($work.Count -eq 0 -and $removes.Count -eq 0) {
         if (Test-Path -LiteralPath $state) { Remove-Item -LiteralPath $state -Recurse -Force }
         Say ''
-        Write-Host "Your game is already up to date (v$ReleaseVersion)." -ForegroundColor Green
+        if ($ClientOnly) {
+            Write-Host "The client in $game is already up to date (v$ReleaseVersion)." -ForegroundColor Green
+            Say 'The server, the launcher and runtime\true165 were not checked (-ClientOnly).'
+        } else {
+            Write-Host "Your game is already up to date (v$ReleaseVersion)." -ForegroundColor Green
+        }
         return $game
     }
     $replaceBytes = [int64](($work | Where-Object { $_.Action -eq 'replace' } | ForEach-Object { (Get-Item -LiteralPath (Join-Path $game $_.File.Path)).Length } | Measure-Object -Sum).Sum)
@@ -354,6 +368,10 @@ function Update-Game([string]$game) {
     }
     Say ''
     Say ("Update v{0} -> v{1}: {2} file(s) to update or add, {3} to remove. Download: {4:N0} MB." -f $from, $ReleaseVersion, $work.Count, $removes.Count, ($patch.Bytes / 1MB))
+    if ($ClientOnly) {
+        Say 'Client-only update (-ClientOnly): only the new-client files are replaced. The server, the launcher and'
+        Say 'runtime\true165 keep exactly what they have now, so no fork build has to be put back afterwards.'
+    }
     Say 'Everything it replaces is backed up first, and your saves are never touched.'
     if (!(Ask 'Update now?')) { Stop-Install 'Nothing was changed.' }
 

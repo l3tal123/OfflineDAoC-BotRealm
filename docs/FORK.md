@@ -177,10 +177,35 @@ rule 8).
 The playable folder is updated with the release downloader that ships with the fork, `release\GET-OFFLINE-DAOC-TRUE165.cmd`
 (its current release version is in `release\Get-OfflineDAoC-True165.ps1`). It is the player-facing installer:
 verified parts, SHA-256 checks, `patch-backups\` before replacing anything, an undo on failure, and it never touches
-`runtime/data`, `runtime/account.txt`, the logs, `runtime/server/state-165` or `new-client/save`. It has one
-fork-specific addition: **`-AllowLocalChanges`** (see step 3). Use this checkout's copy, not the downloader zip from
-the release page (that one is the stock script, without the switch); sync `release/` from upstream first so it knows
+`runtime/data`, `runtime/account.txt`, the logs, `runtime/server/state-165` or `new-client/save`. It has two
+fork-specific switches: **`-ClientOnly`** (the client alone - the common case, see below) and **`-AllowLocalChanges`**
+(the whole folder; see the whole-folder steps below). Use this checkout's copy, not the downloader zip from the
+release page (that one is the stock script, without the switches); sync `release/` from upstream first so it knows
 the newest release.
+
+#### Client-only updates
+
+The client moves with upstream's releases and contains none of the fork's work, so it does not need the whole-folder
+path below. To take just the released client - keeping the server, the launcher/dashboard and `runtime\true165`
+exactly as they are - double-click **`release\UPDATE-CLIENT-ONLY.cmd`** (it finds the playable folder in the usual
+place and asks before changing anything; pass `-Update "<folder>"` if it is elsewhere), or run:
+
+```
+release\GET-OFFLINE-DAOC-TRUE165.cmd -Mode update -Update "<playable folder>" -ClientOnly
+```
+
+- It uses the same verified **release patch** (about 2.4 GB for v0.1 to v0.2) instead of the complete install (about
+  40 GB), and plans only the patch's `new-client\` files. `runtime\` is not touched at all, so no fork build has to be
+  put back and no database backup is needed for it.
+- `-AllowLocalChanges` is not needed: the fork never edits `new-client\`, so those files match the released versions.
+  If one does not match (a local edit), the update still stops before changing anything.
+- The client and the server can then be **a release apart** (a newer client with the fork's server build); that is
+  the point of the switch, and the two do not have to match. Sync and rebuild the fork (section 2) when you want the
+  server on the new release too, or run the whole-folder update below.
+- The client's settings and `new-client\save` are never touched, and everything replaced is backed up in
+  `patch-backups\`.
+
+#### Whole folder (client, server, launcher and content)
 
 1. Quit the game, click **STOP SERVER**, close the launcher. Nothing may be running from the folder.
 2. Sync and rebuild first (section 2): the update puts the *released* launcher, server and content into the folder,
@@ -241,7 +266,8 @@ the commands in section 2.
 
 - `docs/FORK.md` (this page), `docs/BOT-DEVELOPMENT.md`, `docs/DEV-ENVIRONMENT.md`, `docs/WORLD-MAP.md` (the
   launcher dashboard's live world map);
-- `release/Get-OfflineDAoC-True165.ps1`: the `-AllowLocalChanges` switch for updating a fork install (3.2);
+- `release/Get-OfflineDAoC-True165.ps1`: the `-ClientOnly` and `-AllowLocalChanges` switches for updating a fork
+  install (3.2), and `release/UPDATE-CLIENT-ONLY.cmd`, the double-click helper for a client-only update;
 - a fork note appended to `AGENTS.md`;
 - git-ignored local material: the release downloader cache (`release/.downloads/`), reference repositories
   (`references/`) and the playable folder.
@@ -261,7 +287,8 @@ The fork's old setup/sync scripts (`scripts/setup-fork.cmd`, `scripts/bootstrap-
 | `git push` fails after a merge | The merge is already committed locally; run `git push origin main` once interactively to sign in, then push again. |
 | CRLF / line-ending noise in `git diff` | The repo stores LF; `core.autocrlf=true` (on machines that set it) checks out CRLF for text files and normalises on commit. Keep a file's existing line endings when editing (AGENTS.md rule 15). |
 | The upstream merge wants to delete a fork file | Upstream never had the file; a delete/modify conflict means upstream renamed/moved something the fork extended. Resolve by moving the fork code onto upstream's new location, not by dropping upstream's change. |
-| The downloader says "files ... were changed on this PC" | It is a fork install: run it with `-AllowLocalChanges` (3.2), then put the fork builds back. |
+| The downloader says "files ... were changed on this PC" | It is a fork install: for the client only, use `-ClientOnly` / `UPDATE-CLIENT-ONLY.cmd` (3.2), which never plans those files. For a whole-folder update run it with `-AllowLocalChanges`, then put the fork builds back. |
+| The updater offers a fresh install (a ~40 GB download) when only the client is wanted | Use `-ClientOnly` (3.2): it applies the release patch (a few GB) to `new-client\` and leaves the server, launcher and content alone. |
 | The update stopped or the PC turned off | Run the downloader again: it continues where it stopped, or puts the files it replaced back. |
-| After an update the game has no bot features / dashboard | Steps 3.2.4-5 were not done yet: the folder is running the released launcher and server. Deploy the fork builds and content. |
-| The launcher and the client show different versions | Expected when `main` is on upstream's development line (2.1); merge the release tag for an exact pairing. |
+| After a whole-folder update the game has no bot features / dashboard | Steps 3.2 whole-folder 4-5 were not done yet: the folder is running the released launcher and server. Deploy the fork builds and content. |
+| The launcher and the client show different versions | Expected when `main` is on upstream's development line (2.1) or when only the client was updated (3.2); merge the release tag for an exact pairing. |
