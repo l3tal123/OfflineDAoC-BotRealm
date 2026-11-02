@@ -10,7 +10,7 @@ Offline DAoC True 1.65 is a single-player Dark Age of Camelot world as it was at
 Isles, 1 November 2003). It has these parts:
 - a server: an OpenDAoC fork, C#, .NET 10, SQLite;
 - autonomous gamebots and hired companions;
-- a Windows launcher;
+- a launcher: a .NET host plus a browser dashboard;
 - a new game client built in Godot 4.
 
 The only additions to the period game are the bot and companion systems and the Realm Exchange.
@@ -20,7 +20,7 @@ The only additions to the period game are the bot and companion systems and the 
   (server) and `Server.world_mode` (client). Nothing new goes into them.
 - **One client.** The new client is the only one. The original DAoC client is not supported, and there is no DXVK.
 - **A fresh start.** Nothing transfers from Offline DAoC, and there is no progress importer.
-- **Version:** v0.2. The launcher's version is `MainForm.DisplayVersion`, and
+- **Version:** v0.2. The launcher's version is `LauncherHost.DisplayVersion`, and
   the client's window title is `LoginScreen.GAME_TITLE` in `godot/game/login_screen.gd`.
 
 ## Layout
@@ -33,7 +33,8 @@ The repository mirrors the development folders, so the tools find their files as
 | `development-source/server/GameServer/mode165` | The True 1.65 rules and systems: `Classic165Mode`, `PlayerRules165`, hired companions, inns, the horn, crafting, charm, death penalties. |
 | `development-source/server/GameServer/bots` | Gamebots and companions: `GameBot`, the brains, equipment, resting. |
 | `development-source/server/GameServer/bots/autonomous` | The world population AI: goals, camps, groups, travel, RvR, relic raids, sieges. |
-| `development-source/tools/OfflineDaoc.Launcher` | The launcher (`OfflineDAoC.exe`). It starts the server and the new client. |
+| `development-source/tools/OfflineDaoc.Dashboard` | **The launcher** (`OfflineDAoC.exe`): starts the server and the new client, and serves the browser dashboard from `dashboard\wwwroot` on `http://127.0.0.1:10310/`. |
+| `development-source/tools/OfflineDaoc.Launcher` | The retired WinForms launcher. Kept as the parity reference and for clean upstream merges; **do not deploy** (see its `LEGACY.md`). |
 | `development-source/tools/OpenDAoC-BuildNav` | The navigation mesh builder. |
 | `tools/claude-version/true165` | The Python generators that build the True 1.65 content files. |
 | `runtime/true165` | The True 1.65 content (JSON) that the launcher writes into the world database at START SERVER. |

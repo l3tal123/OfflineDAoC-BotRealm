@@ -63,19 +63,24 @@ dotnet test Tests/Tests.csproj -c Release --no-build
   you replace. Only do this with the server stopped.
 - `CLAUDE.md` and `AGENTS.md` in `development-source/server` still say .NET 9 in places. Every project now targets `net10.0`.
 
-**Launcher** (its own project, not in the server solution):
+**Launcher** (the web launcher; its own project, not in the server solution):
 
 ```
-cd development-source/tools/OfflineDaoc.Launcher
-dotnet build OfflineDaoc.Launcher.csproj -c Release
+cd development-source/tools/OfflineDaoc.Dashboard
+dotnet build OfflineDaoc.Dashboard.csproj -c Release
 ```
 
-- Output: `bin/Release/net10.0-windows/OfflineDAoC.dll` and `OfflineDAoC.exe`. Copy both into `runtime/` (with the
-  launcher closed).
-- The csproj compiles three server files into the launcher by relative path (`BotGoalSettings.cs`,
-  `RealmEventRecordStore.cs`, `BotAiDelayReport.cs`). The path is `../../server/GameServer/...`,
-  which works as cloned because the repo mirrors the dev layout.
-- The version shown in the window title is `MainForm.DisplayVersion` ("0.1").
+- Output: `bin/Release/net10.0/OfflineDAoC.exe`, `OfflineDAoC.dll`, `.pdb`, `.deps.json`,
+  `.runtimeconfig.json` and a `wwwroot/` folder. Deploy, with the launcher closed, by copying the five files into
+  `runtime/` and `wwwroot/` into `runtime/dashboard/wwwroot/`. The launcher serves the UI at
+  `http://127.0.0.1:10310/` and opens the browser; keep its console window open while playing (closing it stops the
+  server). See the project README for the screens and the API.
+- The csproj compiles the launcher's UI-free files (`TrueMode.cs`, `RollingServerLog.cs`, `NewClient.cs`,
+  `XpRateSetting.cs`, `ServerPropertyWrite.cs`, `BotCharacterGenerator.cs`) and two server files
+  (`BotGoalSettings.cs`, `RealmEventRecordStore.cs`) by relative path, so they cannot drift from the originals.
+- The version is `LauncherHost.DisplayVersion`.
+- The old WinForms launcher in `development-source/tools/OfflineDaoc.Launcher` is **retired**: it is kept for parity
+  checks and upstream merges only and must not be deployed (see its `LEGACY.md`).
 
 ---
 

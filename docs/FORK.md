@@ -120,7 +120,7 @@ behaviour, horse sizing, companion teleport/death handling, death logging). When
 The verified toolchain and everything still missing is in [docs/DEV-ENVIRONMENT.md](DEV-ENVIRONMENT.md). Short
 version for this PC:
 
-- **.NET 10 SDK** - installed (`dotnet --version`); the server is `net10.0`, the launcher `net10.0-windows`.
+- **.NET 10 SDK** - installed (`dotnet --version`); the server and the launcher are `net10.0` (the launcher is the web launcher; the retired WinForms one is `net10.0-windows`).
 - **Python 3.10+** - installed; needed by the content pipeline and `database/unpack_db.py`.
 - **Godot 4.7.2 stable .NET/mono** - needed only for the client; not on `PATH` by default. See
   [source/new-client/README.md](../source/new-client/README.md).
@@ -155,7 +155,10 @@ The machine is offline for NuGet (`api.nuget.org` unreachable); restore works fr
 machine without that cache cannot restore.
 
 Do not build or test while a server is running (AGENTS.md rule 10). The first build is the long one; later builds
-are incremental. The launcher has its own project in `development-source/tools/OfflineDaoc.Launcher`.
+are incremental. The launcher has its own project in `development-source/tools/OfflineDaoc.Dashboard`: build it
+with `dotnet build OfflineDaoc.Dashboard.csproj -c Release`, then copy `OfflineDAoC.*` into `runtime\` and
+`wwwroot\` into `runtime\dashboard\wwwroot\` with the launcher closed. The WinForms project in
+`development-source/tools/OfflineDaoc.Launcher` is retired (parity reference only; see its `LEGACY.md`).
 
 Client script checks need `Godot --headless`; see the client README's "Checks and tests" section. Treat a client
 change as untested until `load_check.gd` passes on the edited scripts.
@@ -223,7 +226,9 @@ release\GET-OFFLINE-DAOC-TRUE165.cmd -Mode update -Update "<playable folder>" -C
    in `release/Get-OfflineDAoC-True165.ps1`; keep it when merging upstream.
 4. Put the fork's builds back over the updated folder, after backing up what is replaced in
    `deployment-backups\<change>-<date>-\`:
-   - launcher: `runtime\OfflineDAoC.exe`, `runtime\OfflineDAoC.dll`, `runtime\OfflineDAoC.pdb`;
+   - launcher: `runtime\OfflineDAoC.exe`, `runtime\OfflineDAoC.dll`, `runtime\OfflineDAoC.pdb`,
+     `runtime\OfflineDAoC.deps.json`, `runtime\OfflineDAoC.runtimeconfig.json`, and everything in
+     `runtime\dashboard\wwwroot\` (the web UI);
    - server: `GameServer`, `CoreServer`, `CoreDatabase` and `CoreBase` (DLL and PDB) in `runtime\server`,
      `runtime\server\lib` and, where the install has it, `runtime\server\win-x64`;
    - content: the merged `runtime\true165\*.json`;
