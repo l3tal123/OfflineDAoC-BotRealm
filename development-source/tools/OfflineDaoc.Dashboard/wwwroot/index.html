@@ -57,6 +57,9 @@
       Server
       <span class="badge" :class="serverUp ? 'badge-on' : ''">{{ launcher.state || '—' }}</span>
     </button>
+    <button role="tab" class="tab" :class="{ active: tab === 'options' }" @click="openOptions()">
+      Options
+    </button>
     <span class="tabs-spacer"></span>
     <button class="ghost-button" @click="refreshNow()" :disabled="loading">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
   </nav>
@@ -121,6 +124,10 @@
             <td class="action-col">
               <button v-if="bot.online && bot.regionId > 0" class="row-action" title="Show on the world map"
                       @click.stop="showOnMap(bot)">map</button>
+              <button v-if="bot.online && options.makeMeGm && serverUp" class="row-action" title="Teleport your character to this bot (GM)"
+                      @click.stop="teleportToBot(bot)">tp</button>
+              <button class="row-action danger-text" title="Delete this bot permanently"
+                      @click.stop="deleteBot(bot)">del</button>
             </td>
           </tr>
           <tr v-if="pageBots.length === 0">
@@ -224,6 +231,88 @@
              :class="{ 'console-error': line.startsWith('ERROR') }">{{ line }}</div>
         <div v-if="logLines.length === 0" class="console-empty">No console output yet. Start the server to see its log here.</div>
       </div>
+    </div>
+  </main>
+
+  <!-- ------------------------------------------------------------------ options -->
+  <main v-show="tab === 'options'" class="panel options-panel">
+    <div class="options-grid">
+
+      <section class="option-card">
+        <h2>Experience rate</h2>
+        <p class="option-note">Multiplies experience from every source, for players and for every kind of gamebot. Applies when the server next starts.</p>
+        <div class="option-row">
+          <input class="number-input" v-model="options.xpRate" inputmode="decimal" aria-label="XP rate" />
+          <span class="option-unit">×</span>
+          <button class="button" :disabled="busy || !options.serverStopped" @click="saveXpRate()">Apply</button>
+        </div>
+        <p class="option-hint">{{ options.serverStopped ? 'Server stopped — safe to change.' : 'Stop the server to change the XP rate.' }}</p>
+      </section>
+
+      <section class="option-card">
+        <h2>GM access</h2>
+        <p class="option-note">Gives your local account GM commands in game. The account must exist: enter the realm once first.</p>
+        <label class="switch"><input type="checkbox" v-model="options.makeMeGm" :disabled="busy || !options.serverStopped" @change="saveGm()" /> <span>Make me a GM</span></label>
+      </section>
+
+      <section class="option-card">
+        <h2>Announcements</h2>
+        <p class="option-note">World announcements, applied when the server next starts.</p>
+        <label class="switch"><input type="checkbox" v-model="options.rvrAnnouncements" :disabled="busy || !options.serverStopped" @change="saveAnnouncements()" /> <span>RvR and battleground announcements</span></label>
+        <label class="switch"><input type="checkbox" v-model="options.pveAnnouncements" :disabled="busy || !options.serverStopped" @change="saveAnnouncements()" /> <span>PvE realm event announcements</span></label>
+      </section>
+
+      <section class="option-card">
+        <h2>Bots</h2>
+        <p class="option-note">{{ options.botCount.toLocaleString() }} world bots. New bots join when the server starts.</p>
+        <div class="option-row">
+          <select v-model.number="generate.realm" aria-label="Realm">
+            <option :value="1">Albion</option>
+            <option :value="2">Midgard</option>
+            <option :value="3">Hibernia</option>
+          </select>
+          <select v-model.number="generate.count" aria-label="How many bots">
+            <option :value="1">1 bot</option>
+            <option :value="10">10 bots</option>
+            <option :value="100">100 bots</option>
+          </select>
+          <select v-model.number="generate.level" aria-label="Starting level">
+            <option :value="1">Level 1</option>
+            <option :value="50">Level 50</option>
+          </select>
+          <button class="button" :disabled="busy" @click="generateBots()">Generate</button>
+        </div>
+        <div class="option-row">
+          <button class="button danger" :disabled="busy || options.botCount === 0" @click="deleteAllBots()">Delete every bot…</button>
+        </div>
+        <p class="option-hint">Bots can also be deleted one at a time from the Active Population list.</p>
+      </section>
+
+      <section class="option-card wide">
+        <h2>Bot goals</h2>
+        <p class="option-note">How each bot splits its time. Each row must total exactly 100%. Levels 1–19 cannot do RvR, and level 50 cannot enter battlegrounds. Applies when the server next starts.</p>
+        <table class="goals">
+          <thead>
+            <tr><th>Levels</th><th>Solo PvE</th><th>Group PvE</th><th>RvR</th><th>Battlegrounds</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in goalRows" :key="row.key">
+              <td class="goal-label">{{ row.label }}</td>
+              <td v-for="field in goalFields" :key="field.key">
+                <input type="number" min="0" max="100" step="1" v-model.number="goals[row.key][field.key]"
+                       :disabled="busy || !options.serverStopped" :aria-label="row.label + ' ' + field.label" />
+              </td>
+              <td :class="goalTotal(row.key) === 100 ? 'goal-ok' : 'goal-bad'">{{ goalTotal(row.key) }}%</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="option-row">
+          <button class="button" :disabled="busy || !options.serverStopped || !goalsValid" @click="saveGoals()">Save goals</button>
+          <button class="button ghost" :disabled="busy || !options.serverStopped" @click="loadOptions()">Undo edits</button>
+          <button class="button ghost" :disabled="busy || !options.serverStopped" @click="restoreGoalDefaults()">Restore defaults</button>
+        </div>
+        <p class="option-hint" v-if="!goalsValid">Each row must add up to exactly 100%.</p>
+      </section>
     </div>
   </main>
 

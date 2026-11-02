@@ -6,7 +6,12 @@ namespace OfflineDaoc.Dashboard;
 
 internal static class Program
 {
-    private const string InstanceName = @"Local\OfflineDAoC.Launcher";
+    /// <summary>One launcher per install: the name carries a hash of the runtime folder, so a second install (a
+    /// scratch copy used for testing, for example) can run its own launcher at the same time.</summary>
+    private static string InstanceNameFor(DashboardOptions options) =>
+        @"Local\OfflineDAoC.Launcher." +
+        Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(Path.GetFullPath(options.RuntimeDirectory))))[..16];
 
     private static int Main(string[] arguments)
     {
@@ -24,7 +29,7 @@ internal static class Program
             return exception.Message.Length > 0 ? 2 : 0;
         }
 
-        using var instance = new Mutex(true, InstanceName, out bool isFirstInstance);
+        using var instance = new Mutex(true, InstanceNameFor(options), out bool isFirstInstance);
         if (!isFirstInstance)
         {
             // One launcher per install: a second double-click just brings the dashboard back up.

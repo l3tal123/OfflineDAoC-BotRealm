@@ -29,6 +29,10 @@
     <Compile Include="../OfflineDaoc.Launcher/TrueMode.cs" Link="Launcher/TrueMode.cs" />
     <Compile Include="../OfflineDaoc.Launcher/RollingServerLog.cs" Link="Launcher/RollingServerLog.cs" />
     <Compile Include="../OfflineDaoc.Launcher/NewClient.cs" Link="Launcher/NewClient.cs" />
+    <Compile Include="../OfflineDaoc.Launcher/XpRateSetting.cs" Link="Launcher/XpRateSetting.cs" />
+    <Compile Include="../OfflineDaoc.Launcher/ServerPropertyWrite.cs" Link="Launcher/ServerPropertyWrite.cs" />
+    <Compile Include="../OfflineDaoc.Launcher/BotCharacterGenerator.cs" Link="Launcher/BotCharacterGenerator.cs" />
+    <Compile Include="../../server/GameServer/bots/autonomous/BotGoalSettings.cs" Link="Configuration/BotGoalSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- The front-end travels next to the exe in dashboard\wwwroot: one folder, no build step, nothing to install. -->

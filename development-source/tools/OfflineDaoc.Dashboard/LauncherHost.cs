@@ -55,6 +55,36 @@ internal sealed class LauncherHost : IDisposable
 
     internal IReadOnlyList<string> LogSince(long after, out long next) => _log.Since(after, out next);
 
+    internal string Root => _root;
+
+    internal string Database => _database;
+
+    internal string BotGoalsPath => Path.Combine(_serverDirectory, "state-165", "bot-goals.json");
+
+    /// <summary>
+    /// True only when nothing of ours runs and port 10300 is free: the condition the old launcher used for every
+    /// world write (XP rate, GM access, announcements, bot goals, generating and deleting bots).
+    /// </summary>
+    internal bool ServerStopped()
+    {
+        lock (_sync)
+        {
+            if (_server is { HasExited: false })
+                return false;
+            if (_state is "Starting" or "Stopping")
+                return false;
+        }
+
+        if (Listening())
+            return false;
+        using Process? exact = FindExactServerProcess();
+        return exact is null;
+    }
+
+    internal string AccountName() => ReadCredentials().Account;
+
+    internal void Log(string message) => _log.Add("[launcher] " + message);
+
     // ------------------------------------------------------------------ status
 
     internal object Status()

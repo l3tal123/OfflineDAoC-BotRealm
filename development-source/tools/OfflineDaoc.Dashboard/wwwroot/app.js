@@ -88,6 +88,29 @@
       let drag = null;
       let fittedFor = 0;
 
+      // ------------------------------------------------------------------ options state
+      const options = reactive({
+        xpRate: "1", makeMeGm: false, rvrAnnouncements: true, pveAnnouncements: true,
+        botCount: 0, serverStopped: true,
+      });
+      const goals = reactive({
+        levels1To19: { soloPve: 60, groupPve: 40, rvr: 0, battlegrounds: 0 },
+        levels20To49: { soloPve: 40, groupPve: 40, rvr: 20, battlegrounds: 0 },
+        level50: { soloPve: 20, groupPve: 40, rvr: 40, battlegrounds: 0 },
+      });
+      const generate = reactive({ realm: 1, count: 10, level: 1 });
+      const goalRows = [
+        { key: "levels1To19", label: "Levels 1–19" },
+        { key: "levels20To49", label: "Levels 20–49" },
+        { key: "level50", label: "Level 50" },
+      ];
+      const goalFields = [
+        { key: "soloPve", label: "Solo PvE" },
+        { key: "groupPve", label: "Group PvE" },
+        { key: "rvr", label: "RvR" },
+        { key: "battlegrounds", label: "Battlegrounds" },
+      ];
+
       const realms = REALMS;
 
       // ------------------------------------------------------------------ launcher derived state
@@ -116,6 +139,8 @@
           if (data.launcher) {
             Object.assign(launcher, data.launcher);
             if (data.launcher.install) installName.value = data.launcher.install;
+            // World writes are only safe when the server is fully stopped; keep the Options form in step.
+            options.serverStopped = launcher.state === "Stopped" && !launcher.listening && !launcher.pid;
           }
         } catch (exception) {
           // A status hiccup must not spam the UI; actions report their own failures.
@@ -168,6 +193,111 @@
       function scrollLogToEnd() {
         const element = logBody.value;
         if (element) element.scrollTop = element.scrollHeight;
+      }
+
+      // ------------------------------------------------------------------ options and world writes
+      async function loadOptions() {
+        try {
+          const data = await getJson("api/options");
+          options.xpRate = data.xpRate;
+          options.makeMeGm = data.makeMeGm;
+          options.rvrAnnouncements = data.rvrAnnouncements;
+          options.pveAnnouncements = data.pveAnnouncements;
+          options.botCount = data.botCount;
+          options.serverStopped = data.serverStopped;
+          if (data.botGoals) {
+            for (const [key, weights] of Object.entries(data.botGoals)) {
+              if (goals[key]) Object.assign(goals[key], weights);
+            }
+          }
+        } catch (exception) {
+          // The Options tab is refreshed on entry and after every action.
+        }
+      }
+
+      function openOptions() {
+        tab.value = "options";
+        loadOptions();
+      }
+
+      function goalTotal(key) {
+        const row = goals[key];
+        return ["soloPve", "groupPve", "rvr", "battlegrounds"]
+          .reduce((sum, field) => sum + (Number(row[field]) || 0), 0);
+      }
+
+      const goalsValid = computed(() => goalRows.every((row) => goalTotal(row.key) === 100));
+
+      function restoreGoalDefaults() {
+        Object.assign(goals.levels1To19, { soloPve: 60, groupPve: 40, rvr: 0, battlegrounds: 0 });
+        Object.assign(goals.levels20To49, { soloPve: 40, groupPve: 40, rvr: 20, battlegrounds: 0 });
+        Object.assign(goals.level50, { soloPve: 20, groupPve: 40, rvr: 40, battlegrounds: 0 });
+      }
+
+      function goalQuery() {
+        const prefix = { levels1To19: "l1", levels20To49: "l2", level50: "l50" };
+        const names = { soloPve: "Solo", groupPve: "Group", rvr: "RvR", battlegrounds: "Bg" };
+        const parts = [];
+        for (const row of goalRows) {
+          for (const field of goalFields) {
+            parts.push(`${prefix[row.key]}${names[field.key]}=${encodeURIComponent(Number(goals[row.key][field.key]) || 0)}`);
+          }
+        }
+        return parts.join("&");
+      }
+
+      async function saveXpRate() {
+        await postAction(`api/options/xp?value=${encodeURIComponent(options.xpRate)}`);
+        await loadOptions();
+      }
+
+      async function saveGm() {
+        await postAction(`api/options/gm?enabled=${options.makeMeGm ? "true" : "false"}`);
+        await loadOptions();
+      }
+
+      async function saveAnnouncements() {
+        const rvr = options.rvrAnnouncements ? "true" : "false";
+        const pve = options.pveAnnouncements ? "true" : "false";
+        await postAction(`api/options/announcements?rvr=${rvr}&pve=${pve}`);
+        await loadOptions();
+      }
+
+      async function generateBots() {
+        const label = generate.count === 1 ? "one bot" : `${generate.count} bots`;
+        if (!window.confirm(`Generate ${label} for ${REALMS[generate.realm - 1].name} at level ${generate.level}?`)) return;
+        await postAction(`api/bots/generate?realm=${generate.realm}&count=${generate.count}&level=${generate.level}`);
+        await loadOptions();
+        await refreshPopulation();
+        await refreshMap();
+      }
+
+      async function deleteBot(bot) {
+        const warning = `Permanently delete ${bot.name}, the level ${bot.level} ${bot.className}?\n\n` +
+          "This removes the character, its equipment, coins and Realm Exchange listings. This cannot be undone.";
+        if (!window.confirm(warning)) return;
+        await postAction(`api/bots/delete?botId=${bot.id}`);
+        await loadOptions();
+        await refreshPopulation();
+      }
+
+      async function deleteAllBots() {
+        const warning = `Permanently delete all ${options.botCount.toLocaleString()} world bots?\n\n` +
+          "This removes every bot's progress, equipment, coins and Realm Exchange records. Your player characters are not affected. This cannot be undone.";
+        if (!window.confirm(warning)) return;
+        await postAction("api/bots/delete-all");
+        await loadOptions();
+        await refreshPopulation();
+      }
+
+      async function teleportToBot(bot) {
+        await postAction(`api/bots/teleport?botId=${bot.id}`);
+      }
+
+      async function saveGoals() {
+        if (!goalsValid.value) return;
+        await postAction(`api/bots/goals?${goalQuery()}`);
+        await loadOptions();
       }
 
       function formatUptime(seconds) {
@@ -634,10 +764,12 @@
         refreshMap();
         refreshStatus();
         refreshLog();
-        // Deep links: #map, #server or #population, so every screen can be bookmarked.
+        loadOptions();
+        // Deep links: #map, #server, #options or #population, so every screen can be bookmarked.
         const initial = (location.hash || "").replace("#", "");
         if (initial === "map") openMap();
         else if (initial === "server") tab.value = "server";
+        else if (initial === "options") tab.value = "options";
         watch(tab, (value) => {
           const hash = "#" + value;
           if (location.hash !== hash) history.replaceState(null, "", hash);
@@ -685,6 +817,10 @@
         // launcher
         launcher, notice, noticeOk, busy, serverUp, starting, ready, canEnterRealm, enterRealmHint, stateClass,
         startServer, stopServer, enterRealm, logLines, logBody, autoScroll, clearLog, formatUptime,
+        // options
+        options, goals, goalRows, goalFields, goalsValid, goalTotal, generate, openOptions, loadOptions,
+        saveXpRate, saveGm, saveAnnouncements, generateBots, deleteBot, deleteAllBots, teleportToBot, saveGoals,
+        restoreGoalDefaults,
         // population
         search, searchInput, realmFilter, onlineOnly, sortBy, arrow, page, pageSize,
         pageBots, pageCount, pageWindow, goPage, filteredBots, selectedBot, selectedBotId,
