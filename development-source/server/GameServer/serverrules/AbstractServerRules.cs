@@ -1412,7 +1412,7 @@ namespace DOL.GS.ServerRules
             long groupBonus = CalculateGroupBonus();
             long guildBonus = CalculateGuildBonus();
             long bafBonus = CalculateBafBonus();
-            long outpostBonus = CalculateOutpostExperienceBonus(playerToAward, baseXpReward);
+            long outpostBonus = PlayerEquivalentKillRewards165.OutpostExperienceBonus(playerToAward, baseXpReward);
             GainedExperienceEventArgs arguments = new(baseXpReward, campBonus, groupBonus, guildBonus, bafBonus, outpostBonus, true, true, eXPSource.NPC);
             long totalReward = arguments.ExpTotal;
 
@@ -2073,9 +2073,8 @@ namespace DOL.GS.ServerRules
                 CalculateRewardsModifiedByGroup(entityCountTotalDamagePair, out baseRpReward, out baseBpReward, out baseXpReward, out baseMoneyReward);
 
                 baseRpReward = Math.Min(baseRpReward, CalculateRpCap());
-                baseBpReward = Math.Min(baseBpReward, CalculateBpCap());
-                baseXpReward = Math.Min(baseXpReward, CalculateXpCap());
-                baseMoneyReward = Math.Min(baseMoneyReward, CalculateMoneyCap());
+                // Bounty points, XP and money are capped per awarder inside PlayerEquivalentKillRewards165, which the
+                // three reward functions below call, so they are not capped here.
 
                 RewardRealmPoints(out realmPointsEarned);
                 RewardBountyPoints();
@@ -2116,21 +2115,6 @@ namespace DOL.GS.ServerRules
                 return playerToAward.RealmPointsValue * 2;
             }
 
-            int CalculateBpCap()
-            {
-                return playerToAward.BountyPointsValue * 2;
-            }
-
-            long CalculateXpCap()
-            {
-                return playerToAward.ExperienceValue * Properties.XP_PVP_CAP_PERCENT / 100;
-            }
-
-            long CalculateMoneyCap()
-            {
-                return playerToAward.MoneyValue * 2;
-            }
-
             void RewardRealmPoints(out int realmPointsEarned)
             {
                 int realmPoints = (int) (baseRpReward * damagePercent);
@@ -2158,28 +2142,15 @@ namespace DOL.GS.ServerRules
 
             void RewardBountyPoints()
             {
-                int bountyPoints = (int) (baseBpReward * damagePercent);
-                bountyPoints += CalculateOutpostBonus();
+                int bountyPoints = PlayerEquivalentKillRewards165.BountyPoints(playerToAward, baseBpReward, damagePercent);
 
                 if (bountyPoints > 0)
                     playerToAward.GainBountyPoints(bountyPoints);
-
-                int CalculateOutpostBonus()
-                {
-                    if (KeepBonusMgr.RealmHasBonus(eKeepBonusType.Bounty_Points_5, playerToAward.Realm))
-                        return (int) (bountyPoints / 100.0 * 5);
-
-                    if (KeepBonusMgr.RealmHasBonus(eKeepBonusType.Bounty_Points_3, playerToAward.Realm))
-                        return (int) (bountyPoints / 100.0 * 3);
-
-                    return 0;
-                }
             }
 
             void RewardExperience()
             {
-                long experience = (long) (baseXpReward * damagePercent);
-                experience += CalculateOutpostExperienceBonus(playerToAward, baseXpReward);
+                long experience = PlayerEquivalentKillRewards165.Experience(playerToAward, baseXpReward, damagePercent);
 
                 if (experience > 0)
                     playerToAward.GainExperience(eXPSource.Player, experience);
@@ -2187,7 +2158,7 @@ namespace DOL.GS.ServerRules
 
             void RewardMoney()
             {
-                long money = (long) (baseMoneyReward * damagePercent);
+                long money = PlayerEquivalentKillRewards165.Money(playerToAward, baseMoneyReward, damagePercent);
 
                 if (money > 0)
                 {
@@ -2207,41 +2178,6 @@ namespace DOL.GS.ServerRules
                 playerToAward.Out.SendMessage($"{killedPlayer.Name} has been killed recently and is worth no realm points!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
                 playerToAward.Out.SendMessage($"{killedPlayer.Name} has been killed recently and is worth no experience!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
             }
-        }
-
-        private static long CalculateOutpostExperienceBonus(GamePlayer playerToAward, long baseXpReward)
-        {
-            //outpost XP
-            //1.54 http://www.camelotherald.com/more/567.shtml
-            //- Players now receive an exp bonus when fighting within 16,000
-            //units of a keep controlled by your realm or your guild.
-            //You get 20% bonus if your guild owns the keep or a 10% bonus
-            //if your realm owns the keep.
-
-            const double GUILD_OUTPOST_PERCENT_BONUS = 0.2;
-            const double REALM_OUTPOST_PERCENT_BONUS = 0.1;
-            const int OUTPOST_RADIUS = 16000;
-
-            double outpostPercentBonus = 0.0;
-            AbstractGameKeep keep = GameServer.KeepManager.GetClosestKeepToSpot(playerToAward.CurrentRegionID, playerToAward, OUTPOST_RADIUS);
-
-            if (keep != null)
-            {
-                if (keep.Guild != null && keep.Guild == playerToAward.Guild)
-                    outpostPercentBonus = GUILD_OUTPOST_PERCENT_BONUS;
-                else if (keep.Realm == playerToAward.Realm && GameServer.Instance.Configuration.ServerType is EGameServerType.GST_Normal)
-                   outpostPercentBonus = REALM_OUTPOST_PERCENT_BONUS;
-            }
-
-            long outpostBonus = (long) (baseXpReward * outpostPercentBonus);
-
-            // Merge global keep bonuses for simplicity's sake.
-            if (KeepBonusMgr.RealmHasBonus(eKeepBonusType.Experience_5, playerToAward.Realm))
-                outpostBonus += (long) (baseXpReward / 100.0 * 5);
-            else if (KeepBonusMgr.RealmHasBonus(eKeepBonusType.Experience_3, playerToAward.Realm))
-                outpostBonus += (long) (baseXpReward / 100.0 * 3);
-
-            return outpostBonus;
         }
 
         /// <summary>

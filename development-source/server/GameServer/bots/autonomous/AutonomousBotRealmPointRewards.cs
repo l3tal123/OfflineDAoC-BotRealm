@@ -10,9 +10,10 @@ using static DOL.GS.ServerRules.IServerRules;
 namespace DOL.GS;
 
 /// <summary>
-/// Treats a persistent autonomous gamebot as a player only for RvR realm-point
-/// credit. Ordinary NPCs, controlled pets, and temporary /spawn companions
-/// remain ineligible victims.
+/// Treats a persistent autonomous gamebot as a player for PvP kill rewards: realm points, and (owner 2026-11-02: a
+/// gamebot is a player in every aspect) the same experience, bounty points and money a player of the same level and
+/// realm level would be worth. Ordinary NPCs, controlled pets, and temporary /spawn companions remain ineligible
+/// victims, and gamebots earn what a player would when they kill.
 /// </summary>
 public static class AutonomousBotRealmPointRewards
 {
@@ -163,6 +164,30 @@ public static class AutonomousBotRealmPointRewards
 
                     if (realmPointsEarned > 0)
                         player.GainRealmPoints(realmPointsEarned, true);
+
+                    // A gamebot is a player in every aspect (owner 2026-11-02): killing one pays the same XP, bounty
+                    // points and money as killing a player of its level, through the same arithmetic.
+                    long baseExperience = PlayerEquivalentKillRewards165.ExperienceValue(killedBot) / contributorCount;
+                    long experience = PlayerEquivalentKillRewards165.Experience(player, baseExperience, damagePercent);
+
+                    if (experience > 0)
+                        player.GainExperience(eXPSource.Player, experience);
+
+                    long baseBountyPoints = (!Properties.ALLOW_BPS_IN_BGS && killedBot.CurrentZone?.IsBG == true
+                        ? 0 : PlayerEquivalentKillRewards165.BountyPointsValue(killedBot)) / contributorCount;
+                    int bountyPoints = PlayerEquivalentKillRewards165.BountyPoints(player, baseBountyPoints, damagePercent);
+
+                    if (bountyPoints > 0)
+                        player.GainBountyPoints(bountyPoints);
+
+                    long baseMoney = PlayerEquivalentKillRewards165.MoneyValue(killedBot) / contributorCount;
+                    long money = PlayerEquivalentKillRewards165.Money(player, baseMoney, damagePercent);
+
+                    if (money > 0)
+                    {
+                        player.AddMoney(money, "You receive {0}");
+                        InventoryLogging.LogInventoryAction(killedBot, player, eInventoryActionType.Other, money);
+                    }
                 }
                 else
                 {
@@ -206,6 +231,21 @@ public static class AutonomousBotRealmPointRewards
                 GetPlayerEquivalentRealmPointValue(bot.Level, bot.RealmLevel), bot.RealmLevel,
                 groupCount, groupCount, Math.Min(1.0, groupDamage / totalDamage), true);
             if (points > 0) bot.GainRealmPoints(points, true);
+
+            // A gamebot is a player in every aspect (owner 2026-11-02): it earns the same XP and money from the kill as
+            // a player of its level would, split the same way.
+            double damageShare = Math.Min(1.0, groupDamage / totalDamage);
+            long baseExperience = PlayerEquivalentKillRewards165.ExperienceValue(victim) / groupCount;
+            long experience = PlayerEquivalentKillRewards165.Experience(bot, baseExperience, damageShare);
+
+            if (experience > 0)
+                bot.GainExperience(eXPSource.Player, experience);
+
+            long baseMoney = PlayerEquivalentKillRewards165.MoneyValue(victim) / groupCount;
+            long money = PlayerEquivalentKillRewards165.Money(bot, baseMoney, damageShare);
+
+            if (money > 0)
+                AutonomousBotEconomy.AddMoney(bot.DatabaseID, money);
         }
     }
 
@@ -213,6 +253,11 @@ public static class AutonomousBotRealmPointRewards
     public static void PayGamebotsForPlayerKill(GamePlayer killedPlayer)
     {
         if (killedPlayer == null) return;
+
+        // A player killed again inside the realm point window is worth nothing to players; a gamebot follows the same
+        // rule (owner 2026-11-02: bots are players in every aspect).
+        if (killedPlayer.DeathTime + Properties.RP_WORTH_SECONDS > killedPlayer.PlayedTime) return;
+
         KeyValuePair<GameLiving, double>[] raw;
         lock (killedPlayer.XpGainersLock)
             raw = killedPlayer.XPGainers.ToArray();

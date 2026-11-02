@@ -202,6 +202,7 @@ group instead of following them from outside it.
 | Chat, guilds, map markers, dashboard | `AutonomousBotChat*`, `AutonomousBotGuilds`, `AutonomousBotMapMarkers`, `AutonomousBotDashboard` | Implemented (cosmetic/QoL) |
 | Bot Inspector: one bot's coin, stats, gear, bag, specs, training, abilities, listings, buffs | `AutonomousBotInspector` (server), `MainForm.BotInspector.cs` (launcher) | Implemented (read-only) |
 | Server Stats: world totals (mobs killed, deaths, money looted, PvP kills, RP earned, keeps captured) and top-10 boards, counting players and bots | `ServerStatistics165` (server), `MainForm.ServerStats.cs` (launcher) | Implemented (read-only, on demand) |
+| PvP rewards: a gamebot is a player in every aspect - killing one pays the killer XP, bounty points and money as a player kill would, and a bot killing a player or another bot earns XP and money as a player of its level would | `PlayerEquivalentKillRewards165`, `AutonomousBotRealmPointRewards` | Implemented |
 | Hired companions: hire, summon, gear, spec, RA, repairs, revive | `Hire165`, `CompanionWindows165` | Implemented |
 | Quests / tasks (`/task`, classic quests) | - | **Not implemented for bots** |
 | Epic quests (Lord of Deceit, Symbol of the Broken, Last Heir) | `Epics165` (player helpers only) | **Player only** |
@@ -214,7 +215,10 @@ group instead of following them from outside it.
 Partial / thin areas: low-level survivability (README known issue: levels 6-9 die a lot); support bots hold
 combat while only their pet fights (README known issue); a player can now invite a nearby world bot into their
 group, but bots still never initiate aid or react to player requests beyond chat; item drops on ~2,100
-coin-only monsters (content gap, not bot code).
+coin-only monsters (content gap, not bot code). The PvP kill rewards treat gamebots as players (worth and paid as a
+player of their level), but the rest of the server still has many `is GamePlayer` checks that bots do not satisfy -
+for example the Thidranki and Caledonia kill tasks only count real-player victims, so killing bots does not advance
+them. Converting the ones that matter is a per-system audit, not a switch.
 
 ## 3. Gaps and weak points (verified in code)
 

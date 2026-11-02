@@ -7,6 +7,7 @@ using DOL.AI.Brain;
 using DOL.Database;
 using DOL.Database.Handlers;
 using DOL.GS;
+using DOL.GS.ServerProperties;
 using DOL.GS.ServerRules;
 using NUnit.Framework;
 
@@ -131,5 +132,78 @@ public class UT_AutonomousBotRealmPointRewards
         Assert.That(AutonomousRvrDefense.IsCombatant(null), Is.False);
         Assert.That(AutonomousBotRealmPointRewards.IsEligibleVictim(companion), Is.False);
         Assert.That(AutonomousBotRealmPointRewards.IsEligibleVictim(pet), Is.False);
+    }
+
+    // A gamebot has no worth values of its own; in True 1.65 it is worth what a player of its level and realm level
+    // would be (owner 2026-11-02: bots are players in every aspect).
+
+    [Test]
+    public void BotVictimIsWorthPlayerExperienceForItsLevel()
+    {
+        RewardBot bot = Bot(true, false);
+        bot.Level = 25;
+
+        Assert.That(PlayerEquivalentKillRewards165.ExperienceValue(bot),
+            Is.EqualTo(GameLiving.XPForLiving[25] * 4),
+            "a gamebot reports the living XP value; a player of the same level is worth four times it");
+    }
+
+    [TestCase(1, 1)]
+    [TestCase(25, 16)]
+    [TestCase(35, 22)]
+    [TestCase(50, 31)]
+    public void BotVictimBountyPointValueMatchesPlayerFormula(int level, int expected)
+    {
+        Assert.That(PlayerEquivalentKillRewards165.BountyPointsValueForLevel(level), Is.EqualTo(expected));
+    }
+
+    [TestCase(1)]
+    [TestCase(25)]
+    [TestCase(35)]
+    [TestCase(50)]
+    [TestCase(60)]
+    public void BotVictimMoneyValueMatchesPlayerFormula(int level)
+    {
+        int row = Math.Min(level, GamePlayer.prcRestore.Length - 1);
+        Assert.That(PlayerEquivalentKillRewards165.MoneyValueForLevel(level),
+            Is.EqualTo(3 * (long)GamePlayer.prcRestore[row]));
+    }
+
+    [Test]
+    public void BotVictimWorthMatchesAPlayerOfItsLevel()
+    {
+        RewardBot bot = Bot(true, false);
+        bot.Level = 35;
+
+        Assert.That(PlayerEquivalentKillRewards165.ExperienceValue(bot), Is.EqualTo(GameLiving.XPForLiving[35] * 4));
+        Assert.That(PlayerEquivalentKillRewards165.BountyPointsValue(bot),
+            Is.EqualTo(PlayerEquivalentKillRewards165.BountyPointsValueForLevel(35)));
+        Assert.That(PlayerEquivalentKillRewards165.MoneyValue(bot),
+            Is.EqualTo(PlayerEquivalentKillRewards165.MoneyValueForLevel(35)));
+    }
+
+    [Test]
+    public void PlayerKillCapsAreThePlayerRules()
+    {
+        // The XP cap is a server property; the unpacked test double has no server properties table, so set the
+        // production default and put the field back afterwards.
+        int previousCap = Properties.XP_PVP_CAP_PERCENT;
+        Properties.XP_PVP_CAP_PERCENT = 125;
+
+        try
+        {
+            Assert.That(PlayerEquivalentKillRewards165.CappedExperience(8000, 20000), Is.EqualTo(10000),
+                "a player kill pays at most 125% of the awarder's level value");
+            Assert.That(PlayerEquivalentKillRewards165.CappedExperience(8000, 5000), Is.EqualTo(5000),
+                "a small kill is not raised to the cap");
+            Assert.That(PlayerEquivalentKillRewards165.CappedBountyPoints(20, 500), Is.EqualTo(40),
+                "at most twice the awarder's bounty point value");
+            Assert.That(PlayerEquivalentKillRewards165.CappedMoney(300, 5000), Is.EqualTo(600),
+                "at most twice the awarder's money value");
+        }
+        finally
+        {
+            Properties.XP_PVP_CAP_PERCENT = previousCap;
+        }
     }
 }
