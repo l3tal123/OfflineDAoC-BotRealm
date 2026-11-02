@@ -29,7 +29,49 @@
     return String(a ?? "").localeCompare(String(b ?? ""), undefined, { sensitivity: "base", numeric: true });
   }
 
-  createApp({
+  /** A small generic table used by the read-only world screens (columns are declarative or taken from the data). */
+  const SimpleTable = {
+    props: {
+      columns: { type: Array, default: () => [] },
+      rows: { type: Array, default: () => [] },
+      auto: { type: Boolean, default: false },
+      empty: { type: String, default: "Nothing to show." },
+      compact: { type: Boolean, default: false },
+      selectable: { type: Boolean, default: false },
+      selected: { type: Function, default: null },
+    },
+    computed: {
+      effectiveColumns() {
+        if (!this.auto) return this.columns;
+        const first = (this.rows && this.rows[0]) || {};
+        return Object.keys(first).map((key) => ({ key, label: key }));
+      },
+    },
+    methods: {
+      cell(row, column) {
+        const value = row[column.key];
+        if (column.format) return column.format(value, row);
+        return value === null || value === undefined || value === "" ? "—" : value;
+      },
+    },
+    template: `
+      <div class="table-wrap compact-table">
+        <table class="bots">
+          <thead><tr><th v-for="column in effectiveColumns" :key="column.key" :class="column.className">{{ column.label }}</th></tr></thead>
+          <tbody>
+            <tr v-for="(row, index) in rows" :key="index"
+                :class="{ 'row-selected': selectable && selected && selected(row) }"
+                @click="selectable && $emit('row-click', row)">
+              <td v-for="column in effectiveColumns" :key="column.key" :class="column.className">{{ cell(row, column) }}</td>
+            </tr>
+            <tr v-if="!rows || rows.length === 0">
+              <td :colspan="effectiveColumns.length || 1" class="empty">{{ empty }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`,
+  };
+  const app = createApp({
     setup() {
       // ------------------------------------------------------------------ shared state
       const tab = ref("population");
@@ -110,6 +152,49 @@
         { key: "rvr", label: "RvR" },
         { key: "battlegrounds", label: "Battlegrounds" },
       ];
+
+      // ------------------------------------------------------------------ world screens state
+      const groups = ref([]);
+      const groupsLoaded = ref(false);
+      const rvr = ref(null);
+      const rvrLoaded = ref(false);
+      const stats = ref(null);
+      const statsLoaded = ref(false);
+      const eventRealm = ref(0);
+      const eventKind = ref("");
+      const eventActiveOnly = ref(false);
+      const eventSearch = ref("");
+      const selectedObjectiveId = ref("");
+      const inspector = ref(null);
+      const inspectorLoading = ref(false);
+      const inspectorSection = ref("Stats");
+      const exchange = reactive({
+        available: false, error: "", tab: "listings", realm: "", search: "", page: 1, pageSize: 50,
+        listings: [], purchases: [],
+      });
+      const exchangeListingColumns = [
+        { key: "itemName", label: "Item" },
+        { key: "itemLevel", label: "Level", className: "num" },
+        { key: "quantity", label: "Qty", className: "num" },
+        { key: "seller", label: "Listed by" },
+        { key: "price", label: "Price", className: "num" },
+        { key: "realm", label: "Realm" },
+        { key: "expires", label: "Expires / remaining" },
+      ];
+      const exchangePurchaseColumns = [
+        { key: "sold", label: "Sold" },
+        { key: "itemName", label: "Item" },
+        { key: "quantity", label: "Qty", className: "num" },
+        { key: "seller", label: "Seller" },
+        { key: "buyer", label: "Buyer" },
+        { key: "price", label: "Price", className: "num" },
+        { key: "realm", label: "Realm" },
+      ];
+      const records = reactive({
+        available: true, error: "", rows: [], total: 0, page: 1, pageSize: 100,
+        realm: "", kind: "", outcome: "", search: "",
+      });
+      const inspectorSections = ["Stats", "Equipment", "Bag", "Vault", "Specs", "Abilities", "Listings", "Effects"];
 
       const realms = REALMS;
 
@@ -300,6 +385,325 @@
         await loadOptions();
       }
 
+      // ------------------------------------------------------------------ world screens: loaders
+      async function loadGroups() {
+        try {
+          const data = await getJson("api/groups");
+          groups.value = data.groups || [];
+          groupsLoaded.value = true;
+        } catch (exception) { /* refreshed by the poll */ }
+      }
+
+      async function loadRvr() {
+        try {
+          const data = await getJson("api/rvr");
+          if (data.available) rvr.value = data.snapshot;
+          rvrLoaded.value = true;
+        } catch (exception) { /* refreshed by the poll */ }
+      }
+
+      async function loadStats() {
+        try {
+          const data = await getJson("api/stats");
+          if (data.available) stats.value = data.snapshot;
+          statsLoaded.value = true;
+        } catch (exception) { /* refreshed by the poll */ }
+      }
+
+      async function loadExchange() {
+        try {
+          const data = await getJson("api/exchange");
+          exchange.available = data.available;
+          exchange.error = data.error || "";
+          exchange.listings = data.listings || [];
+          exchange.purchases = data.purchases || [];
+          if (exchange.page > exchangePageCount.value) exchange.page = exchangePageCount.value;
+        } catch (exception) {
+          exchange.error = "The Realm Exchange could not be read: " + exception.message;
+        }
+      }
+
+      async function loadRecords(page) {
+        records.page = Math.max(1, page || 1);
+        const query = new URLSearchParams({
+          page: String(records.page), realm: records.realm, kind: records.kind,
+          outcome: records.outcome, search: records.search,
+        });
+        try {
+          const data = await getJson("api/records?" + query.toString());
+          records.available = data.available;
+          records.error = data.error || "";
+          records.rows = data.rows || [];
+          records.total = data.total || 0;
+        } catch (exception) {
+          records.error = "The event records could not be read: " + exception.message;
+        }
+      }
+
+      async function loadInspector(bot) {
+        inspectorLoading.value = true;
+        inspectorSection.value = "Stats";
+        try {
+          const data = await getJson(`api/inspect?botId=${bot.id}`);
+          inspector.value = data.available ? data.snapshot : null;
+          if (!data.available) {
+            notice.value = `${bot.name} cannot be inspected: the server is not running, so there is no live description.`;
+            noticeOk.value = false;
+          }
+        } catch (exception) {
+          notice.value = "The Bot Inspector could not read that bot: " + exception.message;
+          noticeOk.value = false;
+          inspector.value = null;
+        } finally {
+          inspectorLoading.value = false;
+        }
+      }
+
+      function openGroups() { tab.value = "groups"; loadGroups(); }
+      function openRvr() { tab.value = "rvr"; loadRvr(); }
+      function openBattlegrounds() { tab.value = "battlegrounds"; loadRvr(); }
+      function openEvents() { tab.value = "events"; loadRvr(); }
+      function openStats() { tab.value = "stats"; loadStats(); }
+      function openExchange() { tab.value = "exchange"; loadExchange(); }
+      function openRecords() { tab.value = "records"; loadRecords(1); }
+      function openInspector(bot) { tab.value = "inspector"; loadInspector(bot); }
+      function selectObjective(event) { selectedObjectiveId.value = event.Id || event.Name; }
+      function inspectFromRoster(bot) { openInspector(bot); }
+
+      // ------------------------------------------------------------------ world screens: derived data
+      const rvrObjectives = computed(() => (rvr.value && rvr.value.Objectives) || []);
+      const rvrUpdated = computed(() => (rvr.value ? new Date(rvr.value.UpdatedUtc) : null));
+      const rvrElapsed = computed(() => (rvrUpdated.value ? Math.max(0, now.value - rvrUpdated.value.getTime()) : 0));
+      const rvrRunning = computed(() => !!(rvr.value && rvr.value.Running));
+      const selectedObjective = computed(() => rvrObjectives.value.find(
+        (objective) => (objective.Id || objective.Name) === selectedObjectiveId.value) || null);
+      const eventParticipants = computed(() => ((rvr.value && rvr.value.Participants) || [])
+        .filter((participant) => !selectedObjective.value || participant.EventId === selectedObjective.value.Id));
+      const participantColumns = [
+        { key: "Name", label: "Name" },
+        { key: "Realm", label: "Realm" },
+        { key: "GroupId", label: "Group" },
+        { key: "Location", label: "Zone" },
+        { key: "X", label: "X", className: "num" },
+        { key: "Y", label: "Y", className: "num" },
+        { key: "Z", label: "Z", className: "num" },
+        { key: "Activity", label: "Current activity" },
+      ];
+
+      const groupMemberColumns = [
+        { key: "name", label: "Member" },
+        { key: "level", label: "Level", className: "num" },
+        { key: "className", label: "Class" },
+        { key: "zone", label: "Zone" },
+        { key: "activity", label: "Activity" },
+      ];
+
+      function objectiveSelected(row) {
+        return (row.Id || row.Name) === selectedObjectiveId.value;
+      }
+
+      function markerFor(kind) {
+        return kind === "Dragon" ? "DRAGON" : kind === "Epic dungeon" ? "DUNGEON" : kind === "Neutral raid" ? "NEUTRAL RAID"
+          : kind === "Relic" ? "RELIC" : kind === "Relic keep" ? "RELIC KEEP" : kind === "Keep" ? "KEEP" : "PORTAL";
+      }
+
+      function clockText(milliseconds) {
+        const total = Math.max(0, Math.round(milliseconds / 1000));
+        const hours = Math.floor(total / 3600);
+        const minutes = Math.floor((total % 3600) / 60);
+        const seconds = total % 60;
+        return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+          : `${minutes}:${String(seconds).padStart(2, "0")}`;
+      }
+
+      function objectiveClock(objective) {
+        const remaining = Number(objective.PhaseRemainingMilliseconds) || 0;
+        if (remaining < 0) return (objective.Phase || "Running") + " (no time limit)";
+        return clockText(Math.max(0, remaining - (rvrRunning.value ? rvrElapsed.value : 0)));
+      }
+
+      function objectiveCooldown(objective) {
+        if (objective.IsCatalogOnly) return "Unknown";
+        const cooldown = Number(objective.CooldownMilliseconds) || 0;
+        if (cooldown > 0) return Math.ceil(cooldown / 60000) + " min";
+        if (objective.State === "Encounter unavailable") return "Not ready";
+        return "Ready";
+      }
+
+      function activeEvent(objective) {
+        const phase = objective.Phase || "";
+        const state = objective.State || "";
+        return ["Muster", "Staging", "Waiting", "Battle"].includes(phase)
+          || /rally|SIEGE|RAID|ESCORT|DROPPED|Under attack/i.test(state);
+      }
+
+      const objectivesColumns = [
+        { key: "Kind", label: "Marker", format: markerFor },
+        { key: "Name", label: "Objective" },
+        { key: "Owner", label: "Realm" },
+        { key: "State", label: "State" },
+        { key: "Forces", label: "Forces" },
+        { key: "PhaseRemainingMilliseconds", label: "Stage / battle", format: (value, row) => objectiveClock(row) },
+        { key: "CooldownMilliseconds", label: "Cooldown", format: (value, row) => objectiveCooldown(row) },
+        { key: "Carrier", label: "Carrier" },
+      ];
+
+      const eventKinds = computed(() => [...new Set(rvrObjectives.value.map((objective) => objective.Kind))].sort());
+      const eventRealms = computed(() => [...new Set(rvrObjectives.value.map((objective) => objective.Location))].sort());
+
+      const filteredEvents = computed(() => {
+        const search = eventSearch.value.trim().toLowerCase();
+        return rvrObjectives.value.filter((objective) => {
+          if (eventRealm.value && objective.Location !== eventRealm.value) return false;
+          if (eventKind.value && objective.Kind !== eventKind.value) return false;
+          if (eventActiveOnly.value && !activeEvent(objective)) return false;
+          if (search) {
+            const haystack = `${objective.Name} ${objective.Kind} ${objective.State} ${objective.Location} ${objective.Forces}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+          }
+          return true;
+        });
+      });
+
+      watch(filteredEvents, (list) => {
+        if (!list.some((objective) => (objective.Id || objective.Name) === selectedObjectiveId.value))
+          selectedObjectiveId.value = list.length ? (list[0].Id || list[0].Name) : "";
+      }, { immediate: true });
+
+      const battlegroundRows = computed(() => ((rvr.value && rvr.value.Battlegrounds) || []).map((battleground) => ({
+        name: battleground.Name,
+        levels: `${battleground.MinLevel}–${battleground.MaxLevel}`,
+        centralKeep: battleground.CentralKeep,
+        owner: battleground.Owner,
+        albion: battleground.AlbionInside,
+        midgard: battleground.MidgardInside,
+        hibernia: battleground.HiberniaInside,
+        total: battleground.AlbionInside + battleground.MidgardInside + battleground.HiberniaInside,
+        travelling: battleground.AlbionTravelling + battleground.MidgardTravelling + battleground.HiberniaTravelling,
+        monsters: battleground.Monsters,
+      })));
+      const battlegroundColumns = [
+        { key: "name", label: "Battleground" },
+        { key: "levels", label: "Levels" },
+        { key: "centralKeep", label: "Central keep" },
+        { key: "owner", label: "Held by" },
+        { key: "albion", label: "Albion", className: "num" },
+        { key: "midgard", label: "Midgard", className: "num" },
+        { key: "hibernia", label: "Hibernia", className: "num" },
+        { key: "total", label: "Inside", className: "num" },
+        { key: "travelling", label: "On their way", className: "num" },
+        { key: "monsters", label: "Monsters", className: "num" },
+      ];
+
+      const statsTotals = computed(() => {
+        const snapshot = stats.value;
+        if (!snapshot) return [];
+        return [
+          { label: "Monsters killed", value: snapshot.MobKills.toLocaleString() },
+          { label: "Deaths", value: snapshot.Deaths.toLocaleString() },
+          { label: "Money looted", value: worldMoney(snapshot.MoneyLootedCopper) },
+          { label: "PvP kills", value: snapshot.PvpKills.toLocaleString() },
+          { label: "Realm points", value: snapshot.RealmPoints.toLocaleString() },
+          { label: "Keeps captured", value: snapshot.KeepsCaptured.toLocaleString() },
+          { label: "Players tracked", value: snapshot.PlayersTracked.toLocaleString() },
+          { label: "Bots tracked", value: snapshot.BotsTracked.toLocaleString() },
+        ];
+      });
+      const statsBoards = computed(() => {
+        const snapshot = stats.value;
+        if (!snapshot) return [];
+        const ranked = (rows) => (rows || []).map((row, index) => ({ ...row, rank: index + 1 }));
+        return [
+          { title: "Top mob kills", rows: ranked(snapshot.TopMobKills) },
+          { title: "Top deaths", rows: ranked(snapshot.TopDeaths) },
+          { title: "Top PvP kills", rows: ranked(snapshot.TopPvpKills) },
+          { title: "Top keeps captured", rows: ranked(snapshot.TopKeepsCaptured) },
+        ];
+      });
+      const statsBoardColumns = [
+        { key: "rank", label: "#", className: "num",
+          format: (value) => value },
+        { key: "Name", label: "Name" },
+        { key: "Kind", label: "Kind" },
+        { key: "Realm", label: "Realm", format: (value) => REALMS.find((realm) => realm.id === Number(value))?.name || value },
+        { key: "Level", label: "Level", className: "num" },
+        { key: "Value", label: "Value", className: "num" },
+      ];
+      function worldMoney(copper) {
+        if (!Number.isFinite(Number(copper))) return "—";
+        const total = Number(copper);
+        const platinum = Math.floor(total / 1000000);
+        const gold = Math.floor((total % 1000000) / 10000);
+        const silver = Math.floor((total % 10000) / 100);
+        const remainder = total % 100;
+        const parts = [];
+        if (platinum > 0) parts.push(`${platinum}p`);
+        if (gold > 0) parts.push(`${gold}g`);
+        if (silver > 0) parts.push(`${silver}s`);
+        if (remainder > 0 || parts.length === 0) parts.push(`${remainder}c`);
+        return parts.join(" ");
+      }
+
+      const exchangeRows = computed(() => {
+        const list = exchange.tab === "listings" ? exchange.listings : exchange.purchases;
+        const realm = exchange.realm;
+        const search = exchange.search.trim().toLowerCase();
+        return list.filter((row) => {
+          if (realm && row.realm !== realm) return false;
+          if (!search) return true;
+          const haystack = `${row.itemName} ${row.seller || ""} ${row.buyer || ""} ${row.realm}`.toLowerCase();
+          return haystack.includes(search);
+        });
+      });
+      const exchangePageCount = computed(() => Math.max(1, Math.ceil(exchangeRows.value.length / exchange.pageSize)));
+      const exchangePageRows = computed(() => exchangeRows.value.slice(
+        (exchange.page - 1) * exchange.pageSize, exchange.page * exchange.pageSize));
+      const exchangeColumns = computed(() => (exchange.tab === "listings" ? exchangeListingColumns : exchangePurchaseColumns));
+      watch(() => [exchange.realm, exchange.search, exchange.tab], () => { exchange.page = 1; });
+      function exchangeGoPage(page) { exchange.page = Math.min(Math.max(1, page), exchangePageCount.value); }
+
+      const recordsPageCount = computed(() => Math.max(1, Math.ceil(records.total / records.pageSize)));
+      const recordsColumns = [
+        { key: "Name", label: "Event" },
+        { key: "Kind", label: "Kind" },
+        { key: "Realm", label: "Realm" },
+        { key: "StartedUtc", label: "Started" },
+        { key: "EndedUtc", label: "Ended" },
+        { key: "Phase", label: "Phase" },
+        { key: "Outcome", label: "Outcome" },
+        { key: "Assigned", label: "Assigned", className: "num" },
+        { key: "Present", label: "Present", className: "num" },
+        { key: "Details", label: "Details" },
+      ];
+      function recordsGoPage(page) { loadRecords(Math.min(Math.max(1, page), recordsPageCount.value)); }
+
+      const inspectorData = computed(() => (inspector.value && inspector.value[inspectorSection.value]) || []);
+      const inspectorOverview = computed(() => {
+        const snapshot = inspector.value;
+        if (!snapshot) return [];
+        return [
+          ["Level", snapshot.Level],
+          ["Realm", snapshot.RealmName],
+          ["Class", snapshot.ClassName],
+          ["Race", snapshot.RaceName],
+          ["Zone", snapshot.ZoneName],
+          ["State", snapshot.Online ? "live in the world" : "last saved state"],
+          ["Money", snapshot.Money],
+          ["Health", `${snapshot.Health} / ${snapshot.MaxHealth}`],
+          ["Mana", `${snapshot.Mana} / ${snapshot.MaxMana}`],
+          ["Endurance", `${snapshot.Endurance} / ${snapshot.MaxEndurance}`],
+          ["Deaths", snapshot.DeathCount],
+          ["Craft", snapshot.Craft],
+          ["Spec points spent", snapshot.SpecPointsSpent],
+          ["Guild", snapshot.Guild],
+          ["Group", snapshot.Group],
+          ["Activity", snapshot.Activity],
+          ["Goal", snapshot.CurrentGoal],
+          ["Target", snapshot.TargetName],
+          ["Warning", snapshot.Warning],
+        ].filter((pair) => pair[1] !== null && pair[1] !== undefined && pair[1] !== "");
+      });
+
       function formatUptime(seconds) {
         const total = Math.max(0, Math.round(seconds));
         const hours = Math.floor(total / 3600);
@@ -411,6 +815,10 @@
           applyShared(data);
           bots.value = data.bots || [];
           error.value = "";
+          if (tab.value === "inspector" && !inspector.value && !inspectorLoading.value) {
+            const bot = bots.value.find((candidate) => candidate.online) || bots.value[0];
+            if (bot) loadInspector(bot);
+          }
         } catch (exception) {
           error.value = `Could not read the dashboard data: ${exception.message}`;
         } finally {
@@ -765,15 +1173,26 @@
         refreshStatus();
         refreshLog();
         loadOptions();
-        // Deep links: #map, #server, #options or #population, so every screen can be bookmarked.
+        // Every screen can be bookmarked; the tab watcher below does the loading, so register it first.
         const initial = (location.hash || "").replace("#", "");
-        if (initial === "map") openMap();
-        else if (initial === "server") tab.value = "server";
-        else if (initial === "options") tab.value = "options";
         watch(tab, (value) => {
           const hash = "#" + value;
           if (location.hash !== hash) history.replaceState(null, "", hash);
+          if (value === "groups") loadGroups();
+          else if (value === "rvr" || value === "battlegrounds" || value === "events") loadRvr();
+          else if (value === "stats") loadStats();
+          else if (value === "exchange") loadExchange();
+          else if (value === "records") loadRecords(records.page);
+          else if (value === "inspector" && !inspector.value) {
+            const bot = bots.value.find((candidate) => candidate.id === selectedBotId.value)
+              || bots.value.find((candidate) => candidate.online)
+              || bots.value[0];
+            if (bot) loadInspector(bot);
+          }
         });
+        if (initial === "map") openMap();
+        else if (["server", "options", "groups", "rvr", "battlegrounds", "events", "records", "exchange", "stats", "inspector"].includes(initial))
+          tab.value = initial;
         statusTimer = window.setInterval(() => {
           if (!document.hidden) refreshStatus();
         }, 1000);
@@ -790,6 +1209,14 @@
           now.value = Date.now();
           if (hover.value) draw();
         }, 1000);
+        window.setInterval(() => {
+          if (document.hidden) return;
+          if (tab.value === "groups") loadGroups();
+          else if (tab.value === "rvr" || tab.value === "battlegrounds" || tab.value === "events") loadRvr();
+        }, 4000);
+        window.setInterval(() => {
+          if (!document.hidden && tab.value === "stats") loadStats();
+        }, 15000);
         document.addEventListener("keydown", keydown);
         if (mapCanvas.value) {
           mapCanvas.value.addEventListener("wheel", onWheel, { passive: false });
@@ -821,6 +1248,19 @@
         options, goals, goalRows, goalFields, goalsValid, goalTotal, generate, openOptions, loadOptions,
         saveXpRate, saveGm, saveAnnouncements, generateBots, deleteBot, deleteAllBots, teleportToBot, saveGoals,
         restoreGoalDefaults,
+        // world screens
+        groups, groupsLoaded, rvr, rvrLoaded, rvrObjectives, rvrUpdated, rvrRunning, objectivesColumns,
+        selectedObjective, selectedObjectiveId, eventParticipants, participantColumns, selectObjective,
+        groupMemberColumns, objectiveSelected, loadGroups, loadRvr, loadStats, loadExchange, loadRecords, loadInspector,
+        eventRealm, eventKind, eventActiveOnly, eventSearch, eventKinds, eventRealms, filteredEvents,
+        battlegroundRows, battlegroundColumns,
+        stats, statsLoaded, statsTotals, statsBoards, statsBoardColumns, worldMoney,
+        exchange, exchangeRows, exchangePageRows, exchangePageCount, exchangeColumns, exchangeListingColumns,
+        exchangePurchaseColumns, exchangeGoPage,
+        records, recordsColumns, recordsPageCount, recordsGoPage,
+        inspector, inspectorLoading, inspectorSection, inspectorSections, inspectorData, inspectorOverview,
+        openGroups, openRvr, openBattlegrounds, openEvents, openStats, openExchange, openRecords, openInspector,
+        inspectFromRoster,
         // population
         search, searchInput, realmFilter, onlineOnly, sortBy, arrow, page, pageSize,
         pageBots, pageCount, pageWindow, goPage, filteredBots, selectedBot, selectedBotId,
@@ -831,7 +1271,10 @@
         onPointerMove, onPointerDown, onPointerUp, onPointerLeave,
       };
     },
-  }).mount("#app");
+  });
+
+  app.component("simple-table", SimpleTable);
+  app.mount("#app");
 })();
 
 

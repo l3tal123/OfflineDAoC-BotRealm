@@ -211,6 +211,7 @@ internal sealed class DashboardData
             bool online = serverRunning && (live ? hasLive : row.IsOnline);
             int level = hasLive ? status!.Level : row.Level;
             string zone = hasLive ? status!.ZoneName ?? row.Zone : row.Zone;
+            GroupMetadata? group = online ? ParseGroupMetadata(row.Itinerary) : null;
             string activity = FormatActivity(
                 hasLive ? status!.Activity ?? string.Empty : row.Activity,
                 hasLive ? status!.CurrentGoal ?? string.Empty : row.Goal,
@@ -227,10 +228,103 @@ internal sealed class DashboardData
                 hasLive ? status!.Z : 0,
                 hasLive ? status!.ObjectiveKind ?? string.Empty : string.Empty,
                 hasLive ? status!.TargetName ?? string.Empty : row.Target,
-                hasLive ? status!.IsAlive : false));
+                hasLive ? status!.IsAlive : false)
+            {
+                GroupId = group?.GroupId ?? string.Empty,
+                GroupPhase = group?.Phase ?? string.Empty,
+                GroupGoal = group?.SharedGoal ?? string.Empty,
+                GroupStatus = group?.Status ?? string.Empty,
+                GroupLeader = group?.LeaderName ?? string.Empty,
+                GroupRendezvous = group?.RendezvousName ?? string.Empty,
+                GroupPuller = group?.PullerName ?? string.Empty,
+            });
         }
 
         return new State(serverRunning, live, snapshot?.UpdatedUtc ?? DateTime.UtcNow, bots);
+    }
+
+    /// <summary>Active bot groups: the same grouping the launcher's Active Groups tab shows.</summary>
+    internal object Groups()
+    {
+        State state = Read();
+        List<GroupRow> groups = state.Bots
+            .Where(bot => bot.Online && !bot.Retired && bot.GroupId.Length > 0)
+            .GroupBy(bot => bot.GroupId, StringComparer.Ordinal)
+            .Select(group =>
+            {
+                List<Bot> members = group.ToList();
+                // Status writes are asynchronous: prefer a member whose published leader is actually present.
+                Bot first = members.First();
+                Bot? coherent = members.FirstOrDefault(member =>
+                    members.Any(candidate => candidate.Name.Equals(member.GroupLeader, StringComparison.OrdinalIgnoreCase)));
+                Bot source = coherent ?? first;
+                return new GroupRow(group.Key, source, coherent != null ? source.GroupLeader : "Re-electing…",
+                    members.OrderByDescending(member => member.Level).ToList());
+            })
+            .Where(group => group.Members.Count >= 2)
+            .OrderByDescending(group => group.Members.Count)
+            .ThenBy(group => group.Source.Realm)
+            .ToList();
+
+        return new
+        {
+            serverRunning = state.ServerRunning,
+            live = state.Live,
+            updatedUtc = state.UpdatedUtc,
+            groups = groups.Select(group => new
+            {
+                groupId = group.Id,
+                realm = group.Source.Realm,
+                realmName = RealmName(group.Source.Realm),
+                phase = group.Source.GroupPhase,
+                goal = group.Source.GroupGoal,
+                status = group.Source.GroupStatus,
+                leader = group.Leader,
+                rendezvous = group.Source.GroupRendezvous,
+                puller = group.Source.GroupPuller,
+                members = group.Members.Select(member => new
+                {
+                    id = member.Id,
+                    name = member.Name,
+                    level = member.Level,
+                    className = member.ClassName,
+                    realm = member.Realm,
+                    realmName = RealmName(member.Realm),
+                    zone = member.Zone,
+                    activity = member.Activity,
+                }).ToList(),
+            }).ToList(),
+        };
+    }
+
+    private sealed record GroupRow(string Id, Bot Source, string Leader, List<Bot> Members);
+    /// <summary>The group metadata a bot publishes in its itinerary JSON (the launcher's format).</summary>
+    private static GroupMetadata? ParseGroupMetadata(string raw)
+    {
+        const string prefix = "offline-group-v1:";
+        if (string.IsNullOrWhiteSpace(raw) || !raw.StartsWith(prefix, StringComparison.Ordinal))
+            return null;
+        try
+        {
+            GroupMetadata? metadata = System.Text.Json.JsonSerializer.Deserialize<GroupMetadata>(
+                raw[prefix.Length..], new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return string.IsNullOrWhiteSpace(metadata?.GroupId) ? null : metadata;
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return null;
+        }
+    }
+
+    private sealed class GroupMetadata
+    {
+        public string GroupId { get; set; } = string.Empty;
+        public string Phase { get; set; } = string.Empty;
+        public string SharedGoal { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string LeaderName { get; set; } = string.Empty;
+        public string RendezvousName { get; set; } = string.Empty;
+        public string PullerName { get; set; } = string.Empty;
     }
 
     private static object Counts(State state) => new
@@ -347,7 +441,9 @@ internal sealed class DashboardData
 
     private sealed record Bot(long Id, string Name, int Realm, string Race, int Gender, string ClassName, int Level,
         string Zone, string Activity, bool Online, bool Retired, int RegionId, int X, int Y, int Z,
-        string ObjectiveKind, string Target, bool Alive);
+        string ObjectiveKind, string Target, bool Alive,
+        string GroupId = "", string GroupPhase = "", string GroupGoal = "", string GroupStatus = "",
+        string GroupLeader = "", string GroupRendezvous = "", string GroupPuller = "");
 }
 
 /// <summary>Is the game server listening? The launcher uses the same test: TCP port 10300.</summary>

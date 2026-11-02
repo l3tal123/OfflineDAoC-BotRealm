@@ -30,7 +30,8 @@ internal sealed class WorldReader
         command.CommandText =
             "SELECT BotId, Name, Realm, COALESCE(RaceName, ''), Gender, COALESCE(ClassName, ''), Level, " +
             "COALESCE(ZoneName, ''), COALESCE(Activity, ''), COALESCE(CurrentGoal, ''), COALESCE(TargetName, ''), " +
-            "COALESCE(TravelDestination, ''), COALESCE(ObjectiveProgress, ''), IsOnline, IsRetired " +
+            "COALESCE(TravelDestination, ''), COALESCE(ObjectiveProgress, ''), IsOnline, IsRetired, " +
+            "COALESCE(ItineraryJson, '') " +
             "FROM offline_world_bots WHERE 1=1" +
             (hasCompanions ? " AND BotId NOT IN (SELECT BotId FROM offline_hired_companions)" : string.Empty) +
             " ORDER BY Realm, Level DESC, Name";
@@ -52,7 +53,8 @@ internal sealed class WorldReader
                 reader.GetString(11),
                 reader.GetString(12),
                 reader.GetBoolean(13),
-                reader.GetBoolean(14)));
+                reader.GetBoolean(14),
+                reader.GetString(15)));
         }
 
         return rows;
@@ -117,7 +119,7 @@ internal sealed class WorldReader
 
     internal sealed record RosterRow(long Id, string Name, int Realm, string Race, int Gender, string ClassName, int Level,
         string Zone, string Activity, string Goal, string Target, string Destination, string Progress,
-        bool IsOnline, bool IsRetired);
+        bool IsOnline, bool IsRetired, string Itinerary);
 
     internal sealed class ZoneRow
     {

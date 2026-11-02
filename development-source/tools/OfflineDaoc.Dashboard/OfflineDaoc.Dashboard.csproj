@@ -33,6 +33,7 @@
     <Compile Include="../OfflineDaoc.Launcher/ServerPropertyWrite.cs" Link="Launcher/ServerPropertyWrite.cs" />
     <Compile Include="../OfflineDaoc.Launcher/BotCharacterGenerator.cs" Link="Launcher/BotCharacterGenerator.cs" />
     <Compile Include="../../server/GameServer/bots/autonomous/BotGoalSettings.cs" Link="Configuration/BotGoalSettings.cs" />
+    <Compile Include="../../server/GameServer/bots/autonomous/RealmEventRecordStore.cs" Link="Records/RealmEventRecordStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- The front-end travels next to the exe in dashboard\wwwroot: one folder, no build step, nothing to install. -->

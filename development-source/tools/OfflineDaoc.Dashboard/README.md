@@ -60,11 +60,15 @@ Ported in phase 2 (all of them keep the server-stopped gate, enforced by the hos
 - Bots: generate 1/10/100 at level 1 or 50, delete one bot, delete every bot, teleport to a bot (GM + server running).
 - Bot Goals Setting: the three level bands, 100% validation per row, save/undo/defaults.
 
-Not ported yet — these still exist only in the WinForms launcher, and are the next steps:
+Ported in phase 3 (read-only screens, all fed by the server's published snapshots or read-only reads):
 
-- Realm Exchange, Server Stats, Bot Inspector detail, Active Groups, Active RvR, Battlegrounds, Realm Events,
-  Realm Records screens (the server-side data for all of them is already published or readable).
-- The "open folder" helpers and the WinForms window itself (retired at the end of the migration).
+- Groups, RvR, Battlegrounds, Realm Events, Realm Records, Realm Exchange, Server Stats and the Bot Inspector.
+  The snapshots are fetched through the same state-165 file broker the launcher uses; the exchange is a read-only
+  query on the world database; the records come from the separate event ledger.
+
+Still to come (end of the migration):
+
+- Retire the WinForms project from the repository once parity is confirmed, and move the docs to the new launcher.
 - Keep and relic reset is deliberately absent: the current launcher no longer offers it to players either.
 
 ## Removing the launcher

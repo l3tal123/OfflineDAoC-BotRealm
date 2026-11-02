@@ -168,6 +168,53 @@ internal sealed class DashboardHost : IDisposable
                     return;
                 }
 
+                if (path == "/api/groups")
+                {
+                    await WriteJsonAsync(stream, _data.Groups(), head).ConfigureAwait(false);
+                    return;
+                }
+
+                if (path == "/api/rvr")
+                {
+                    JsonElement? rvr = WorldPanels.ReadRvr(_launcher.ServerDirectory);
+                    await WriteJsonAsync(stream, new { available = rvr != null, snapshot = rvr }, head).ConfigureAwait(false);
+                    return;
+                }
+
+                if (path == "/api/stats")
+                {
+                    JsonElement? stats = WorldPanels.ReadStats(_launcher.ServerDirectory, LauncherHost.Listening());
+                    await WriteJsonAsync(stream, new { available = stats != null, snapshot = stats }, head).ConfigureAwait(false);
+                    return;
+                }
+
+                if (path == "/api/inspect")
+                {
+                    long.TryParse(request.Query.GetValueOrDefault("botId"), out long botId);
+                    JsonElement? snapshot = WorldPanels.ReadInspector(_launcher.ServerDirectory, LauncherHost.Listening(), botId);
+                    await WriteJsonAsync(stream, new { available = snapshot != null, snapshot }, head).ConfigureAwait(false);
+                    return;
+                }
+
+                if (path == "/api/exchange")
+                {
+                    await WriteJsonAsync(stream, WorldPanels.ReadExchange(_launcher.Database), head).ConfigureAwait(false);
+                    return;
+                }
+
+                if (path == "/api/records")
+                {
+                    int.TryParse(request.Query.GetValueOrDefault("page"), out int recordsPage);
+                    object records = WorldPanels.ReadRecords(_launcher.ServerDirectory,
+                        request.Query.GetValueOrDefault("realm") ?? string.Empty,
+                        request.Query.GetValueOrDefault("kind") ?? string.Empty,
+                        request.Query.GetValueOrDefault("outcome") ?? string.Empty,
+                        request.Query.GetValueOrDefault("search") ?? string.Empty,
+                        Math.Max(1, recordsPage));
+                    await WriteJsonAsync(stream, records, head).ConfigureAwait(false);
+                    return;
+                }
+
                 object? payload = path switch
                 {
                     "/api/overview" => _data.Overview(),
@@ -214,7 +261,7 @@ internal sealed class DashboardHost : IDisposable
             }
             catch (Exception exception)
             {
-                Console.Error.WriteLine($"launcher: {exception.GetType().Name}: {exception.Message}");
+                Console.Error.WriteLine($"launcher: {exception}");
             }
         }
     }

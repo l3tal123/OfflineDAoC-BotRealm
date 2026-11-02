@@ -59,6 +59,8 @@ internal sealed class LauncherHost : IDisposable
 
     internal string Database => _database;
 
+    internal string ServerDirectory => _serverDirectory;
+
     internal string BotGoalsPath => Path.Combine(_serverDirectory, "state-165", "bot-goals.json");
 
     /// <summary>

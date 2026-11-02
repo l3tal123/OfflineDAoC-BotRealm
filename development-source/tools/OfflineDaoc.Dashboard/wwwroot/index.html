@@ -53,7 +53,17 @@
       World Map
       <span class="badge" v-if="mapRegionsOnline > 0">{{ mapRegionsOnline }} regions</span>
     </button>
-    <button role="tab" class="tab" :class="{ active: tab === 'server' }" @click="tab = 'server'">
+    <button role="tab" class="tab" :class="{ active: tab === 'groups' }" @click="openGroups()">
+      Groups
+      <span class="badge" v-if="groups.length > 0">{{ groups.length }}</span>
+    </button>
+    <button role="tab" class="tab" :class="{ active: tab === 'rvr' }" @click="openRvr()">RvR</button>
+    <button role="tab" class="tab" :class="{ active: tab === 'battlegrounds' }" @click="openBattlegrounds()">Battlegrounds</button>
+    <button role="tab" class="tab" :class="{ active: tab === 'events' }" @click="openEvents()">Events</button>
+    <button role="tab" class="tab" :class="{ active: tab === 'records' }" @click="openRecords()">Records</button>
+    <button role="tab" class="tab" :class="{ active: tab === 'exchange' }" @click="openExchange()">Exchange</button>
+    <button role="tab" class="tab" :class="{ active: tab === 'stats' }" @click="openStats()">Stats</button>
+    <button role="tab" class="tab" :class="{ active: tab === 'inspector' }" @click="tab = 'inspector'">Inspector</button>    <button role="tab" class="tab" :class="{ active: tab === 'server' }" @click="tab = 'server'">
       Server
       <span class="badge" :class="serverUp ? 'badge-on' : ''">{{ launcher.state || '—' }}</span>
     </button>
@@ -124,7 +134,7 @@
             <td class="action-col">
               <button v-if="bot.online && bot.regionId > 0" class="row-action" title="Show on the world map"
                       @click.stop="showOnMap(bot)">map</button>
-              <button v-if="bot.online && options.makeMeGm && serverUp" class="row-action" title="Teleport your character to this bot (GM)"
+              <button class="row-action" title="Inspect this bot" @click.stop="inspectFromRoster(bot)">inspect</button>              <button v-if="bot.online && options.makeMeGm && serverUp" class="row-action" title="Teleport your character to this bot (GM)"
                       @click.stop="teleportToBot(bot)">tp</button>
               <button class="row-action danger-text" title="Delete this bot permanently"
                       @click.stop="deleteBot(bot)">del</button>
@@ -189,6 +199,196 @@
     </div>
   </main>
 
+  <!-- ------------------------------------------------------------------ groups -->
+  <main v-show="tab === 'groups'" class="panel world-panel">
+    <div class="toolbar">
+      <span class="toolbar-count">{{ groups.length }} active groups · groups form and dissolve as their shared goal changes</span>
+      <button class="ghost-button" @click="loadGroups()">Refresh</button>
+    </div>
+    <div class="group-grid">
+      <section class="group-card" v-for="group in groups" :key="group.groupId">
+        <header>
+          <strong>{{ group.leader }}</strong>
+          <span class="realm" :class="'realm-' + group.realm"><i></i>{{ group.realmName }}</span>
+          <span class="badge">{{ group.members.length }} members</span>
+        </header>
+        <p class="group-goal">{{ group.goal || group.phase || 'No shared goal published' }}</p>
+        <p class="option-note">{{ group.status }}<template v-if="group.rendezvous"> · rendezvous {{ group.rendezvous }}</template><template v-if="group.puller"> · puller {{ group.puller }}</template></p>
+        <simple-table :columns="groupMemberColumns" :rows="group.members" compact />
+      </section>
+      <div v-if="groups.length === 0" class="empty-state">
+        {{ serverUp ? 'No bot group is active right now.' : 'The server is stopped: groups appear while it runs.' }}
+      </div>
+    </div>
+  </main>
+
+  <!-- ------------------------------------------------------------------ rvr -->
+  <main v-show="tab === 'rvr'" class="panel world-panel">
+    <div class="toolbar">
+      <label class="select-label">Realm
+        <select v-model="eventRealm">
+          <option value="">All realms</option>
+          <option v-for="realm in eventRealms" :key="realm" :value="realm">{{ realm }}</option>
+        </select>
+      </label>
+      <label class="select-label">Type
+        <select v-model="eventKind">
+          <option value="">All types</option>
+          <option v-for="kind in eventKinds" :key="kind" :value="kind">{{ kind }}</option>
+        </select>
+      </label>
+      <label class="toggle"><input type="checkbox" v-model="eventActiveOnly" /> <span>Active only</span></label>
+      <input class="search-input" v-model="eventSearch" placeholder="Search objective or zone" />
+      <span class="toolbar-count" v-if="rvrUpdated">snapshot {{ rvrUpdated.toLocaleTimeString() }}</span>
+    </div>
+    <simple-table :columns="objectivesColumns" :rows="filteredEvents" selectable :selected="objectiveSelected"
+                  @row-click="selectObjective" empty="No objective matches these filters." />
+    <div class="section-title">Bots on the selected objective<span v-if="selectedObjective"> — {{ selectedObjective.Name }}</span></div>
+    <simple-table :columns="participantColumns" :rows="eventParticipants" empty="No bot is assigned to that objective right now." />
+  </main>
+
+  <!-- ------------------------------------------------------------------ battlegrounds -->
+  <main v-show="tab === 'battlegrounds'" class="panel world-panel">
+    <div class="toolbar">
+      <span class="toolbar-count">{{ battlegroundRows.length }} battlegrounds · bots with battleground goals reach them through a realm teleporter</span>
+      <button class="ghost-button" @click="loadRvr()">Refresh</button>
+    </div>
+    <simple-table :columns="battlegroundColumns" :rows="battlegroundRows"
+                  empty="The server is stopped: battleground activity appears while it runs." />
+  </main>
+
+  <!-- ------------------------------------------------------------------ realm events -->
+  <main v-show="tab === 'events'" class="panel world-panel">
+    <div class="toolbar">
+      <label class="select-label">Realm
+        <select v-model="eventRealm">
+          <option value="">All realms</option>
+          <option v-for="realm in eventRealms" :key="realm" :value="realm">{{ realm }}</option>
+        </select>
+      </label>
+      <label class="select-label">Type
+        <select v-model="eventKind">
+          <option value="">All types</option>
+          <option v-for="kind in eventKinds" :key="kind" :value="kind">{{ kind }}</option>
+        </select>
+      </label>
+      <label class="toggle"><input type="checkbox" v-model="eventActiveOnly" /> <span>Active only</span></label>
+      <input class="search-input" v-model="eventSearch" placeholder="Search objective or zone" />
+    </div>
+    <p class="option-note">Realm events are started in game with the Horn of Rallying at your realm's traveler's inn; this page only follows them.</p>
+    <simple-table :columns="objectivesColumns" :rows="filteredEvents" selectable :selected="objectiveSelected"
+                  @row-click="selectObjective" empty="No realm event matches these filters." />
+    <div class="section-title">Assigned bots<span v-if="selectedObjective"> — {{ selectedObjective.Name }}</span></div>
+    <simple-table :columns="participantColumns" :rows="eventParticipants" empty="No bot is assigned to that event right now." />
+  </main>
+
+  <!-- ------------------------------------------------------------------ records -->
+  <main v-show="tab === 'records'" class="panel world-panel">
+    <div class="toolbar">
+      <select v-model="records.realm" @change="recordsGoPage(1)" aria-label="Realm">
+        <option value="">All realms</option><option value="Albion">Albion</option><option value="Midgard">Midgard</option><option value="Hibernia">Hibernia</option>
+      </select>
+      <select v-model="records.kind" @change="recordsGoPage(1)" aria-label="Event kind">
+        <option value="">All events</option>
+        <option value="Dragon">Dragon</option><option value="Epic dungeon">Epic dungeon</option>
+        <option value="Neutral raid">Neutral raid</option><option value="Keep">Keep</option>
+        <option value="Relic keep">Relic keep</option><option value="Relic">Relic</option>
+      </select>
+      <select v-model="records.outcome" @change="recordsGoPage(1)" aria-label="Outcome">
+        <option value="">All outcomes</option>
+        <option>In progress</option><option>Boss defeated</option><option>Failed rally</option>
+        <option>Stopped by player</option><option>Route blocked</option><option>Timed out</option>
+        <option>Defended (timeout)</option><option>Captured</option><option>Captured / returned</option>
+        <option>Relic taken</option><option>Interrupted</option><option>Ended (unconfirmed)</option>
+        <option>Encounter unavailable</option>
+      </select>
+      <input class="search-input" v-model="records.search" placeholder="Search name, realm or details" @change="recordsGoPage(1)" />
+      <button class="ghost-button" @click="loadRecords(records.page)">Refresh</button>
+      <span class="toolbar-count">{{ records.total.toLocaleString() }} records</span>
+    </div>
+    <div v-if="records.error" class="server-warning">{{ records.error }}</div>
+    <simple-table :columns="recordsColumns" :rows="records.rows" empty="No recorded realm event matches these filters." />
+    <div class="pager">
+      <span class="pager-info">Page {{ records.page }} of {{ recordsPageCount.toLocaleString() }}</span>
+      <div class="pages">
+        <button @click="recordsGoPage(1)" :disabled="records.page === 1">«</button>
+        <button @click="recordsGoPage(records.page - 1)" :disabled="records.page === 1">‹</button>
+        <button @click="recordsGoPage(records.page + 1)" :disabled="records.page === recordsPageCount">›</button>
+        <button @click="recordsGoPage(recordsPageCount)" :disabled="records.page === recordsPageCount">»</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ------------------------------------------------------------------ exchange -->
+  <main v-show="tab === 'exchange'" class="panel world-panel">
+    <div class="toolbar">
+      <div class="segmented">
+        <button :class="{ selected: exchange.tab === 'listings' }" @click="exchange.tab = 'listings'">For sale</button>
+        <button :class="{ selected: exchange.tab === 'purchases' }" @click="exchange.tab = 'purchases'">Sold</button>
+      </div>
+      <select v-model="exchange.realm" aria-label="Realm">
+        <option value="">All realms</option><option value="Albion">Albion</option><option value="Midgard">Midgard</option><option value="Hibernia">Hibernia</option>
+      </select>
+      <input class="search-input" v-model="exchange.search" placeholder="Search item, seller or buyer" />
+      <button class="ghost-button" @click="loadExchange()">Refresh</button>
+      <span class="toolbar-count">{{ exchangeRows.length.toLocaleString() }} rows</span>
+    </div>
+    <div v-if="exchange.error" class="server-warning">{{ exchange.error }}</div>
+    <simple-table :columns="exchangeColumns" :rows="exchangePageRows" empty="Nothing is listed right now." />
+    <div class="pager">
+      <span class="pager-info">Page {{ exchange.page }} of {{ exchangePageCount.toLocaleString() }} · {{ exchange.pageSize }} per page</span>
+      <div class="pages">
+        <button @click="exchangeGoPage(1)" :disabled="exchange.page === 1">«</button>
+        <button @click="exchangeGoPage(exchange.page - 1)" :disabled="exchange.page === 1">‹</button>
+        <button @click="exchangeGoPage(exchange.page + 1)" :disabled="exchange.page === exchangePageCount">›</button>
+        <button @click="exchangeGoPage(exchangePageCount)" :disabled="exchange.page === exchangePageCount">»</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ------------------------------------------------------------------ server stats -->
+  <main v-show="tab === 'stats'" class="panel world-panel">
+    <div class="toolbar">
+      <span class="toolbar-count" v-if="stats">collected {{ new Date(stats.GeneratedUtc).toLocaleTimeString() }}<template v-if="!serverUp"> · last saved snapshot</template></span>
+      <button class="ghost-button" @click="loadStats()">Refresh</button>
+    </div>
+    <div class="server-grid">
+      <div class="server-card" v-for="total in statsTotals" :key="total.label">
+        <span class="server-label">{{ total.label }}</span>
+        <strong>{{ total.value }}</strong>
+      </div>
+    </div>
+    <div class="stats-boards">
+      <section class="stats-board" v-for="board in statsBoards" :key="board.title">
+        <h2>{{ board.title }}</h2>
+        <simple-table :columns="statsBoardColumns" :rows="board.rows" empty="No data yet." />
+      </section>
+    </div>
+  </main>
+
+  <!-- ------------------------------------------------------------------ bot inspector -->
+  <main v-show="tab === 'inspector'" class="panel world-panel">
+    <div class="toolbar">
+      <span class="toolbar-count" v-if="inspector">{{ inspector.Name }} · level {{ inspector.Level }} {{ inspector.ClassName }} · {{ inspector.Online ? 'live' : 'last saved state' }}</span>
+      <span class="toolbar-count" v-else>Pick a bot with inspect in Active Population.</span>
+      <button class="ghost-button" v-if="selectedBot" @click="loadInspector(selectedBot)">Refresh</button>
+    </div>
+    <div v-if="inspectorLoading" class="empty-state">Reading the bot…</div>
+    <template v-else-if="inspector">
+      <div v-if="inspector.Warning" class="server-warning">{{ inspector.Warning }}</div>
+      <div class="inspector-overview">
+        <div class="inspector-pair" v-for="pair in inspectorOverview" :key="pair[0]">
+          <span>{{ pair[0] }}</span><strong>{{ pair[1] }}</strong>
+        </div>
+      </div>
+      <div class="segmented inspector-tabs">
+        <button v-for="section in inspectorSections" :key="section"
+                :class="{ selected: inspectorSection === section }" @click="inspectorSection = section">{{ section }}</button>
+      </div>
+      <simple-table :columns="[]" :rows="inspectorData" auto :empty="'Nothing in ' + inspectorSection + '.'" />
+    </template>
+    <div v-else class="empty-state">No bot is being inspected. Use inspect on a row in Active Population.</div>
+  </main>
   <!-- ------------------------------------------------------------------ server console -->
   <main v-show="tab === 'server'" class="panel server-panel">
     <div class="server-grid">
