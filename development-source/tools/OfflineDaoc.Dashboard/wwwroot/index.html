@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Offline DAoC · BotRealm Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 5 7v9c0 7 5 12 11 14 6-2 11-7 11-14V7z' fill='%23c9a86a'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app" v-cloak>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="shield" aria-hidden="true"></span>
+      <div>
+        <h1>Offline <span class="brand-gold">DAoC</span></h1>
+        <p>BotRealm · live dashboard <span class="preview">preview</span></p>
+      </div>
+    </div>
+    <div class="status-cluster">
+      <span class="chip" :class="serverRunning ? 'chip-on' : 'chip-off'">
+        <span class="dot"></span>{{ serverRunning ? 'Server running' : 'Server stopped' }}
+      </span>
+      <span class="chip chip-quiet" :title="live ? 'Positions and tasks come from the live server snapshot.' : 'The server is not publishing a live snapshot; the saved roster is shown.'">
+        {{ live ? 'live snapshot' : 'saved roster' }}
+      </span>
+      <span class="updated" :title="updatedText">{{ updatedText }}</span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" class="tab" :class="{ active: tab === 'population' }" @click="tab = 'population'">
+      Active Population
+      <span class="badge">{{ counts.online }} / {{ counts.total }}</span>
+    </button>
+    <button role="tab" class="tab" :class="{ active: tab === 'map' }" @click="openMap()">
+      World Map
+      <span class="badge" v-if="mapRegionsOnline > 0">{{ mapRegionsOnline }} regions</span>
+    </button>
+    <span class="tabs-spacer"></span>
+    <button class="ghost-button" @click="refreshNow()" :disabled="loading">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
+  </nav>
+
+  <!-- ------------------------------------------------------------------ population -->
+  <main v-show="tab === 'population'" class="panel">
+    <div class="toolbar">
+      <label class="search">
+        <span class="search-icon" aria-hidden="true"></span>
+        <input ref="searchInput" v-model="search" type="search" spellcheck="false"
+               placeholder="Search bots by name, class, zone or task…" />
+        <button v-if="search" class="clear" @click="search = ''" title="Clear search" aria-label="Clear search">×</button>
+      </label>
+
+      <div class="segmented" role="group" aria-label="Realm filter">
+        <button :class="{ selected: realmFilter === 0 }" @click="realmFilter = 0">All realms</button>
+        <button v-for="realm in realms" :key="realm.id"
+                :class="{ selected: realmFilter === realm.id }"
+                @click="realmFilter = realmFilter === realm.id ? 0 : realm.id">
+          <i class="realm-dot" :style="{ background: realm.color }"></i>{{ realm.name }}
+        </button>
+      </div>
+
+      <label class="toggle" title="Show only bots the server reports online">
+        <input type="checkbox" v-model="onlineOnly" /> <span>Online only</span>
+      </label>
+
+      <span class="toolbar-count">{{ filteredBots.length.toLocaleString() }} shown</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="bots">
+        <thead>
+          <tr>
+            <th class="sortable" @click="sortBy('name')">Bot <span class="arrow">{{ arrow('name') }}</span></th>
+            <th class="sortable num" @click="sortBy('level')">Level <span class="arrow">{{ arrow('level') }}</span></th>
+            <th class="sortable" @click="sortBy('className')">Class <span class="arrow">{{ arrow('className') }}</span></th>
+            <th class="sortable" @click="sortBy('realm')">Realm <span class="arrow">{{ arrow('realm') }}</span></th>
+            <th class="sortable" @click="sortBy('zone')">Zone <span class="arrow">{{ arrow('zone') }}</span></th>
+            <th class="sortable activity-col" @click="sortBy('activity')">Activity <span class="arrow">{{ arrow('activity') }}</span></th>
+            <th class="sortable" @click="sortBy('online')">Status <span class="arrow">{{ arrow('online') }}</span></th>
+            <th class="action-col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="bot in pageBots" :key="bot.id" :class="{ online: bot.online, retired: bot.retired }"
+              @click="selectedBotId = bot.id">
+            <td>
+              <span class="bot-name">{{ bot.name }}</span>
+              <span class="bot-sub">{{ bot.race }} · {{ bot.gender }}</span>
+            </td>
+            <td class="num level">{{ bot.level }}</td>
+            <td>{{ bot.className }}</td>
+            <td><span class="realm" :class="'realm-' + bot.realm"><i></i>{{ bot.realmName }}</span></td>
+            <td class="zone-cell">{{ bot.zone || '—' }}</td>
+            <td class="activity-col" :title="bot.activity">{{ bot.activity }}</td>
+            <td>
+              <span v-if="bot.retired" class="state state-retired">Retired</span>
+              <span v-else-if="bot.online" class="state state-online"><i></i>Online</span>
+              <span v-else class="state state-offline"><i></i>Offline</span>
+            </td>
+            <td class="action-col">
+              <button v-if="bot.online && bot.regionId > 0" class="row-action" title="Show on the world map"
+                      @click.stop="showOnMap(bot)">map</button>
+            </td>
+          </tr>
+          <tr v-if="pageBots.length === 0">
+            <td colspan="8" class="empty">
+              {{ bots.length === 0 ? 'No bots in the roster yet.' : 'No bot matches these filters.' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pager">
+      <span class="pager-info">Page {{ page }} of {{ pageCount.toLocaleString() }} · {{ pageSize }} per page</span>
+      <div class="pages">
+        <button @click="goPage(1)" :disabled="page === 1" title="First page">«</button>
+        <button @click="goPage(page - 1)" :disabled="page === 1" title="Previous page">‹</button>
+        <button v-for="p in pageWindow" :key="p" :class="{ current: p === page }" @click="goPage(p)">{{ p.toLocaleString() }}</button>
+        <button @click="goPage(page + 1)" :disabled="page === pageCount" title="Next page">›</button>
+        <button @click="goPage(pageCount)" :disabled="page === pageCount" title="Last page">»</button>
+      </div>
+      <span class="selection" v-if="selectedBot">{{ selectedBot.name }} — level {{ selectedBot.level }} {{ selectedBot.className }}, {{ selectedBot.zone || 'unknown zone' }}</span>
+    </div>
+  </main>
+
+  <!-- ------------------------------------------------------------------ world map -->
+  <main v-show="tab === 'map'" class="panel map-panel">
+    <div class="toolbar">
+      <label class="select-label">Region
+        <select v-model.number="mapRegionId">
+          <option v-for="region in map.regions" :key="region.id" :value="region.id">
+            {{ region.name }} — {{ region.realmName }} ({{ region.online }} online)
+          </option>
+        </select>
+      </label>
+      <div class="segmented zoom">
+        <button @click="zoomBy(1 / 1.5)" title="Zoom out">−</button>
+        <span class="zoom-value">{{ Math.round(zoomPercent) }}%</span>
+        <button @click="zoomBy(1.5)" title="Zoom in">+</button>
+      </div>
+      <button class="ghost-button" @click="resetView()">Reset view</button>
+      <span class="toolbar-count">{{ currentRegion ? currentRegion.online : 0 }} bots in this region</span>
+      <span class="map-hint">wheel zooms · drag to pan · hover a dot · click a dot to find it in the roster</span>
+    </div>
+    <div class="map-stage" ref="mapStage">
+      <canvas ref="mapCanvas"></canvas>
+      <div v-if="mapBots.length === 0" class="map-empty">
+        {{ serverRunning ? 'No bot has a live position in this region right now.' : 'The server is stopped: the map shows the world, but bots have no live positions.' }}
+      </div>
+      <div v-if="hover" class="map-tooltip" :style="{ left: hover.x + 'px', top: hover.y + 'px' }">
+        <strong>{{ hover.bot.name }}</strong>
+        <span>{{ hover.bot.level }} {{ hover.bot.className }} · {{ hover.bot.realmName }}</span>
+        <span>{{ hover.bot.zone }}</span>
+        <span class="tip-activity">{{ hover.bot.activity }}</span>
+      </div>
+    </div>
+    <div class="map-legend">
+      <span v-for="realm in realms" :key="realm.id"><i :style="{ background: realm.color }"></i>{{ realm.name }}</span>
+      <span class="legend-quiet">{{ paintedMaps ? 'painted zone maps from the new client' : 'zone outlines from the world database' }}</span>
+    </div>
+  </main>
+
+  <footer class="statusbar">
+    <span v-if="error" class="error">{{ error }}</span>
+    <span v-else-if="databaseError" class="error">{{ databaseError }}</span>
+    <span v-else>{{ refreshNote }}</span>
+    <span class="status-right">{{ installName }} · read-only · http://127.0.0.1</span>
+  </footer>
+</div>
+
+<script src="vendor/vue.global.prod.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
+
+

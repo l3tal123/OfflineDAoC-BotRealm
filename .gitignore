@@ -89,3 +89,6 @@ references/
 # The playable install (client content, engine, saves, binaries; ~38 GB) lives inside this checkout but is never
 # repository source. It is rebuilt from the release download and the fork build.
 OfflineDAoC-True165/
+
+# Local scratch space for tool tests (dashboard harness, screenshots, throwaway world copies)
+/build/
