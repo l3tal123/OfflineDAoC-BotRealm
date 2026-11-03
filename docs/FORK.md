@@ -120,7 +120,7 @@ behaviour, horse sizing, companion teleport/death handling, death logging). When
 The verified toolchain and everything still missing is in [docs/DEV-ENVIRONMENT.md](DEV-ENVIRONMENT.md). Short
 version for this PC:
 
-- **.NET 10 SDK** - installed (`dotnet --version`); the server and the launcher are `net10.0` (the launcher is the web launcher; the retired WinForms one is `net10.0-windows`).
+- **.NET 10 SDK** - installed (`dotnet --version`); the server and the launcher are `net10.0`.
 - **Python 3.10+** - installed; needed by the content pipeline and `database/unpack_db.py`.
 - **Godot 4.7.2 stable .NET/mono** - needed only for the client; not on `PATH` by default. See
   [source/new-client/README.md](../source/new-client/README.md).
@@ -157,8 +157,8 @@ machine without that cache cannot restore.
 Do not build or test while a server is running (AGENTS.md rule 10). The first build is the long one; later builds
 are incremental. The launcher has its own project in `development-source/tools/OfflineDaoc.Dashboard`: build it
 with `dotnet build OfflineDaoc.Dashboard.csproj -c Release`, then copy `OfflineDAoC.*` into `runtime\` and
-`wwwroot\` into `runtime\dashboard\wwwroot\` with the launcher closed. The WinForms project in
-`development-source/tools/OfflineDaoc.Launcher` is retired (parity reference only; see its `LEGACY.md`).
+`wwwroot\` into `runtime\dashboard\wwwroot\` with the launcher closed. The launcher's UI-free logic lives in that
+project's `Launcher\` folder; the old WinForms project is no longer in the repository.
 
 Client script checks need `Godot --headless`; see the client README's "Checks and tests" section. Treat a client
 change as untested until `load_check.gd` passes on the edited scripts.
@@ -271,13 +271,11 @@ the commands in section 2.
 
 - `docs/FORK.md` (this page), `docs/BOT-DEVELOPMENT.md`, `docs/DEV-ENVIRONMENT.md`, `docs/WORLD-MAP.md` (the
   launcher dashboard's live world map);
-- `development-source/tools/OfflineDaoc.Dashboard/`: **the launcher** (2026-11-02). A .NET host (`OfflineDAoC.exe`)
-  plus a web UI in `dashboard\wwwroot` that it serves on `http://127.0.0.1:10310/`. It replaces the WinForms
-  launcher for daily use: start/stop server, True 1.65 pre-flight and content refresh, ENTER REALM (Godot client),
-  server console, live population and world map. The WinForms launcher
-  (`development-source/tools/OfflineDaoc.Launcher`) stays in the repository as the parity reference and is not
-  deployed; its UI-free files (`TrueMode.cs`, `RollingServerLog.cs`, `NewClient.cs`) are compiled into the new host
-  rather than copied, so they cannot drift. Features still to port are listed in the project README;
+- `development-source/tools/OfflineDaoc.Dashboard/`: **the launcher**. A .NET host (`OfflineDAoC.exe`) plus a web UI
+  in `wwwroot` that it serves on `http://127.0.0.1:10310/`: start/stop server, True 1.65 pre-flight and content
+  refresh, ENTER REALM (Godot client), server console, live population and world map. Its `Launcher/` folder holds
+  the UI-free logic (True 1.65 mode and content refresh, rolling console log, client launcher, XP-rate and
+  server-property writes, bot generator); the retired WinForms launcher it replaced is no longer in the repository;
 - `release/Get-OfflineDAoC-True165.ps1`: the `-ClientOnly` and `-AllowLocalChanges` switches for updating a fork
   install (3.2), and `release/UPDATE-CLIENT-ONLY.cmd`, the double-click helper for a client-only update;
 - a fork note appended to `AGENTS.md`;

@@ -1,7 +1,7 @@
 @echo off
-rem Offline DAoC BotRealm - web dashboard (preview).
-rem Everything this needs lives in this folder: delete the folder to remove the feature.
-title Offline DAoC BotRealm - dashboard
+rem Offline DAoC BotRealm - launcher and dashboard.
+rem Runs the launcher from the build output folder (bin\Release\net10.0).
+title Offline DAoC BotRealm - launcher
 cd /d "%~dp0"
-"%~dp0OfflineDaoc.Dashboard.exe" %*
+"%~dp0OfflineDAoC.exe" %*
 if errorlevel 2 pause

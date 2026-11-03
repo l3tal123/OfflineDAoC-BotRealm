@@ -33,8 +33,7 @@ The repository mirrors the development folders, so the tools find their files as
 | `development-source/server/GameServer/mode165` | The True 1.65 rules and systems: `Classic165Mode`, `PlayerRules165`, hired companions, inns, the horn, crafting, charm, death penalties. |
 | `development-source/server/GameServer/bots` | Gamebots and companions: `GameBot`, the brains, equipment, resting. |
 | `development-source/server/GameServer/bots/autonomous` | The world population AI: goals, camps, groups, travel, RvR, relic raids, sieges. |
-| `development-source/tools/OfflineDaoc.Dashboard` | **The launcher** (`OfflineDAoC.exe`): starts the server and the new client, and serves the browser dashboard from `dashboard\wwwroot` on `http://127.0.0.1:10310/`. |
-| `development-source/tools/OfflineDaoc.Launcher` | The retired WinForms launcher. Kept as the parity reference and for clean upstream merges; **do not deploy** (see its `LEGACY.md`). |
+| `development-source/tools/OfflineDaoc.Dashboard` | **The launcher** (`OfflineDAoC.exe`): starts the server and the new client, and serves the browser dashboard from `dashboard\wwwroot` on `http://127.0.0.1:10310/`. The launcher-only logic (True 1.65 mode and content refresh, the client launcher, the console log) is in its `Launcher\` folder. |
 | `development-source/tools/OpenDAoC-BuildNav` | The navigation mesh builder. |
 | `tools/claude-version/true165` | The Python generators that build the True 1.65 content files. |
 | `runtime/true165` | The True 1.65 content (JSON) that the launcher writes into the world database at START SERVER. |

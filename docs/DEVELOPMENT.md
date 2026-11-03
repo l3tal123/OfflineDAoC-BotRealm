@@ -8,7 +8,7 @@ anything.
 | Part | Where | What |
 |---|---|---|
 | Server | `development-source/server` | OpenDAoC fork ("Dawn of Light" solution), C#, `net10.0`. |
-| Launcher | `development-source/tools/OfflineDaoc.Launcher` | WinForms app `OfflineDAoC.exe` (`net10.0-windows`). It starts the server and the client. |
+| Launcher | `development-source/tools/OfflineDaoc.Dashboard` | The launcher `OfflineDAoC.exe` (`net10.0`): a .NET host plus the browser dashboard in `wwwroot/`. It starts the server and the client. |
 | Tools | `development-source/tools` | The navmesh builder (`OpenDAoC-BuildNav`) and other development tools. |
 | True 1.65 generators | `tools/claude-version/true165` | Python scripts that build the True 1.65 content files. |
 | True 1.65 content | `runtime/true165` | The JSON files the launcher writes into the world database. |
@@ -75,12 +75,12 @@ dotnet build OfflineDaoc.Dashboard.csproj -c Release
   `runtime/` and `wwwroot/` into `runtime/dashboard/wwwroot/`. The launcher serves the UI at
   `http://127.0.0.1:10310/` and opens the browser; keep its console window open while playing (closing it stops the
   server). See the project README for the screens and the API.
-- The csproj compiles the launcher's UI-free files (`TrueMode.cs`, `RollingServerLog.cs`, `NewClient.cs`,
-  `XpRateSetting.cs`, `ServerPropertyWrite.cs`, `BotCharacterGenerator.cs`) and two server files
-  (`BotGoalSettings.cs`, `RealmEventRecordStore.cs`) by relative path, so they cannot drift from the originals.
+- The csproj compiles the server's `BotGoalSettings.cs` and `RealmEventRecordStore.cs` by relative path, so they
+  cannot drift from the originals. The launcher's own UI-free logic lives in `Launcher/` next to the host code.
 - The version is `LauncherHost.DisplayVersion`.
-- The old WinForms launcher in `development-source/tools/OfflineDaoc.Launcher` is **retired**: it is kept for parity
-  checks and upstream merges only and must not be deployed (see its `LEGACY.md`).
+- The old WinForms launcher is gone from the repository; `Launcher/` holds the UI-free files that came from it
+  (`TrueMode.cs` and the content refresh, `RollingServerLog.cs`, `NewClient.cs`, `XpRateSetting.cs`,
+  `ServerPropertyWrite.cs`, `BotCharacterGenerator.cs`).
 
 ---
 
@@ -160,7 +160,7 @@ Other headless launcher options (all refuse while `CoreServer` runs):
 
 ## 3. How the True 1.65 content reaches the world database
 
-All of this is in `development-source/tools/OfflineDaoc.Launcher/TrueMode.cs`.
+All of this is in `development-source/tools/OfflineDaoc.Dashboard/Launcher/TrueMode.cs`.
 
 ### 3.1 The input files (`runtime/true165/`)
 

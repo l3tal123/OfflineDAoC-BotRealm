@@ -65,8 +65,8 @@ you replace — AGENTS.md rules 10 and 11):
 1. **Server** – build `development-source/server` Release and copy `Release/lib/GameServer.dll` and
    `Release/lib/CoreDatabase.dll` into the playable `runtime/server/`, `runtime/server/lib/` and
    `runtime/server/win-x64/`.
-2. **Launcher** – build `development-source/tools/OfflineDaoc.Launcher` Release and copy `OfflineDAoC.exe` and
-   `OfflineDAoC.dll` from `bin/Release/net10.0-windows/` into the playable `runtime/`.
+2. **Launcher** – build `development-source/tools/OfflineDaoc.Dashboard` Release and copy `OfflineDAoC.*` and
+   `wwwroot/` from `bin/Release/net10.0/` into the playable `runtime/` and `runtime/dashboard/wwwroot/`.
 3. Start the server, then the launcher: the **World Map** tab appears between **Active Population** and
    **Active Groups**.
 

@@ -8,7 +8,7 @@ namespace OfflineDaoc.Dashboard;
 /// <summary>
 /// The launcher half of the program: it owns the game server process and the game client process, runs the True 1.65
 /// pre-flight (mode check + content refresh) before a start, keeps the redirected server console, and reports all of
-/// it as JSON for the web UI. It is the same behaviour the WinForms launcher has, without the WinForms.
+/// it as JSON for the web UI. It is the same behaviour the old WinForms launcher had, without the WinForms.
 /// </summary>
 internal sealed class LauncherHost : IDisposable
 {
@@ -500,7 +500,7 @@ internal sealed class LauncherHost : IDisposable
         return _client;
     }
 
-    /// <summary>The local login, created on first use exactly as the WinForms launcher made it.</summary>
+    /// <summary>The local login, created on first use exactly as the old launcher made it.</summary>
     private (string Account, string Password) ReadCredentials()
     {
         string path = Path.Combine(_root, "account.txt");

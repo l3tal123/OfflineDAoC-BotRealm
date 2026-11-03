@@ -1,4 +1,4 @@
-"""Dry run of the launcher's TrueMode.Refresh (OfflineDaoc.Launcher\\TrueMode.cs) on a COPY of a True 1.65 world.
+"""Dry run of the launcher's TrueMode.Refresh (OfflineDaoc.Dashboard\\Launcher\\TrueMode.cs) on a COPY of a True 1.65 world.
 Same steps, same order, one transaction: settings, remove rules (archived), updates, period drops (replaced), add-*.json
 (insert missing, update ours, delete stale). Usage: python -I dryrun.py <content folder> <source db> <out db>"""
 import datetime

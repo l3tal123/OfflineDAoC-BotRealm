@@ -1,8 +1,7 @@
 # Offline DAoC BotRealm — launcher and live dashboard
 
-This folder is the launcher. It replaces the WinForms launcher
-(`development-source/tools/OfflineDaoc.Launcher`, kept in the repository for parity checks only) with a small
-.NET host plus a web UI that opens in your browser.
+This folder is the launcher: a small .NET host plus a web UI that opens in your browser. It replaced the old WinForms
+launcher, which is no longer in the repository.
 
 ## Running it
 
@@ -26,9 +25,9 @@ when the exe sits in `<playable>\runtime`.
 ## What it is, technically
 
 - **The host** (this program, ~1,500 lines of C#): process control for the server and the game client, the True 1.65
-  mode marker and content refresh (the launcher's own `TrueMode` code is recompiled in, not copied), the rolling
-  server console (`RollingServerLog`), the local login file, SQLite reads and writes, and the state-165 file broker
-  that the server publishes its live snapshots to.
+  mode marker and content refresh (the launcher's own `TrueMode` code, in `Launcher/`), the rolling server console
+  (`RollingServerLog`), the local login file, SQLite reads and writes, and the state-165 file broker that the server
+  publishes its live snapshots to.
 - **The web UI** (`dashboard\wwwroot`): plain HTML/CSS/JS with Vue 3's browser build vendored, so there is no build
   step, no npm at run time and nothing to install. It is served by a plain `TcpListener` on `127.0.0.1` — no
   admin rights, no URL reservations, no ASP.NET runtime, no open firewall port.
@@ -49,7 +48,8 @@ when the exe sits in `<playable>\runtime`.
 | `LiveBots.cs` | The state-165 file-broker client for the live snapshot. |
 | `DashboardOptions.cs` | Command line and install/database/server/maps detection. |
 | `wwwroot/` | The UI: `index.html`, `styles.css`, `app.js`, vendored Vue. |
-| `../OfflineDaoc.Launcher/` | The old WinForms launcher, recompiled in part and kept for parity checks. |
+| `Launcher/` | The UI-free launcher logic that came from the old WinForms project: True 1.65 mode and content refresh, rolling console log, client launcher, XP rate, server-property writes, bot generator. |
+| `../../server/GameServer/bots/autonomous/` | Two server files compiled in by path (`BotGoalSettings.cs`, `RealmEventRecordStore.cs`), so they cannot drift from the server. |
 
 ## Parity with the old launcher
 
@@ -77,10 +77,9 @@ Ported in phase 3 (read-only screens, all fed by the server's published snapshot
   The clocks (meet-up, task, staging) are the launcher's own display clock: milliseconds from the roster, ticked
   locally once a second, with no extra database or server reads.
 
-Still to come (end of the migration):
-
-- Retire the WinForms project from the repository once parity is confirmed, and move the docs to the new launcher.
-- Keep and relic reset is deliberately absent: the current launcher no longer offers it to players either.
+The old WinForms project is gone from the repository; the launcher-only logic it carried lives in `Launcher/` and the
+docs describe this launcher. Keep and relic reset is deliberately absent: the launcher no longer offers it to
+players either.
 
 ## The world map
 
@@ -108,6 +107,6 @@ six realm overviews, no zone pictures).
 
 ## Removing the launcher
 
-Revert to the WinForms launcher by restoring the files backed up in
-`<playable>\deployment-backups\web-launcher-<timestamp>\` (the old `OfflineDAoC.*` files and the old
-`runtime\dashboard` folder), or delete this folder and rebuild the old project.
+Restore the files backed up in `<playable>\deployment-backups\web-launcher-<timestamp>\` (the old `OfflineDAoC.*`
+files and the old `runtime\dashboard` folder) and delete `runtime\dashboard` to go back to whatever launcher that
+backup held. The old WinForms project is not in the repository any more, so there is nothing else to rebuild.

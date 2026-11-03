@@ -3,8 +3,10 @@
     Offline DAoC BotRealm: the launcher and live dashboard. One program, two halves:
       - this host: process control (server and game client), the True 1.65 pre-flight, SQLite reads/writes and the
         state-165 file broker, all served as a small loopback HTTP API;
-      - wwwroot/: the UI, plain HTML/CSS/JS with Vue 3 vendored, opened in the browser.
-    It replaces the WinForms launcher (development-source/tools/OfflineDaoc.Launcher, kept for parity checks).
+      - wwwroot/: the UI, plain HTML/CSS/JS with Vue 3 vendored, opened in the browser;
+      - Launcher/: the launcher-only logic (True 1.65 mode and content refresh, the rolling server console log, the
+        Godot client launcher, the XP-rate and server-property writes, the bot character generator). Those files carry
+        no UI and came over from the retired WinForms launcher, which is no longer in the repository.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -22,16 +24,7 @@
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
   </ItemGroup>
   <ItemGroup>
-    <!--
-      The launcher-only logic is reused as-is from the WinForms launcher instead of being copied: the True 1.65 mode
-      and content refresh, the rolling server console log and the Godot client launcher. Those files carry no UI.
-    -->
-    <Compile Include="../OfflineDaoc.Launcher/TrueMode.cs" Link="Launcher/TrueMode.cs" />
-    <Compile Include="../OfflineDaoc.Launcher/RollingServerLog.cs" Link="Launcher/RollingServerLog.cs" />
-    <Compile Include="../OfflineDaoc.Launcher/NewClient.cs" Link="Launcher/NewClient.cs" />
-    <Compile Include="../OfflineDaoc.Launcher/XpRateSetting.cs" Link="Launcher/XpRateSetting.cs" />
-    <Compile Include="../OfflineDaoc.Launcher/ServerPropertyWrite.cs" Link="Launcher/ServerPropertyWrite.cs" />
-    <Compile Include="../OfflineDaoc.Launcher/BotCharacterGenerator.cs" Link="Launcher/BotCharacterGenerator.cs" />
+    <!-- Launcher/ (the files that came from the retired WinForms launcher) is compiled by the default glob. -->
     <Compile Include="../../server/GameServer/bots/autonomous/BotGoalSettings.cs" Link="Configuration/BotGoalSettings.cs" />
     <Compile Include="../../server/GameServer/bots/autonomous/RealmEventRecordStore.cs" Link="Records/RealmEventRecordStore.cs" />
   </ItemGroup>

@@ -5,8 +5,8 @@ namespace OfflineDaoc.Dashboard;
 
 /// <summary>
 /// The launcher's bot roster changes: create, delete, delete all and teleport. Same SQL and the same rules as the
-/// WinForms launcher (bot generation and deletion are launcher-side by design: the launcher edits the world database
-/// while the server is stopped, or queues a command for the running server). This is a port of the launcher's
+/// old launcher (bot generation and deletion are launcher-side by design: the launcher edits the world database
+/// while the server is stopped, or queues a command for the running server). This is a port of the old launcher's
 /// MainForm methods so the web UI can do the same work.
 /// </summary>
 internal static class BotAdmin

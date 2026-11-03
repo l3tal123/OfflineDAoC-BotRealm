@@ -17,7 +17,7 @@ was deployed and no server or launcher was started. No game server was running b
 | Database unpack | OK | `runtime/data/opendaoc-165.sqlite3.db`, `quick_check ok`, 133 tables, empty `Account`. |
 | Server build | OK with workaround | `Build succeeded`, **619 warnings, 0 errors**, 56.95 s. Documented plain command fails in this sandbox (see Blockers). |
 | Tests | OK with workaround | **3006 total, 2937 passed, 0 failed, 69 skipped** (all `Explicit`), 19.6 s. Ran via in-process NUnit engine, not VSTest (see Blockers). |
-| Launcher build | OK | Documented command works as-is: **2 warnings, 0 errors**; `OfflineDAoC.exe` produced. |
+| Launcher build | OK | Re-verified 2026-11-03 (the web launcher, `net10.0`): **0 warnings, 0 errors**, smoke test passed. |
 
 ## Commands run and observed results
 
@@ -67,12 +67,17 @@ removed afterwards. Result XML: `result="Passed" total="3006" passed="2937" fail
 inconclusive="0" warnings="0" duration="19.62"`. All 69 skips are `Explicit` tool/probe fixtures. This is the real
 NUnit suite, but it is **not** the documented `dotnet test` invocation, and it is reported separately for that reason.
 
-### Launcher (`development-source/tools/OfflineDaoc.Launcher`)
+### Launcher (`development-source/tools/OfflineDaoc.Dashboard`, re-verified 2026-11-03 after the old WinForms project was removed)
 ```
-dotnet build OfflineDaoc.Launcher.csproj -c Release   -> Build succeeded, 2 Warning(s) (NU1900), 0 Error(s)
+dotnet build OfflineDaoc.Dashboard.csproj -c Release -p:RestoreBuildInParallel=false -p:BuildInParallel=false -m:1
+  -> Build succeeded, 0 Warning(s), 0 Error(s), 2.3 s
 ```
-Outputs `bin/Release/net10.0-windows/OfflineDAoC.exe` (162,816 B) and `OfflineDAoC.dll` (1,442,304 B). The launcher
-builds the three linked server files by relative path as documented.
+Outputs `bin/Release/net10.0/OfflineDAoC.exe` (162,816 B), `OfflineDAoC.dll` (317,440 B) and a `wwwroot/` folder. The
+launcher's UI-free logic now lives in its `Launcher/` folder (the old WinForms project is no longer in the repository),
+and its csproj still compiles the two server files (`BotGoalSettings.cs`, `RealmEventRecordStore.cs`) by relative path.
+Smoke test: run from the build output with `--port 10311 --root <playable>\runtime --no-open`; it reported launcher 0.3
+with the install detected, and `/`, `/app.js`, `/styles.css`, the vendored Vue build, `/api/health`, `/api/world` and
+`/api/population` all answered 200.
 
 ### Database (repo root)
 ```

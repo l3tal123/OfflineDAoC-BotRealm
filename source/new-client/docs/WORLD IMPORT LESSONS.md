@@ -636,7 +636,7 @@ DAoC scatters billboard clutter that is **not** in fixtures. This is the "little
 - **Build:** `python pipeline/build_ui.py` → `godot/content/ui/{original,x4plus}`, `fonts/`, `loading_tips.json`; title music is exported into content/sounds.
 - **Login** (`game/login_screen.gd`, the main scene). The owner's choices:
   - background: the client's stone chamber (data/login.mpk `smcamback.bmp`) with its 16-frame flame strip (`flames.bmp`, 60×210 frames on black, drawn additive, phases offset) along the bottom;
-  - logo: the three-realm emblem from the OfflineDAoC 0.35 launcher (`development-source/tools/OfflineDaoc.Launcher/Assets/offline-daoc-realm-emblem.png`);
+  - logo: the three-realm emblem from the OfflineDAoC 0.35 launcher (its `Assets/offline-daoc-realm-emblem.png`, from the retired WinForms launcher that is no longer in the repository);
   - fonts: the client's own Minion Pro / Myriad Pro (app/ui/fonts);
   - **all text UPPER CASE and bold** (owner: mixed case "looks corny").
   - The client's launcher was the reference, stripped of server lists, patch notes, tech support and credits: LOG IN, CREATE ACCOUNT, EXIT, SAVE ACCOUNT NAME / SAVE PASSWORD.

@@ -33,7 +33,7 @@ need the author's permission to fork it.
 | Gamebot and companion combat AI | `development-source/server/GameServer/bots` |
 | Commands, combat, spells, pets | `development-source/server/GameServer` |
 | World content: drops, item stats, spawns, merchants, inns | `runtime/true165` (the JSON) and the generator in `tools/claude-version/true165` that writes it |
-| The launcher | `development-source/tools/OfflineDaoc.Launcher` |
+| The launcher | `development-source/tools/OfflineDaoc.Dashboard` |
 | The new client: interface, world, controls | `source/new-client/godot/game` (see its [README](../source/new-client/README.md)) |
 | The client's converted content | `source/new-client/pipeline` |
 

@@ -6,7 +6,7 @@ namespace OfflineDaoc.Dashboard;
 
 /// <summary>
 /// The launcher's world settings: XP rate, GM access, announcement switches, Bot Goals and the keep/relic reset.
-/// These are the same writes the WinForms launcher's Options and Bot Goals tabs do; every one of them requires a
+/// These are the same writes the old launcher's Options and Bot Goals tabs did; every one of them requires a
 /// fully stopped server, exactly as before.
 /// </summary>
 internal static class SettingsAdmin
