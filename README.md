@@ -17,42 +17,86 @@
 > **This is an AI-made project.** All of its code was written by AI tools (Codex, then Claude). The project owner
 > has no game development or coding experience: they directed the work and play-tested it. Expect bugs.
 >
-> **v0.2 is out**, with an in-place update for v0.1 players. Large parts of the game haven't been played through by a person.
-> Expect bugs, and keep a backup of your save. Bug reports are welcome in [Issues](https://github.com/shadowofze/OfflineDAoC-True165/issues).
+> **BotRealm is a fork** of [shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165),
+> itself built on the author's earlier Offline DAoC. The last public release from the original project is **v0.2**;
+> BotRealm builds are published from this repository's Releases page. Large parts of the game haven't been played
+> through by a person. Expect bugs, keep a backup of your save, and report problems in
+> [Issues](https://github.com/l3tal123/OfflineDAoC-BotRealm/issues).
 
 # BotRealm: a single-player Dark Age of Camelot world built around autonomous bots
 
 BotRealm is a local, single-player Dark Age of Camelot that runs entirely on your own PC. Its content base is the
-Classic and Shrouded Isles game of the **1.65 era** (November 2003), and it fills the world with gamebots that
-level, group, trade, craft and fight on their own. On top of that base it adds the bot and companion systems, the
-Realm Exchange, and the owner's quality-of-life and custom changes; it is not a promise of a faithful 1.65
-reproduction.
+Classic and Shrouded Isles game of the **1.65 era** (November 2003), and it fills the world with thousands of
+gamebots that level, group, trade, craft and fight on their own. On top of that base it adds the bot and companion
+systems, the Realm Exchange, and its own quality-of-life and custom changes.
 
-It grew out of [Offline DAoC](https://github.com/shadowofze/OfflineDAoC), which is now on hold. Everything this
-project adds to the OpenDAoC server was written by AI tools (Codex, then Claude), as was the whole new client. The
-project owner, who has no game development or coding experience, directed and play-tested it.
+The 1.65-era world is the starting point, not a promise. BotRealm is not a faithful 1.65 reproduction and does not
+try to be one: the owner adds and changes things as the bot game needs them. What is inherited from the period game
+is described below, and so is everything BotRealm does differently.
 
-## Download and play
+## What this project is for, and where it's going
 
-**[Download v0.2](https://github.com/shadowofze/OfflineDAoC-True165/releases/latest)**, no Git or AI tools needed.
-**Already playing v0.1?** The same downloader updates your game in place with a much smaller download (about 2.5 GB). Your
-account, characters, companions and bots stay as they are.
+The point of BotRealm is the bots. The question behind it is simple: **can a world of autonomous gamebots live a
+whole Dark Age of Camelot?** Level, gear up, group, craft, trade, defend and take keeps, run relic raids, and get
+through the game's content on their own, under the same rules a player lives by, while you play alongside them or
+just watch the world run.
 
-1. On the release page, under **Assets**, download **`Download-BotRealm-v0.2.zip`** (just the
-   downloader, a few KB).
-2. Put it in a folder with a short path, such as `C:\Games\BotRealm`. Right-click it, choose **Extract All…**,
-   and open the extracted folder.
-3. Close the game and the launcher if they're running. Then double-click **`GET-BOTREALM.cmd`**. If
-   Windows SmartScreen appears, click **More info → Run anyway**. It checks your PC and asks:
-   - **1 = Update my game:** it finds your `BotRealm` folder (or asks you to pick it), checks it, and
-     updates it in place (about 2.5 GB);
-   - **2 = New install:** the complete game, into a new folder (about 36 GB).
+So the project's priorities are:
 
-   If it stops, run it again; it continues where it stopped.
-4. In the `BotRealm` folder, double-click **`START BOTREALM.cmd`**. Click **START
-   SERVER**, wait for **RUNNING**, then click **ENTER REALM**. Your account is created the first time.
+- **Bot autonomy.** Bots that make their own decisions about where to hunt, when to rest, what to buy, whom to
+  group with, which keep to defend and which event to join, with as little scripting as possible.
+- **Bots on the player rules.** No bot-only shortcuts: the same combat, wear, ammo, death penalties, resting,
+  looting and travel rules apply to them as to you.
+- **Quality of life for the person playing.** A launcher dashboard that makes a world of thousands of bots
+  manageable: the live population, the map, groups, RvR, events, records, the Realm Exchange and a bot inspector,
+  plus settings such as the XP rate and the bot goals.
+- **A world to support that.** The 1.65-era content base is there because it is a good, coherent, well-documented
+  playground; it is not a museum piece. Custom systems and QoL changes are expected where they make the bot game
+  better.
 
-What you need:
+Going forward, expect the focus to stay on the bot game: deeper autonomy toward completing the whole game
+(epics, raids, RvR, sieges, crafting and the economy), better controls for managing the bots, more custom and
+quality-of-life systems, and performance work so a large population stays smooth. Releases are made from this
+repository when the tree is stable enough; the code is AI-written and owner-directed, and every build is
+play-tested by a person before release. Forks are welcome, and the credits below stay with the people who did the
+original work.
+
+## What's different
+
+### From the 1.65-era game
+
+- **The world is populated.** Thousands of autonomous gamebots are out there levelling, camping, travelling,
+  trading, crafting, sieging keeps and raiding relics, whether or not you are watching.
+- **You have a party of hired companions**, not summoned pets: you hire, level, spec, gear and revive them, and
+  they come with you across the world.
+- **The Realm Exchange**, an auction house where bots and players trade with each other.
+- **Quality-of-life systems**: quest markers and a quest guide, an XP-rate setting, a bot dashboard and map,
+  auto-loot and other conveniences.
+- **Custom rules and content changes** made for the bot game, including bot-tuned bosses and faster respawns on
+  named and quest monsters.
+- **No Trials of Atlantis or later content.** No ToA-or-later bonus types, item stats, regions or classes.
+
+### From the project it grew out of
+
+BotRealm comes from the Offline DAoC lineage (see [Credits](#credits)). The main differences:
+
+| | Offline DAoC (0.37 and earlier) | BotRealm |
+|---|---|---|
+| **Rules** | OpenDAoC's freeshard ruleset, plus many custom additions | The 1.65-era rules as the starting baseline, plus BotRealm's quality-of-life changes and custom systems |
+| **Client** | The original DAoC client, and a beta new client in 0.37c | The new client only, built in Godot 4 |
+| **Items and loot** | Freeshard items, random "ROG" drops, items with later stats | The 1.65-era items, drops and vendor stock, from period data |
+| **Leveling** | XP rate options, free levels, buff merchants, hasteners | XP fixed at 1x by default (the launcher can raise it for testing), with no shortcuts |
+| **Getting around** | Teleporters and `/tele` | Walking, horse routes and the period portals |
+| **Your group** | `/spawn` companion bots on demand | Hired companions that you level, spec and gear |
+| **Bots** | Separate bot rules | The same rules as players |
+| **Saves** | Progress transfers from every older version | A fresh start: no progress import from Offline DAoC |
+
+## Install
+
+BotRealm runs entirely from its own folder on your PC. There is nothing to install in Windows.
+
+### What you need
+
 - 64-bit Windows 10 or 11, with a CPU that supports **AVX2** (the bots' navigation needs it; most CPUs from 2014
   onward do).
 - A graphics card that supports **Vulkan**, with current drivers. It's developed and tested on an RTX 2060 (6 GB).
@@ -60,56 +104,127 @@ What you need:
 - **Nothing to install or turn on in Windows:** .NET comes with the game. You don't need the Windows ".NET Framework
   3.5" feature, the Visual C++ Redistributable or an original DAoC client.
 
-The full walkthrough with troubleshooting is in [docs/PLAY.md](docs/PLAY.md), and the client's guide is in
-[docs/NEW-CLIENT.md](docs/NEW-CLIENT.md). **Code > Download ZIP** on this page gives you the *source code*, not the
-playable game.
+### Use the release download (players)
 
-**Handy commands:** [QUICK COMMANDS.txt](QUICK%20COMMANDS.txt) has the everyday commands and the launcher
-shortcuts: hiring and managing companions, `/task`, `/questguide`, the Horn of Rallying, horse routes and training.
-Every command is in [ALL SERVER COMMANDS.txt](ALL%20SERVER%20COMMANDS.txt), with the GM-only
-ones marked. Both files are in your game folder too.
+1. Open this repository's [Releases page](https://github.com/l3tal123/OfflineDAoC-BotRealm/releases) and, under
+   **Assets**, download the small **`Download-BotRealm-v<version>.zip`** (just the downloader, a few KB).
+2. Put it in a folder with a short path, such as `C:\Games\BotRealm`. Right-click it, choose **Extract All…**, and
+   open the extracted folder.
+3. Close the game and the launcher if they're running. Then double-click **`GET-BOTREALM.cmd`**. If Windows
+   SmartScreen appears, click **More info → Run anyway**. It checks your PC and asks:
+   - **1 = Update my game:** it finds your `BotRealm` folder (or asks you to pick it), checks it, and updates it in
+     place (much smaller than a full download);
+   - **2 = New install:** the complete game, into a new folder (about 36 GB).
 
-## Built on OpenDAoC and Dawn of Light
+   If it stops, run it again; it continues where it stopped.
 
-The server is a modified [OpenDAoC](https://github.com/OpenDAoC/OpenDAoC-Core), which itself grew from
-[Dawn of Light](https://github.com/Dawn-of-Light/DOLSharp) (DOL), the long-running open-source DAoC server emulator.
-Their combat, spell, item, quest and world systems are the foundation everything here is built on, and their GPL
-license and credits carry over to this project. BotRealm adds the bot systems, the hired companions, the Realm
-Exchange and its quality-of-life changes on top of the 1.65-era baseline, and replaces content that freeshards added
-later with period data.
+There is no BotRealm release published yet: the tree is in 0.3 development. Until the first BotRealm build appears
+on the Releases page, use a playable folder you already have (v0.2 from the original project) or build from source
+(see below). Your characters, companions, bots and settings carry over either way.
 
-## Built from period data
+### Run it
 
-The 1.65 world is rebuilt from **about 85,000 pages of period data**, collected from the public sources players
-used at the time:
+1. In the `BotRealm` folder, double-click **`START BOTREALM.cmd`**.
+2. A console window opens and your browser shows the launcher dashboard at `http://127.0.0.1:10310/`.
+3. Click **START SERVER** and wait for the state to read **RUNNING**. The first start applies the world content and
+   takes a little longer; on later starts it only updates what changed.
+4. Click **ENTER REALM**. Your local account is created the first time, and the game client starts logged in.
+5. Create a character: pick a race and a base class, spend your stat points, and choose your look. At level 5 you
+   promote to your real class at a trainer. You begin in your race and class's period starting town.
 
-| Source | Pages | What it gave |
-|---|---|---|
-| Uthgard bestiary (a 1.65 recreation) | about 25,000 | monsters, items and measured drop rates from players' kill logs |
-| Allakhazam, the current site | about 24,700 | monsters, items, quests and zones, with player comments |
-| Allakhazam as it read in 2001-2004 (Wayback Machine) | about 17,000 | period item stats, monster loot, merchant stock and quest walkthroughs |
-| Camelot Warcry (Wayback Machine, 2001-2004) | about 11,600 | quest spoilers, items and news |
-| CapnBry's DAoC radar | about 6,000 | monster positions and levels from 176,970 live-server sightings |
+Close the launcher console window to stop the server. Leave it open while you play; a second double-click simply
+brings the dashboard back up instead of starting a second launcher.
 
-The patch 1.64 client's own data files supplied the recipe list, the class and race tables and the pre-game
-screens.
+### Update it
 
-Period sources come first: an item, drop or spawn stays only when the period data supports it, and nothing is
-invented unless no source exists. **The period data itself is not in this repository at this time.** What's here
-is the result: the world database and the content files built from it.
+Run the downloader again and choose **1 = Update my game**. It keeps your account, characters, companions, bots and
+houses. Before any update, back up:
 
-## How it differs from Offline DAoC
+- `runtime\data\opendaoc-165.sqlite3.db` — the world and your saves (characters, bots, houses, keeps, relics);
+- `runtime\account.txt` — your local login;
+- `new-client\save\` — the client's own settings.
 
-| | Offline DAoC (0.37 and earlier) | BotRealm |
-|---|---|---|
-| **Rules** | OpenDAoC's freeshard ruleset, plus many custom additions | The 1.65-era rules as the starting baseline, plus BotRealm's quality-of-life changes |
-| **Client** | The original DAoC client, and a beta new client in 0.37c | The new client only, built in Godot 4 |
-| **Items and loot** | Freeshard items, random "ROG" drops, items with later stats | The 1.65-era items, drops and vendor stock, from period data |
-| **Leveling** | XP rate options, free levels, buff merchants, hasteners | XP fixed at 1x, with no shortcuts |
-| **Getting around** | Teleporters and `/tele` | Walking, horse routes and the period portals |
-| **Your group** | `/spawn` companion bots on demand | Hired companions that you level, spec and gear |
-| **Bots** | Separate bot rules | The same rules as players |
-| **Saves** | Progress transfers from every older version | A fresh start: no progress import from Offline DAoC |
+The launcher also keeps a few database backups under `runtime\data\mode-switch-backups\` and in its
+`deployment-backups\` folder.
+
+### Remove it
+
+Delete the `BotRealm` folder (and its desktop shortcut). Nothing was installed anywhere else.
+
+### Build from source (developers)
+
+The repository is the source code, not the playable game: the converted client content (about 37 GB), the full
+navigation meshes (about 2.1 GB), the binaries and the raw period data are **not** in Git. A bare clone can be
+built, but it needs those assets from a release download to become playable.
+
+1. Install the **.NET 10 SDK** and **Python 3.10+**.
+2. Unpack the clean world database: `python database/unpack_db.py` (writes
+   `runtime/data/opendaoc-165.sqlite3.db`).
+3. Build the server: `dotnet build "Dawn of Light.sln" -c Release` in `development-source/server`. If the build
+   complains that `CoreServer/config/serverconfig.xml` is missing, copy
+   `CoreServer/config/serverconfig.example.xml` over it.
+4. Build the launcher: `dotnet build OfflineDaoc.Dashboard.csproj -c Release` in
+   `development-source/tools/OfflineDaoc.Dashboard`. The output is `BotRealm.exe`.
+5. Put the built server (`Releases/` plus `Release/lib/`) and launcher into a playable folder's `runtime\` (with
+   its `server\navmesh*`, `data\`, `botrealm\` content and `new-client\`), then start `BotRealm.exe`.
+
+Full details, deploy steps and the content pipeline are in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md); the client's
+own setup is in [source/new-client/README.md](source/new-client/README.md). Clone into a short folder such as
+`C:\src\`; if Git reports "Filename too long", run `git config --global core.longpaths true` and clone again.
+
+## How to use it
+
+### First steps
+
+- **Start with the dashboard.** It is the launcher: **START SERVER**, **STOP SERVER** and **ENTER REALM** are in the
+  top bar, and the server's state and console log are on the **Server** tab.
+- **Play normally.** Combat, spells, styles, crafting, quests and grouping work as in the period game; the
+  [quick commands](QUICK%20COMMANDS.txt) cover the everyday ones, and every command is in
+  [ALL SERVER COMMANDS.txt](ALL%20SERVER%20COMMANDS.txt) (GM-only ones are marked).
+- **Meet the bots.** They are everywhere in the world and in the dashboard's **Active Population** list. You can
+  group with them, trade with them, or just watch them play.
+- **Hire companions** at the traveler's inns near Caer Witrin, Connla and Huginfell. A new slot opens at levels
+  5, 10, 15, 20, 30, 40 and 45.
+- **Set the world up** on the **Options** tab: XP rate, realm-event announcements, bot goal weights (how much of the
+  population does PvE, RvR, sieges and so on), and how many bots to generate.
+
+### The launcher dashboard
+
+| Tab | What it shows |
+|---|---|
+| **Active Population** | Every bot in the world: realm, name, class, level, zone and current task. Search and filter; the **inspect** action opens the bot in the Inspector, and **del** deletes it. |
+| **World Map** | The world: painted realm overviews and each zone's own map, zoomable and pannable, with every online bot as a dot. Filter by realm or region; click a bot to select it there, and double-click to select it in the population list. |
+| **Groups** | The bot groups currently travelling and fighting together. |
+| **RvR / Battlegrounds** | The bots in the frontier and in the battlegrounds, and what they are doing there. |
+| **Events / Records** | Live realm events (keeps, relics, sieges, raids) and the record of finished ones. |
+| **Exchange** | The Realm Exchange: what bots and players are listing, and what has sold. |
+| **Stats** | World totals and leaderboards for kills, deaths, PvP kills and keeps taken. |
+| **Inspector** | One bot in detail, in sections: stats, equipment, bag, vault, specs, abilities, realm-exchange listings and effects. |
+| **Server** | Server state, pid, memory, uptime, the client, and the rolling server console log. |
+| **Options** | The settings above, plus generating and deleting bots. |
+
+### Managing the bots
+
+- **Generate bots** on the **Options** tab: pick a realm and 1, 10 or 100 bots, then **Generate**. **Delete every
+  bot…** clears the population; single bots are deleted from the **Active Population** list. Bots that already exist
+  keep their progress.
+- **Bot goals** are set per level bracket (1-19, 20-49, 50) as the share of time each bot spends on **solo PvE,
+  group PvE, RvR and battlegrounds**. Each row must total 100%. Levels 1-19 cannot do RvR and level 50 cannot enter
+  battlegrounds. This is the main knob for what kind of world you want.
+- **Inspect** a bot from the population list (or the map) to see what it has and what it is trying to do.
+- **Bots level and gear themselves**; they buy from merchants with their own coin, craft, repair and visit healers.
+  You do not have to manage them to play, but the dashboard lets you when you want to.
+
+### Tips while playing
+
+- **Your save is the world database**, not a character file: characters, bots, companions, houses, keeps, relics and
+  the Realm Exchange all live in `runtime\data\opendaoc-165.sqlite3.db`. Copy it to back up.
+- **Quests:** quest markers, objective highlights and `/questguide` are always on. Epic quests and epic armour are
+  being brought to their 1.65 versions.
+- **No teleporters or boats:** walk, use horse routes and the period portals. GM accounts keep `/tele` and `/tc`.
+- **Troubleshooting:** ports 10300 (game) and 10310 (dashboard) must be free; a second launcher just reopens the
+  dashboard; if the browser doesn't open, go to `http://127.0.0.1:10310/`. The full guide is
+  [docs/PLAY.md](docs/PLAY.md).
 
 ## What BotRealm has
 
@@ -155,13 +270,66 @@ is the result: the world database and the content files built from it.
 - Quest markers, quest objectives and the quest guide (`/questguide`).
 - Slash commands that skip the period game, such as `/tele` and `/tc`. They're kept for GM accounts only.
 
+## Built on OpenDAoC and Dawn of Light
+
+The server is a modified [OpenDAoC](https://github.com/OpenDAoC/OpenDAoC-Core), which itself grew from
+[Dawn of Light](https://github.com/Dawn-of-Light/DOLSharp) (DOL), the long-running open-source DAoC server emulator.
+Their combat, spell, item, quest and world systems are the foundation everything here is built on, and their GPL
+license and credits carry over to this project. BotRealm adds the bot systems, the hired companions, the Realm
+Exchange and its quality-of-life changes on top of the 1.65-era baseline, and replaces content that freeshards added
+later with period data.
+
+## Built from period data
+
+The 1.65 world is rebuilt from **about 85,000 pages of period data**, collected from the public sources players
+used at the time:
+
+| Source | Pages | What it gave |
+|---|---|---|
+| Uthgard bestiary (a 1.65 recreation) | about 25,000 | monsters, items and measured drop rates from players' kill logs |
+| Allakhazam, the current site | about 24,700 | monsters, items, quests and zones, with player comments |
+| Allakhazam as it read in 2001-2004 (Wayback Machine) | about 17,000 | period item stats, monster loot, merchant stock and quest walkthroughs |
+| Camelot Warcry (Wayback Machine, 2001-2004) | about 11,600 | quest spoilers, items and news |
+| CapnBry's DAoC radar | about 6,000 | monster positions and levels from 176,970 live-server sightings |
+
+The patch 1.64 client's own data files supplied the recipe list, the class and race tables and the pre-game
+screens.
+
+Period sources come first: an item, drop or spawn stays only when the period data supports it, and nothing is
+invented unless no source exists. **The period data itself is not in this repository at this time.** What's here
+is the result: the world database and the content files built from it.
+
+## Credits
+
+BotRealm stands on other people's work. All of it stays credited:
+
+- **The original project and its creator: [shadowofze](https://github.com/shadowofze).** BotRealm is a fork of
+  [shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165), which grew out of the earlier
+  [Offline DAoC](https://github.com/shadowofze/OfflineDAoC). The 1.65-era world, the content pipeline, the release
+  tooling, the bot foundations and much of what makes this playable are his work and his project's.
+- **The emulator's ancestors:** [OpenDAoC](https://github.com/OpenDAoC/OpenDAoC-Core), which came from
+  [Dawn of Light](https://github.com/Dawn-of-Light/DOLSharp) (DOL). Their server, world and combat systems are the
+  foundation of the game itself.
+- **Community forks whose fixes are ported here:** [stefanrows/OfflineDAoC](https://github.com/stefanrows/OfflineDAoC)
+  (Stefan Rows and Aaron Zielke), [chris4aker/OfflineDAoC-LivingServer](https://github.com/chris4aker/OfflineDAoC-LivingServer)
+  and [chris4aker/OfflineDAoC-SocialExpansion](https://github.com/chris4aker/OfflineDAoC-SocialExpansion),
+  [Nikse77/OfflineDAoC](https://github.com/Nikse77/OfflineDAoC), lometur, and rambodolphin13. The per-fix credit
+  list is under "Fork credits" in [THIRD_PARTY.md](THIRD_PARTY.md).
+- **The period data and the tools behind it:** Allakhazam and its contributors, Camelot Warcry, CapnBry's DAoC
+  radar, and Uthgard; the patch 1.64 client's data files; Godot Engine (MIT); NifTools' nif.xml; Real-ESRGAN. See
+  [THIRD_PARTY.md](THIRD_PARTY.md) for licenses and notices.
+- **The client's art, sounds, maps and models** are derived from the original Dark Age of Camelot client and belong
+  to Electronic Arts / Broadsword, as the disclaimer above says.
+
+If you are one of these authors and want a credit changed or removed, open an issue.
+
 ## For developers and AI assistants
 
 - **Where to start:** [AGENTS.md](AGENTS.md) (also read by Claude as [CLAUDE.md](CLAUDE.md)) has the project rules
   and the layout.
 - **Guides:**
-  - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): building and testing the server and launcher, and how the BotRealm world
-    content reaches the world;
+  - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): building and testing the server and launcher, and how the BotRealm
+    world content reaches the world;
   - [source/new-client/README.md](source/new-client/README.md): the client and its content pipeline;
   - [docs/LLM-QUICKSTART.md](docs/LLM-QUICKSTART.md): customizing it with your own AI.
 - **Where the code is:**
@@ -170,8 +338,6 @@ is the result: the world database and the content files built from it.
   - `tools/claude-version/botrealm` and `runtime/botrealm`: the generators and the world content they make.
   - `database`: the clean world database.
   - `source/new-client`: the new client (Godot 4 project and its content pipeline).
-- **Cloning on Windows:** clone into a short folder, such as `C:\src\`. If Git reports "Filename too long", turn on
-  long paths (`git config --global core.longpaths true`) and clone again.
 
 ## Good to know
 
@@ -184,7 +350,7 @@ is the result: the world database and the content files built from it.
 - **Local only:** the default setup is for one PC. Running a public multiplayer server would need its own
   security work.
 - **Forking:** you don't need permission to fork this repository and make it your own. Keep the existing
-  licenses and credits ([THIRD_PARTY.md](THIRD_PARTY.md)).
+  licenses and credits ([THIRD_PARTY.md](THIRD_PARTY.md)), including the original project's.
 
 ## Known issues
 
@@ -206,4 +372,3 @@ code it is based on. Other parts keep their own licenses; see [THIRD_PARTY.md](T
 ## Changes
 
 See the [changelog](CHANGELOG.md), including what's coming next.
-
