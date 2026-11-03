@@ -166,10 +166,12 @@
         level50: { soloPve: 20, groupPve: 40, rvr: 40, battlegrounds: 0 },
       });
       const generate = reactive({ realm: 1, count: 10 });
+      // Fields the server refuses for a level band (it rejects the whole file if they are not 0): the panel shows
+      // them locked, and they are left out of the row total.
       const goalRows = [
-        { key: "levels1To19", label: "Levels 1–19" },
-        { key: "levels20To49", label: "Levels 20–49" },
-        { key: "level50", label: "Level 50" },
+        { key: "levels1To19", label: "Levels 1–19", locked: ["rvr"] },
+        { key: "levels20To49", label: "Levels 20–49", locked: [] },
+        { key: "level50", label: "Level 50", locked: ["battlegrounds"] },
       ];
       const goalFields = [
         { key: "soloPve", label: "Solo PvE" },
@@ -325,6 +327,7 @@
               if (goals[key]) Object.assign(goals[key], weights);
             }
           }
+          normalizeGoals();
         } catch (exception) {
           // The Options tab is refreshed on entry and after every action.
         }
@@ -335,9 +338,22 @@
         loadOptions();
       }
 
+      function goalLocked(row, field) {
+        return Array.isArray(row.locked) && row.locked.includes(field);
+      }
+
+      /** A locked field can only ever be 0 in the saved file. */
+      function normalizeGoals() {
+        for (const row of goalRows) {
+          for (const field of row.locked) goals[row.key][field] = 0;
+        }
+      }
+
       function goalTotal(key) {
         const row = goals[key];
+        const definition = goalRows.find((candidate) => candidate.key === key);
         return ["soloPve", "groupPve", "rvr", "battlegrounds"]
+          .filter((field) => !definition || !goalLocked(definition, field))
           .reduce((sum, field) => sum + (Number(row[field]) || 0), 0);
       }
 
@@ -353,9 +369,11 @@
         const prefix = { levels1To19: "l1", levels20To49: "l2", level50: "l50" };
         const names = { soloPve: "Solo", groupPve: "Group", rvr: "RvR", battlegrounds: "Bg" };
         const parts = [];
+        normalizeGoals();
         for (const row of goalRows) {
           for (const field of goalFields) {
-            parts.push(`${prefix[row.key]}${names[field.key]}=${encodeURIComponent(Number(goals[row.key][field.key]) || 0)}`);
+            const value = goalLocked(row, field.key) ? 0 : Number(goals[row.key][field.key]) || 0;
+            parts.push(`${prefix[row.key]}${names[field.key]}=${encodeURIComponent(value)}`);
           }
         }
         return parts.join("&");
@@ -1839,7 +1857,7 @@
         launcher, notice, noticeOk, busy, serverUp, starting, ready, canEnterRealm, enterRealmHint, stateClass,
         startServer, stopServer, enterRealm, logLines, logBody, autoScroll, clearLog, formatUptime,
         // options
-        options, goals, goalRows, goalFields, goalsValid, goalTotal, generate, openOptions, loadOptions,
+        options, goals, goalRows, goalFields, goalLocked, goalsValid, goalTotal, generate, openOptions, loadOptions,
         saveXpRate, saveGm, saveAnnouncements, generateBots, deleteBot, deleteAllBots, teleportToBot, saveGoals,
         restoreGoalDefaults,
         // world screens

@@ -387,9 +387,9 @@ internal sealed class DashboardHost : IDisposable
             case "/api/bots/goals":
             {
                 BotGoalSettings goals = SettingsAdmin.BuildGoals(
-                    Number("l1Solo", 0), Number("l1Group", 0), Number("l1Rvr", 0), Number("l1Bg", 0),
+                    Number("l1Solo", 0), Number("l1Group", 0), Number("l1Bg", 0),
                     Number("l2Solo", 0), Number("l2Group", 0), Number("l2RvR", 0), Number("l2Bg", 0),
-                    Number("l50Solo", 0), Number("l50Group", 0), Number("l50RvR", 0), Number("l50Bg", 0));
+                    Number("l50Solo", 0), Number("l50Group", 0), Number("l50RvR", 0));
                 SettingsAdmin.SaveGoals(_launcher.BotGoalsPath, goals, _launcher.ServerStopped);
                 _launcher.Log("Bot goals saved.");
                 return (true, "Bot goals saved. They apply when the server next starts.");

@@ -60,7 +60,8 @@ Ported in phase 2 (all of them keep the server-stopped gate, enforced by the hos
 
 - Options: XP rate, Make Me a GM, RvR/PvE announcement switches.
 - Bots: generate 1/10/100 level-1 bots (they earn their levels in the world), delete one bot, delete every bot, teleport to a bot (GM + server running).
-- Bot Goals Setting: the three level bands, 100% validation per row, save/undo/defaults.
+- Bot Goals Setting: the three level bands, 100% validation per row, save/undo/defaults. The parts a band cannot use
+  (RvR for levels 1-19, battlegrounds for level 50) are locked at 0% and left out of the row total.
 
 Ported in phase 3 (read-only screens, all fed by the server's published snapshots or read-only reads):
 

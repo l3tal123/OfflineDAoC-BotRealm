@@ -555,7 +555,7 @@
 
       <section class="option-card wide">
         <h2>Bot goals</h2>
-        <p class="option-note">How each bot splits its time. Each row must total exactly 100%. Levels 1–19 cannot do RvR, and level 50 cannot enter battlegrounds. Applies when the server next starts.</p>
+        <p class="option-note">How each bot splits its time. Each row must total exactly 100%. Levels 1–19 cannot do RvR and level 50 cannot enter battlegrounds, so those fields stay at 0% and are locked. Applies when the server next starts.</p>
         <table class="goals">
           <thead>
             <tr><th>Levels</th><th>Solo PvE</th><th>Group PvE</th><th>RvR</th><th>Battlegrounds</th><th>Total</th></tr>
@@ -564,8 +564,11 @@
             <tr v-for="row in goalRows" :key="row.key">
               <td class="goal-label">{{ row.label }}</td>
               <td v-for="field in goalFields" :key="field.key">
-                <input type="number" min="0" max="100" step="1" v-model.number="goals[row.key][field.key]"
+                <input v-if="!goalLocked(row, field.key)" type="number" min="0" max="100" step="1"
+                       v-model.number="goals[row.key][field.key]"
                        :disabled="busy || !options.serverStopped" :aria-label="row.label + ' ' + field.label" />
+                <span v-else class="goal-locked" aria-label="Not available at these levels"
+                      title="Not available at these levels">—</span>
               </td>
               <td :class="goalTotal(row.key) === 100 ? 'goal-ok' : 'goal-bad'">{{ goalTotal(row.key) }}%</td>
             </tr>

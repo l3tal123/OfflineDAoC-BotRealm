@@ -109,13 +109,17 @@ internal static class SettingsAdmin
     internal static void SaveGoals(string path, BotGoalSettings settings, Func<bool> serverStopped) =>
         settings.Save(path, serverStopped);
 
-    internal static BotGoalSettings BuildGoals(int l1Solo, int l1Group, int l1RvR, int l1Bg,
-        int l2Solo, int l2Group, int l2RvR, int l2Bg, int l50Solo, int l50Group, int l50RvR, int l50Bg) =>
+    /// <summary>
+    /// Builds the settings from the panel. Levels 1–19 have no RvR goals and level 50 cannot enter the battlegrounds,
+    /// so those weights are always 0 (the server refuses any other value).
+    /// </summary>
+    internal static BotGoalSettings BuildGoals(int l1Solo, int l1Group, int l1Bg,
+        int l2Solo, int l2Group, int l2RvR, int l2Bg, int l50Solo, int l50Group, int l50RvR) =>
         new()
         {
-            Levels1To19 = new BotGoalWeights(l1Solo, l1Group, l1RvR, l1Bg),
+            Levels1To19 = new BotGoalWeights(l1Solo, l1Group, 0, l1Bg),
             Levels20To49 = new BotGoalWeights(l2Solo, l2Group, l2RvR, l2Bg),
-            Level50 = new BotGoalWeights(l50Solo, l50Group, l50RvR, l50Bg),
+            Level50 = new BotGoalWeights(l50Solo, l50Group, l50RvR, 0),
         };
 
     private static bool ReadSwitch(SQLiteConnection connection, string key)
