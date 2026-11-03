@@ -13,8 +13,11 @@ internal static class BotAdmin
 {
     internal const long StartingCopper = 10_000;
 
-    /// <summary>Creates bots at level 1 (starting area) or level 50 (capital, with the class loadout).</summary>
-    internal static int Generate(string database, bool is165, int realm, int count, int level)
+    /// <summary>
+    /// Creates level-1 bots in a realm, race and class-valid starting area. They earn their levels in the world like
+    /// a player does; there is no level-50 shortcut.
+    /// </summary>
+    internal static int Generate(string database, bool is165, int realm, int count)
     {
         if (!File.Exists(database))
             throw new InvalidOperationException("The prepared world database is missing.");
@@ -22,8 +25,6 @@ internal static class BotAdmin
             throw new ArgumentOutOfRangeException(nameof(realm));
         if (count is not (1 or 10 or 100))
             throw new ArgumentOutOfRangeException(nameof(count));
-        if (level is not (1 or 50))
-            throw new ArgumentOutOfRangeException(nameof(level));
 
         using var connection = new SQLiteConnection($"Data Source={database};Version=3;Pooling=False;Default Timeout=10");
         connection.Open();
@@ -45,14 +46,14 @@ internal static class BotAdmin
 
         // True 1.65 Mode: a new level-1 bot starts as the base class of the class it rolled, which it keeps as its
         // planned class (column added by the server; until the server has run once, the server converts it instead).
-        if (level == 1 && is165 && !HasColumn(connection, transaction, "offline_world_bots", "PlannedClassId"))
+        if (is165 && !HasColumn(connection, transaction, "offline_world_bots", "PlannedClassId"))
         {
             using var add = connection.CreateCommand();
             add.Transaction = transaction;
             add.CommandText = "ALTER TABLE offline_world_bots ADD COLUMN PlannedClassId INT(11) NOT NULL DEFAULT 0";
             add.ExecuteNonQuery();
         }
-        bool basePlan = level == 1 && is165 && HasColumn(connection, transaction, "offline_world_bots", "PlannedClassId");
+        bool basePlan = is165 && HasColumn(connection, transaction, "offline_world_bots", "PlannedClassId");
         for (int index = 0; index < count; index++)
         {
             BotCharacterGenerator.Identity identity = BotCharacterGenerator.Generate(realm, reserved, is165);
@@ -62,9 +63,8 @@ internal static class BotAdmin
                 plannedClass = identity.ClassId;
                 identity = identity with { ClassId = baseClass.Id, ClassName = baseClass.Name };
             }
-            BotStartingLocation start = level == 50
-                ? CapitalBotStartingLocation(identity.Realm)
-                : ChooseBotStartingLocation(connection, transaction, identity.Realm, identity.RaceId, identity.ClassId, plannedClass);
+            BotStartingLocation start = ChooseBotStartingLocation(connection, transaction, identity.Realm,
+                identity.RaceId, identity.ClassId, plannedClass);
             string now = DateTime.UtcNow.ToString("O");
             using var insert = connection.CreateCommand();
             insert.Transaction = transaction;
@@ -75,7 +75,7 @@ internal static class BotAdmin
                      ZoneId, X, Y, Z, RegionId, Health, Mana, Endurance, BindRegionId, BindX, BindY, BindZ,
                      CurrentGoal, ObjectiveProgress, LastMeaningfulProgressUtc, IsRetired)
                 VALUES
-                    (@name, @realm, @classId, @className, @raceId, @raceName, @gender, @level, @xp, 0,
+                    (@name, @realm, @classId, @className, @raceId, @raceName, @gender, 1, 0, 0,
                      @zoneName, 'Queued at randomized starting location', 0, 1, @now, @money, 0,
                      @zoneId, @x, @y, @z, @region, 1, 0, 0, @region, @x, @y, @z,
                      'Awaiting staggered login queue', @placement, @now, 0)
@@ -84,9 +84,7 @@ internal static class BotAdmin
                 insert.CommandText = insert.CommandText.Replace("IsRetired)", "IsRetired, PlannedClassId)").Replace("@now, 0)", "@now, 0, @planned)");
             insert.Parameters.AddWithValue("@planned", plannedClass);
             insert.Parameters.AddWithValue("@name", identity.Name);
-            insert.Parameters.AddWithValue("@level", level);
-            insert.Parameters.AddWithValue("@xp", level == 50 ? 169999999950L : 0L);
-            insert.Parameters.AddWithValue("@money", level == 50 ? 100000000L : StartingCopper);
+            insert.Parameters.AddWithValue("@money", StartingCopper);
             insert.Parameters.AddWithValue("@realm", identity.Realm);
             insert.Parameters.AddWithValue("@classId", identity.ClassId);
             insert.Parameters.AddWithValue("@className", identity.ClassName);
@@ -99,28 +97,12 @@ internal static class BotAdmin
             insert.Parameters.AddWithValue("@y", start.Y);
             insert.Parameters.AddWithValue("@z", start.Z);
             insert.Parameters.AddWithValue("@zoneId", start.ZoneId);
-            insert.Parameters.AddWithValue("@zoneName", level == 50 ? start.ZoneName : start.RegionId is 51 or 151 or 181
+            insert.Parameters.AddWithValue("@zoneName", start.RegionId is 51 or 151 or 181
                 ? "Shrouded Isles starting area"
                 : "Classic starting area");
             insert.Parameters.AddWithValue("@placement",
                 $"Launcher assigned a realm/race/class-valid random start in region {start.RegionId} before server startup");
             insert.ExecuteNonQuery();
-            if (level == 50)
-            {
-                long botId = connection.LastInsertRowId;
-                using var gear = connection.CreateCommand();
-                gear.Transaction = transaction;
-                gear.CommandText = """
-                    INSERT INTO Inventory (Inventory_ID,OwnerID,ITemplate_Id,SlotPosition,Count,Condition,Durability,LastTimeRowUpdated)
-                    SELECT lower(hex(randomblob(16))),@owner,l.TemplateId,l.SlotPosition,1,t.MaxCondition,t.MaxDurability,@now
-                    FROM offline_level50_loadouts l JOIN ItemTemplate t ON t.Id_nb=l.TemplateId WHERE l.ClassId=@class
-                    """;
-                gear.Parameters.AddWithValue("@owner", $"offlinebot:{botId}");
-                gear.Parameters.AddWithValue("@now", now);
-                gear.Parameters.AddWithValue("@class", identity.ClassId);
-                if (gear.ExecuteNonQuery() < 15)
-                    throw new InvalidOperationException("The level-50 class template is missing or incomplete. No bots were added.");
-            }
         }
 
         UpdatePopulationTarget(connection, transaction);
@@ -297,15 +279,7 @@ internal static class BotAdmin
         }
     }
 
-    private sealed record BotStartingLocation(int RegionId, int X, int Y, int Z, int ZoneId = 0, string ZoneName = "");
-
-    private static BotStartingLocation CapitalBotStartingLocation(int realm) => realm switch
-    {
-        1 => new(10, 35990, 30298, 8000, 26, "City of Camelot"),
-        2 => new(101, 32020, 28294, 8819, 120, "Jordheim"),
-        3 => new(201, 33197, 31200, 8000, 209, "Tir na Nog"),
-        _ => throw new ArgumentOutOfRangeException(nameof(realm)),
-    };
+    private sealed record BotStartingLocation(int RegionId, int X, int Y, int Z, int ZoneId = 0);
 
     private static BotStartingLocation ChooseBotStartingLocation(SQLiteConnection connection, SQLiteTransaction transaction,
         int realm, int raceId, int classId, int plannedClassId = 0)

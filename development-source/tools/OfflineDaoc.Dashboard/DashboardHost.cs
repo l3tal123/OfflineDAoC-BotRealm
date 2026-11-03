@@ -191,8 +191,11 @@ internal sealed class DashboardHost : IDisposable
                 if (path == "/api/inspect")
                 {
                     long.TryParse(request.Query.GetValueOrDefault("botId"), out long botId);
-                    JsonElement? snapshot = WorldPanels.ReadInspector(_launcher.ServerDirectory, LauncherHost.Listening(), botId);
-                    await WriteJsonAsync(stream, new { available = snapshot != null, snapshot }, head).ConfigureAwait(false);
+                    WorldPanels.InspectorRead read = WorldPanels.ReadInspector(_launcher.ServerDirectory,
+                        LauncherHost.Listening(), botId);
+                    await WriteJsonAsync(stream,
+                        new { available = read.Snapshot != null, reason = read.Failure, snapshot = read.Snapshot }, head)
+                        .ConfigureAwait(false);
                     return;
                 }
 
@@ -353,10 +356,10 @@ internal sealed class DashboardHost : IDisposable
             {
                 int realm = Number("realm", 1);
                 int count = Number("count", 1);
-                int level = Number("level", 1);
-                int made = BotAdmin.Generate(_launcher.Database, true, realm, count, level);
-                _launcher.Log($"Generated {made} level-{level} bot(s) for realm {realm}.");
-                return (true, $"Added {made} level-{level} bot(s). They join when the server starts.");
+                // New bots always start at level 1: they earn their levels in the world like a player does.
+                int made = BotAdmin.Generate(_launcher.Database, true, realm, count);
+                _launcher.Log($"Generated {made} level-1 bot(s) for realm {realm}.");
+                return (true, $"Added {made} level-1 bot(s). They join when the server starts.");
             }
             case "/api/bots/delete":
             {

@@ -440,7 +440,7 @@
     <div class="toolbar">
       <span class="toolbar-count" v-if="inspector">{{ inspector.Name }} · level {{ inspector.Level }} {{ inspector.ClassName }} · {{ inspector.Online ? 'live' : 'last saved state' }}</span>
       <span class="toolbar-count" v-else>Pick a bot with inspect in Active Population.</span>
-      <button class="ghost-button" v-if="selectedBot" @click="loadInspector(selectedBot)">Refresh</button>
+      <button class="ghost-button" v-if="inspectorBot" @click="loadInspector(inspectorBot)">Refresh</button>
     </div>
     <div v-if="inspectorLoading" class="empty-state">Reading the bot…</div>
     <template v-else-if="inspector">
@@ -533,7 +533,7 @@
 
       <section class="option-card">
         <h2>Bots</h2>
-        <p class="option-note">{{ options.botCount.toLocaleString() }} world bots. New bots join when the server starts.</p>
+        <p class="option-note">{{ options.botCount.toLocaleString() }} world bots. New bots start at level 1 and level up in the world; they join when the server starts.</p>
         <div class="option-row">
           <select v-model.number="generate.realm" aria-label="Realm">
             <option :value="1">Albion</option>
@@ -544,10 +544,6 @@
             <option :value="1">1 bot</option>
             <option :value="10">10 bots</option>
             <option :value="100">100 bots</option>
-          </select>
-          <select v-model.number="generate.level" aria-label="Starting level">
-            <option :value="1">Level 1</option>
-            <option :value="50">Level 50</option>
           </select>
           <button class="button" :disabled="busy" @click="generateBots()">Generate</button>
         </div>

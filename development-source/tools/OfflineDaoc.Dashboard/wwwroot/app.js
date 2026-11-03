@@ -165,7 +165,7 @@
         levels20To49: { soloPve: 40, groupPve: 40, rvr: 20, battlegrounds: 0 },
         level50: { soloPve: 20, groupPve: 40, rvr: 40, battlegrounds: 0 },
       });
-      const generate = reactive({ realm: 1, count: 10, level: 1 });
+      const generate = reactive({ realm: 1, count: 10 });
       const goalRows = [
         { key: "levels1To19", label: "Levels 1–19" },
         { key: "levels20To49", label: "Levels 20–49" },
@@ -195,6 +195,7 @@
       const rvrSortKey = ref("default");
       const rvrSortDir = ref("asc");
       const inspector = ref(null);
+      const inspectorBot = ref(null);
       const inspectorLoading = ref(false);
       const inspectorSection = ref("Stats");
       const exchange = reactive({
@@ -379,8 +380,9 @@
 
       async function generateBots() {
         const label = generate.count === 1 ? "one bot" : `${generate.count} bots`;
-        if (!window.confirm(`Generate ${label} for ${REALMS[generate.realm - 1].name} at level ${generate.level}?`)) return;
-        await postAction(`api/bots/generate?realm=${generate.realm}&count=${generate.count}&level=${generate.level}`);
+        if (!window.confirm(`Generate ${label} for ${REALMS[generate.realm - 1].name}? ` +
+          "They start at level 1 and level up in the world.")) return;
+        await postAction(`api/bots/generate?realm=${generate.realm}&count=${generate.count}`);
         await loadOptions();
         await refreshPopulation();
         await refreshMap();
@@ -470,19 +472,29 @@
       }
 
       async function loadInspector(bot) {
+        if (!bot) return;
+        inspectorBot.value = bot;
+        selectedBotId.value = bot.id;
         inspectorLoading.value = true;
         inspectorSection.value = "Stats";
         try {
           const data = await getJson(`api/inspect?botId=${bot.id}`);
-          inspector.value = data.available ? data.snapshot : null;
-          if (!data.available) {
-            notice.value = `${bot.name} cannot be inspected: the server is not running, so there is no live description.`;
+          if (data.available) {
+            inspector.value = data.snapshot;
+            if (notice.value.includes("could not be inspected") || notice.value.includes("cannot be inspected"))
+              notice.value = "";
+          } else {
+            // Keep the last description on screen; the notice says why it did not refresh.
+            notice.value = data.reason === "stopped"
+              ? `${bot.name} cannot be inspected: the server is not running, so there is no live description.`
+              : data.reason === "timeout"
+                ? `${bot.name} could not be inspected: the server was busy and did not answer in time. Press Refresh to try again.`
+                : `${bot.name} could not be inspected right now. Press Refresh to try again.`;
             noticeOk.value = false;
           }
         } catch (exception) {
           notice.value = "The Bot Inspector could not read that bot: " + exception.message;
           noticeOk.value = false;
-          inspector.value = null;
         } finally {
           inspectorLoading.value = false;
         }
@@ -1842,7 +1854,7 @@
         exchange, exchangeRows, exchangePageRows, exchangePageCount, exchangeColumns, exchangeListingColumns,
         exchangePurchaseColumns, exchangeGoPage,
         records, recordsColumns, recordsPageCount, recordsGoPage,
-        inspector, inspectorLoading, inspectorSection, inspectorSections, inspectorData, inspectorOverview,
+        inspector, inspectorBot, inspectorLoading, inspectorSection, inspectorSections, inspectorData, inspectorOverview,
         openGroups, openRvr, openBattlegrounds, openEvents, openStats, openExchange, openRecords, openInspector,
         inspectFromRoster,
         // population

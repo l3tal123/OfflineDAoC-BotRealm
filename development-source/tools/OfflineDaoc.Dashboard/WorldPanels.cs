@@ -20,6 +20,15 @@ internal static class WorldPanels
     private const ushort HiberniaLot = 65003;
     private const long MaxSnapshotBytes = 8L * 1024 * 1024;
 
+    // The state-165 broker has one request slot per snapshot. Two launcher requests writing it at the same time
+    // (two inspector clicks close together, for example) would overwrite each other and one would time out, so each
+    // kind of request is sent one at a time; the handler itself answers in a few hundred milliseconds.
+    private static readonly SemaphoreSlim InspectorGate = new(1, 1);
+    private static readonly SemaphoreSlim StatsGate = new(1, 1);
+
+    /// <summary>What one Bot Inspector read found: the snapshot, or why there was none.</summary>
+    internal sealed record InspectorRead(JsonElement? Snapshot, string Failure);
+
     // ------------------------------------------------------------------ published snapshots (file broker)
 
     /// <summary>Active RvR, battlegrounds and the realm events: one snapshot the server publishes on change.</summary>
@@ -31,30 +40,71 @@ internal static class WorldPanels
     {
         if (serverRunning)
         {
-            JsonElement? fresh = RequestSnapshot(serverDirectory, "server-stats.request", null,
-                Path.Combine("state-165", "server-stats.json"), 5_000);
-            if (fresh != null)
-                return fresh;
+            StatsGate.Wait();
+            try
+            {
+                JsonElement? fresh = RequestSnapshot(serverDirectory, "server-stats.request", null,
+                    Path.Combine("state-165", "server-stats.json"), 5_000);
+                if (fresh != null)
+                    return fresh;
+            }
+            finally
+            {
+                StatsGate.Release();
+            }
         }
 
         return ReadFile(Path.Combine(serverDirectory, "state-165", "server-stats.json"));
     }
 
-    /// <summary>One bot's full description. Only the running server can answer; without it there is nothing live.</summary>
-    internal static JsonElement? ReadInspector(string serverDirectory, bool serverRunning, long botId)
+    /// <summary>
+    /// One bot's full description. Only the running server can answer; without it there is nothing live. A stop is
+    /// reported apart from a timeout, so the page does not say "the server is not running" when it merely was busy.
+    /// </summary>
+    internal static InspectorRead ReadInspector(string serverDirectory, bool serverRunning, long botId)
     {
-        if (!serverRunning || botId <= 0)
-            return null;
-        JsonElement? snapshot = RequestSnapshot(serverDirectory, "bot-inspect.request", botId,
-            Path.Combine("state-165", "bot-inspect.json"), 5_000);
-        if (snapshot == null)
-            return null;
-        return snapshot.Value.TryGetProperty("BotId", out JsonElement id) && id.TryGetInt64(out long found) && found == botId
-            ? snapshot
-            : null;
+        if (botId <= 0)
+            return new InspectorRead(null, "unknown");
+        if (!serverRunning)
+            return new InspectorRead(null, "stopped");
+
+        InspectorGate.Wait();
+        try
+        {
+            for (int attempt = 0; attempt < 2; attempt++)
+            {
+                JsonElement? snapshot = RequestSnapshot(serverDirectory, "bot-inspect.request", botId,
+                    Path.Combine("state-165", "bot-inspect.json"), 6_000);
+                if (snapshot == null)
+                    continue;
+                if (snapshot.Value.TryGetProperty("BotId", out JsonElement id) && id.TryGetInt64(out long found) &&
+                    found == botId)
+                    return new InspectorRead(snapshot, string.Empty);
+                // The broker answered about another bot: the request was overwritten on its way. Ask again.
+            }
+
+            return new InspectorRead(null, "timeout");
+        }
+        finally
+        {
+            InspectorGate.Release();
+        }
     }
 
-    private static JsonElement? RequestSnapshot(string serverDirectory, string requestName, long? botId, string responseRelative, int waitMilliseconds)
+    private static JsonElement? RequestSnapshot(string serverDirectory, string requestName, long? botId,
+        string responseRelative, int waitMilliseconds, int retries = 0)
+    {
+        for (int attempt = 0; ; attempt++)
+        {
+            JsonElement? snapshot = RequestSnapshotOnce(serverDirectory, requestName, botId, responseRelative,
+                waitMilliseconds);
+            if (snapshot != null || attempt >= retries)
+                return snapshot;
+        }
+    }
+
+    private static JsonElement? RequestSnapshotOnce(string serverDirectory, string requestName, long? botId,
+        string responseRelative, int waitMilliseconds)
     {
         string requestId = Guid.NewGuid().ToString("N");
         string requestPath = Path.Combine(serverDirectory, requestName);
