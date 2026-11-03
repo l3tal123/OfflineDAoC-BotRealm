@@ -51,7 +51,7 @@
     </button>
     <button role="tab" class="tab" :class="{ active: tab === 'map' }" @click="openMap()">
       World Map
-      <span class="badge" v-if="mapRegionsOnline > 0">{{ mapRegionsOnline }} regions</span>
+      <span class="badge" v-if="mapZonesOnline > 0">{{ mapZonesOnline }} zones</span>
     </button>
     <button role="tab" class="tab" :class="{ active: tab === 'groups' }" @click="openGroups()">
       Groups
@@ -167,38 +167,74 @@
 
   <!-- ------------------------------------------------------------------ world map -->
   <main v-show="tab === 'map'" class="panel map-panel">
-    <div class="toolbar">
-      <label class="select-label">Region
-        <select v-model.number="mapRegionId">
-          <option v-for="region in map.regions" :key="region.id" :value="region.id">
-            {{ region.name }} — {{ region.realmName }} ({{ region.online }} online)
-          </option>
+    <div class="toolbar map-toolbar">
+      <label class="select-label">Map
+        <select class="map-select" :value="mapData.view" @change="selectMapView($event.target.value)">
+          <optgroup label="Realm overviews">
+            <option v-for="overview in mapData.overviews" :key="overview.id" :value="overview.id">
+              {{ overview.name }} — {{ overview.online }} bots
+            </option>
+          </optgroup>
+          <optgroup v-for="group in realmZoneGroups" :key="group.realm" :label="group.label">
+            <option v-for="zone in group.zones" :key="zone.id" :value="'zone:' + zone.id">
+              {{ zone.name }} — {{ zone.online }} bots
+            </option>
+          </optgroup>
+          <optgroup v-if="currentZoneUnlisted" label="Current zone">
+            <option :value="'zone:' + mapData.zone.id">
+              {{ mapData.zone.name }} — {{ mapData.zone.online }} bots
+            </option>
+          </optgroup>
         </select>
       </label>
+      <div class="segmented layer" v-if="mapData.kind !== 'zone' && mapCurrentOverview && mapCurrentOverview.hasImage">
+        <button :class="{ selected: mapLayer === 'realm' }" @click="mapLayer = 'realm'"
+                title="The client's painted realm map">Realm map</button>
+        <button :class="{ selected: mapLayer === 'zones' }" @click="mapLayer = 'zones'"
+                title="The zone maps composed at the squares the client places them on">Zone maps</button>
+      </div>
+      <button class="ghost-button" v-if="mapData.kind === 'zone' && mapData.zone && mapData.zone.overviewId"
+              @click="selectMapView(mapData.zone.overviewId)" title="Back to the realm overview this zone belongs to">
+        Back to {{ mapOverviewName(mapData.zone.overviewId) }}
+      </button>
       <div class="segmented zoom">
         <button @click="zoomBy(1 / 1.5)" title="Zoom out">−</button>
-        <span class="zoom-value">{{ Math.round(zoomPercent) }}%</span>
+        <span class="zoom-value">{{ Math.round(mapZoom) }}%</span>
         <button @click="zoomBy(1.5)" title="Zoom in">+</button>
       </div>
       <button class="ghost-button" @click="resetView()">Reset view</button>
-      <span class="toolbar-count">{{ currentRegion ? currentRegion.online : 0 }} bots in this region</span>
-      <span class="map-hint">wheel zooms · drag to pan · hover a dot · click a dot to find it in the roster</span>
+      <span class="toolbar-count">{{ mapSummary }}</span>
+      <span class="map-hint">wheel zooms · drag to pan · hover for details · click a bot to select it in Active Population<template v-if="mapData.kind !== 'zone'"> · click a zone for its own map</template></span>
     </div>
     <div class="map-stage" ref="mapStage">
-      <canvas ref="mapCanvas"></canvas>
-      <div v-if="mapBots.length === 0" class="map-empty">
-        {{ serverRunning ? 'No bot has a live position in this region right now.' : 'The server is stopped: the map shows the world, but bots have no live positions.' }}
+      <canvas ref="mapCanvas" :style="{ cursor: mapCursor }"
+              @pointermove="onMapPointerMove" @pointerdown="onMapPointerDown" @pointerup="onMapPointerUp"
+              @pointerleave="onMapPointerLeave" @wheel.prevent="onMapWheel"></canvas>
+      <div v-if="mapData.loaded && mapData.bots.length === 0" class="map-empty">
+        {{ serverRunning
+          ? (mapData.kind === 'zone' ? 'No bot has a live position in this zone right now.' : 'No bot is on this map right now.')
+          : 'The server is stopped: the map shows the world, but bots have no live positions.' }}
       </div>
-      <div v-if="hover" class="map-tooltip" :style="{ left: hover.x + 'px', top: hover.y + 'px' }">
-        <strong>{{ hover.bot.name }}</strong>
-        <span>{{ hover.bot.level }} {{ hover.bot.className }} · {{ hover.bot.realmName }}</span>
-        <span>{{ hover.bot.zone }}</span>
-        <span class="tip-activity">{{ hover.bot.activity }}</span>
+      <div v-if="mapHover && mapHover.kind === 'bot'" class="map-tooltip" :style="tooltipStyle">
+        <strong>{{ mapHover.bot.name }}</strong>
+        <span>level {{ mapHover.bot.level }} {{ mapHover.bot.className }} · {{ mapHover.bot.realmName }}</span>
+        <span>{{ mapHover.bot.zone }}</span>
+        <span class="tip-activity">{{ mapHover.bot.activity }}</span>
+        <span class="tip-hint">click to select this bot in Active Population</span>
+      </div>
+      <div v-else-if="mapHover" class="map-tooltip" :style="tooltipStyle">
+        <strong>{{ mapHover.zone.name }}</strong>
+        <span>{{ mapHover.zone.online }} bot{{ mapHover.zone.online === 1 ? '' : 's' }} in this zone</span>
+        <span class="tip-hint">click to open this zone's map</span>
       </div>
     </div>
     <div class="map-legend">
       <span v-for="realm in realms" :key="realm.id"><i :style="{ background: realm.color }"></i>{{ realm.name }}</span>
-      <span class="legend-quiet">{{ paintedMaps ? 'painted zone maps from the new client' : 'zone outlines from the world database' }}</span>
+      <span v-if="mapData.unplaced > 0" class="legend-zone">
+        {{ mapData.unplaced }} bot{{ mapData.unplaced === 1 ? '' : 's' }} in this realm's frontier zones, not on this
+        map: open their zone from the list
+      </span>
+      <span class="legend-quiet">{{ paintedMaps ? 'painted zone maps from the new client, placed as the client places them' : 'zone outlines only: the client maps are not installed' }}</span>
     </div>
   </main>
 

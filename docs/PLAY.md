@@ -73,7 +73,7 @@ The world fills with gamebots that level, group, craft, trade and fight on their
   build are topped up to the same 1 gold once, the next time you start the server; a bot that already has more
   coin keeps it.
 - **Start small** and add more as your PC allows. Every bot is simulated by the server on your PC.
-- The launcher's tabs show the active population, a live world map, the **Realm Exchange**, the **Bot Inspector**,
+- The launcher's tabs show the active population, a live world map of every painted zone and realm overview, the **Realm Exchange**, the **Bot Inspector**,
   **Server Stats**, groups, RvR, battlegrounds, realm events and realm records. **Bot Goals Setting** sets what the
   bots aim for.
 - **Server Stats** (launcher tab) shows the world's tallies: **mobs killed**, **deaths**, **money looted**,

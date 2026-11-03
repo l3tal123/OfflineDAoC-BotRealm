@@ -16,6 +16,10 @@
     { id: 3, name: "Hibernia", color: "#4caf7d" },
   ];
   const REALM_COLORS = { 1: "#d0574f", 2: "#5b8dd6", 3: "#4caf7d", 0: "#93a7bb" };
+
+  function realmName(realm) {
+    return ({ 1: "Albion", 2: "Midgard", 3: "Hibernia" })[realm] || "Battleground";
+  }
   const POLL_POPULATION_MS = 5000;
   const POLL_MAP_MS = 2000;
 
@@ -84,9 +88,7 @@
       const databaseError = ref("");
       const counts = reactive({ total: 0, online: 0, realms: [] });
       const bots = ref([]);
-      const map = reactive({ regions: [], bots: [] });
       const paintedMaps = ref(false);
-      const zoneImages = new Map();
       const now = ref(Date.now());
 
       // ------------------------------------------------------------------ launcher state
@@ -118,17 +120,40 @@
       const pageSize = PAGE_SIZE;
 
       // ------------------------------------------------------------------ map state
-      const mapRegionId = ref(0);
+      // The map is two kinds of view: a realm overview (the client's own realm map, composed from the painted
+      // zone maps at the squares it places them on) or one zone's own painted map. The API answers for the view
+      // the page asks for and includes only the bots that view can show.
       const mapStage = ref(null);
       const mapCanvas = ref(null);
-      const zoomPercent = ref(100);
-      const hover = ref(null);
-      const view = { scale: 1, offsetX: 0, offsetY: 0, fitScale: 1, fitOffsetX: 0, fitOffsetY: 0 };
+      const mapData = reactive({
+        loaded: false,
+        view: "",
+        kind: "",
+        overviews: [],
+        zones: [],
+        bots: [],
+        zone: null,
+        unplaced: 0,
+      });
+      const mapZoom = ref(100);
+      const mapHover = ref(null);
+      const mapCursor = ref("grab");
+      const mapFocusBotId = ref(0);
+      const mapLayer = ref("realm");
+      const mapTransform = { scale: 1, offsetX: 0, offsetY: 0, fitScale: 1 };
+      const zoneImages = new Map();
+      const regionImages = new Map();
+      let mapContentWidth = 256;
+      let mapContentHeight = 256;
       let cssWidth = 0;
       let cssHeight = 0;
       let dpr = 1;
       let drag = null;
-      let fittedFor = 0;
+      let fittedView = "";
+      let mapDots = [];
+      let mapRequest = 0;
+      let mapFocusPending = false;
+      let mapFollowBotId = 0;
 
       // ------------------------------------------------------------------ options state
       const options = reactive({
@@ -955,11 +980,56 @@
       }
 
       // ------------------------------------------------------------------ derived map data
-      const currentRegion = computed(() => map.regions.find((region) => region.id === mapRegionId.value) || null);
+      const mapBots = computed(() => mapData.bots);
 
-      const mapBots = computed(() => map.bots.filter((bot) => bot.regionId === mapRegionId.value));
+      const mapCurrentOverview = computed(
+        () => mapData.overviews.find((overview) => overview.id === mapData.view) || null);
 
-      const mapRegionsOnline = computed(() => map.regions.filter((region) => region.online > 0).length);
+      const mapZonesWithBots = computed(() => mapData.zones
+        .filter((zone) => zone.online > 0)
+        .sort((a, b) => b.online - a.online || compareText(a.name, b.name)));
+
+      /** The zone filter's list, grouped by realm; only zones that have bots in them appear. */
+      const realmZoneGroups = computed(() => {
+        const groups = [];
+        for (const realm of [1, 2, 3, 0]) {
+          const zones = mapZonesWithBots.value.filter((zone) => zone.realm === realm);
+          if (zones.length === 0) continue;
+          groups.push({ realm, label: `${zones.length} ${realmName(realm)} zone${zones.length === 1 ? "" : "s"} with bots`, zones });
+        }
+        return groups;
+      });
+
+      /** The zone currently shown, when it has no bots and so is not in the filter's own list. */
+      const currentZoneUnlisted = computed(() => mapData.kind === "zone" && mapData.zone &&
+        !mapZonesWithBots.value.some((zone) => zone.id === mapData.zone.id));
+
+      const mapZonesOnline = computed(() => mapZonesWithBots.value.length);
+
+      const mapOverview = computed(() => mapCurrentOverview.value || null);
+
+      const mapSummary = computed(() => {
+        const online = mapData.bots.length;
+        const bots = `${online} bot${online === 1 ? "" : "s"}`;
+        if (mapData.kind === "zone" && mapData.zone) {
+          return `${mapData.zone.name} · ${mapData.zone.kind} · ${mapData.zone.realmName} · ${bots}`;
+        }
+        const overview = mapCurrentOverview.value;
+        return overview ? `${bots} on ${overview.zones.length} zones` : `${bots} on the map`;
+      });
+
+      const tooltipStyle = computed(() => {
+        const hover = mapHover.value;
+        if (!hover) return {};
+        const width = hover.kind === "bot" ? 300 : 240;
+        const height = hover.kind === "bot" ? 130 : 84;
+        const maxLeft = Math.max(8, (cssWidth || 480) - width - 10);
+        const maxTop = Math.max(8, (cssHeight || 320) - height - 10);
+        return {
+          left: `${Math.min(Math.max(8, hover.x + 16), maxLeft)}px`,
+          top: `${Math.min(Math.max(8, hover.y + 16), maxTop)}px`,
+        };
+      });
 
       // ------------------------------------------------------------------ polling
       function applyShared(data) {
@@ -995,26 +1065,54 @@
       }
 
       async function refreshMap() {
+        const request = ++mapRequest;
         try {
-          const data = await getJson("api/world");
+          const url = mapData.view ? `api/world?view=${encodeURIComponent(mapData.view)}` : "api/world";
+          const data = await getJson(url);
+          // A slower answer for a view the user has already left must not overwrite the current one.
+          if (request !== mapRequest) return;
           applyShared(data);
-          map.regions = data.regions || [];
-          map.bots = data.bots || [];
-          if (!mapRegionId.value || !map.regions.some((region) => region.id === mapRegionId.value)) {
-            const suggested = map.regions.find((region) => region.id === data.suggestedRegionId);
-            const busiest = [...map.regions].sort((a, b) => b.online - a.online)[0];
-            mapRegionId.value = suggested ? suggested.id : busiest ? busiest.id : 0;
-            fittedFor = 0;
+          mapData.overviews = data.overviews || [];
+          mapData.zones = data.zones || [];
+          mapData.bots = data.bots || [];
+          mapData.zone = data.zone || null;
+          mapData.kind = data.viewKind || "";
+          mapData.unplaced = data.unplaced || 0;
+          if (mapHover.value && mapHover.value.kind === "bot") mapHover.value = null;
+          const view = data.view || "";
+          if (view !== mapData.view) {
+            mapData.view = view;
+            fittedView = "";
           }
-          if (fittedFor !== mapRegionId.value) {
+          mapData.loaded = true;
+          if (fittedView !== mapData.view) {
             await nextTick();
             resetView();
           } else {
             draw();
           }
+          focusOnSelectedBot();
         } catch (exception) {
+          if (request !== mapRequest) return;
           error.value = `Could not read the map data: ${exception.message}`;
         }
+      }
+
+      /** "Show on map": centre the selected bot and keep the camera on it while it is in view. */
+      function focusOnSelectedBot() {
+        if (!mapFollowBotId) return;
+        const bot = mapData.bots.find((candidate) => candidate.id === mapFocusBotId.value);
+        if (!bot) return;
+        const point = botContentPoint(bot);
+        if (!point) return;
+        if (mapFocusPending) {
+          mapFocusPending = false;
+          mapTransform.scale = mapTransform.fitScale * 2.2;
+          mapZoom.value = 220;
+        }
+        mapTransform.offsetX = cssWidth / 2 - point.x * mapTransform.scale;
+        mapTransform.offsetY = cssHeight / 2 - point.y * mapTransform.scale;
+        draw();
       }
 
       function refreshNow() {
@@ -1022,7 +1120,41 @@
         if (tab.value === "map") refreshMap();
       }
 
-      // ------------------------------------------------------------------ canvas: geometry
+      // ------------------------------------------------------------------ map: views
+      function selectMapView(next) {
+        if (!next || next === mapData.view) {
+          draw();
+          return;
+        }
+        mapData.view = next;
+        mapData.bots = [];
+        mapData.zone = null;
+        mapData.kind = next.startsWith("zone:") ? "zone" : "overview";
+        mapData.unplaced = 0;
+        mapHover.value = null;
+        mapFocusBotId.value = 0;
+        mapFocusPending = false;
+        mapFollowBotId = 0;
+        fittedView = "";
+        nextTick(() => {
+          updateSize();
+          resetView();
+          refreshMap();
+        });
+      }
+
+      function openZone(zoneId) {
+        // An install without the painted maps has no zone views: the outline maps are the whole map.
+        if (!mapData.zones.some((zone) => zone.id === zoneId)) return;
+        selectMapView(`zone:${zoneId}`);
+      }
+
+      function mapOverviewName(viewId) {
+        const overview = mapData.overviews.find((candidate) => candidate.id === viewId);
+        return overview ? overview.name : "the overview";
+      }
+
+      // ------------------------------------------------------------------ map: geometry
       function updateSize() {
         const canvas = mapCanvas.value;
         const stage = mapStage.value;
@@ -1033,50 +1165,84 @@
         dpr = window.devicePixelRatio || 1;
         canvas.width = Math.floor(cssWidth * dpr);
         canvas.height = Math.floor(cssHeight * dpr);
-        if (fittedFor === 0) resetView();
+        // A resized window re-fits a view that is still at 100%; a zoomed view keeps the user's zoom.
+        if (!fittedView || mapZoom.value === 100) resetView();
         else draw();
       }
 
-      function worldToScreen(x, y, region) {
+      /** Content units are the overview's own layout (the realm map's pixels) or a zone map's 256 pixels. */
+      function updateContentSize() {
+        if (mapData.kind === "zone") {
+          mapContentWidth = 256;
+          mapContentHeight = 256;
+          return;
+        }
+        const overview = mapCurrentOverview.value;
+        if (overview && overview.hasImage && mapLayer.value !== "zones") {
+          mapContentWidth = 256;
+          mapContentHeight = 256;
+          return;
+        }
+        mapContentWidth = Math.max(1, overview ? overview.width : 256);
+        mapContentHeight = Math.max(1, overview ? overview.height : 256);
+      }
+
+      function contentToScreen(x, y) {
         return {
-          x: (x - region.minX) * view.scale + view.offsetX,
-          y: (y - region.minY) * view.scale + view.offsetY,
+          x: x * mapTransform.scale + mapTransform.offsetX,
+          y: y * mapTransform.scale + mapTransform.offsetY,
+        };
+      }
+
+      /** On the painted realm layer the content is the whole 256-unit realm map; the zone squares sit inside it. */
+      function mapOffset() {
+        const overview = mapCurrentOverview.value;
+        if (overview && overview.hasImage && mapLayer.value !== "zones")
+          return { x: overview.imageLeft, y: overview.imageTop };
+        return { x: 0, y: 0 };
+      }
+
+      function screenToContent(x, y) {
+        return {
+          x: (x - mapTransform.offsetX) / mapTransform.scale,
+          y: (y - mapTransform.offsetY) / mapTransform.scale,
         };
       }
 
       function resetView() {
-        const region = currentRegion.value;
-        if (!region || !cssWidth || !cssHeight) {
+        if (!cssWidth || !cssHeight || !mapData.loaded) {
           draw();
           return;
         }
-        const padding = 28;
-        const width = Math.max(1, region.width);
-        const height = Math.max(1, region.height);
-        const scale = Math.min((cssWidth - padding * 2) / width, (cssHeight - padding * 2) / height);
-        view.fitScale = scale > 0 ? scale : 1;
-        view.scale = view.fitScale;
-        view.fitOffsetX = (cssWidth - width * scale) / 2;
-        view.fitOffsetY = (cssHeight - height * scale) / 2;
-        view.offsetX = view.fitOffsetX;
-        view.offsetY = view.fitOffsetY;
-        fittedFor = region.id;
-        zoomPercent.value = 100;
+        updateContentSize();
+        const padding = 26;
+        const scale = Math.min((cssWidth - padding * 2) / mapContentWidth,
+          (cssHeight - padding * 2) / mapContentHeight);
+        mapTransform.fitScale = scale > 0 ? scale : 1;
+        mapTransform.scale = mapTransform.fitScale;
+        mapTransform.offsetX = (cssWidth - mapContentWidth * mapTransform.scale) / 2;
+        mapTransform.offsetY = (cssHeight - mapContentHeight * mapTransform.scale) / 2;
+        fittedView = mapData.view;
+        mapZoom.value = 100;
         draw();
       }
 
+      /** A zone map can be read at 900%; a realm overview is a picture of a whole realm and stops at 500%. */
+      function maxZoomFactor() {
+        return mapData.kind === "zone" ? 9 : 5;
+      }
+
       function zoomAt(factor, anchorX, anchorY) {
-        const region = currentRegion.value;
-        if (!region) return;
-        const minScale = view.fitScale * 0.5;
-        const maxScale = view.fitScale * 20;
-        const next = Math.min(Math.max(view.scale * factor, minScale), maxScale);
-        const applied = next / view.scale;
+        if (!mapData.loaded) return;
+        const minScale = mapTransform.fitScale * 0.4;
+        const maxScale = mapTransform.fitScale * maxZoomFactor();
+        const next = Math.min(Math.max(mapTransform.scale * factor, minScale), maxScale);
+        const applied = next / mapTransform.scale;
         if (!Number.isFinite(applied) || applied === 1) return;
-        view.offsetX = anchorX - (anchorX - view.offsetX) * applied;
-        view.offsetY = anchorY - (anchorY - view.offsetY) * applied;
-        view.scale = next;
-        zoomPercent.value = Math.round((view.scale / view.fitScale) * 100);
+        mapTransform.offsetX = anchorX - (anchorX - mapTransform.offsetX) * applied;
+        mapTransform.offsetY = anchorY - (anchorY - mapTransform.offsetY) * applied;
+        mapTransform.scale = next;
+        mapZoom.value = Math.round((mapTransform.scale / mapTransform.fitScale) * 100);
         draw();
       }
 
@@ -1090,32 +1256,63 @@
         return { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
       }
 
+      function zoomFactor() {
+        return mapTransform.scale / Math.max(0.0001, mapTransform.fitScale);
+      }
+
+      /** Where a bot stands, in content units: inside its zone's square of the overview, or inside a zone map. */
+      function botContentPoint(bot) {
+        if (mapData.kind === "zone") {
+          return { x: bot.mx * mapContentWidth, y: bot.my * mapContentHeight };
+        }
+        const overview = mapCurrentOverview.value;
+        if (!overview) return null;
+        const tile = overview.zones.find((zone) => zone.id === bot.zoneId);
+        if (!tile) return null;
+        const offset = mapOffset();
+        return { x: offset.x + tile.left + bot.mx * tile.width, y: offset.y + tile.top + bot.my * tile.height };
+      }
+
+      function botScreenPoint(bot) {
+        const content = botContentPoint(bot);
+        return content ? contentToScreen(content.x, content.y) : null;
+      }
+
       function botAt(point, tolerance) {
-        const region = currentRegion.value;
-        if (!region) return null;
         let best = null;
         let bestDistance = tolerance;
-        for (const bot of mapBots.value) {
-          const screen = worldToScreen(bot.x, bot.y, region);
-          const distance = Math.hypot(screen.x - point.x, screen.y - point.y);
+        for (const dot of mapDots) {
+          const distance = Math.hypot(dot.x - point.x, dot.y - point.y);
           if (distance <= bestDistance) {
             bestDistance = distance;
-            best = bot;
+            best = dot.bot;
           }
         }
         return best;
       }
 
-      // ------------------------------------------------------------------ canvas: drawing
+      function zoneAt(point) {
+        if (mapData.kind === "zone") return null;
+        const overview = mapCurrentOverview.value;
+        if (!overview) return null;
+        const content = screenToContent(point.x, point.y);
+        const offset = mapOffset();
+        content.x -= offset.x;
+        content.y -= offset.y;
+        for (const tile of overview.zones) {
+          if (content.x >= tile.left && content.x <= tile.left + tile.width &&
+              content.y >= tile.top && content.y <= tile.top + tile.height) return tile;
+        }
+        return null;
+      }
+
+      // ------------------------------------------------------------------ map: drawing
       function draw() {
         const canvas = mapCanvas.value;
         if (!canvas) return;
         const context = canvas.getContext("2d");
         context.setTransform(dpr, 0, 0, dpr, 0, 0);
         context.clearRect(0, 0, cssWidth, cssHeight);
-
-        const region = currentRegion.value;
-        if (!region) return;
 
         // Sea glow behind the land.
         const glow = context.createRadialGradient(cssWidth / 2, cssHeight / 2, 40, cssWidth / 2, cssHeight / 2,
@@ -1125,66 +1322,212 @@
         context.fillStyle = glow;
         context.fillRect(0, 0, cssWidth, cssHeight);
 
+        if (!mapData.loaded) return;
+
         context.save();
         context.beginPath();
         context.rect(0, 0, cssWidth, cssHeight);
         context.clip();
+        mapDots = [];
+        if (mapData.kind === "zone") drawZoneMap(context);
+        else drawOverviewMap(context);
+        drawBotDots(context);
+        context.restore();
+      }
 
-        // Zones: the new client's painted map when the install has one, the database's rectangle otherwise.
-        context.font = '11px "Segoe UI", system-ui, sans-serif';
-        for (const zone of region.zones) {
-          const corner = worldToScreen(zone.x, zone.y, region);
-          const width = zone.width * view.scale;
-          const height = zone.height * view.scale;
-          if (corner.x + width < -20 || corner.y + height < -20 || corner.x > cssWidth + 20 || corner.y > cssHeight + 20) continue;
-          const image = zoneImage(zone.id, zone.hasMap);
+      function drawMapMessage(context, text) {
+        context.fillStyle = "rgba(224, 214, 194, .72)";
+        context.font = '14px "Segoe UI", system-ui, sans-serif';
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(text, cssWidth / 2, cssHeight / 2);
+        context.textAlign = "left";
+        context.textBaseline = "top";
+      }
+
+      function drawOverviewMap(context) {
+        const overview = mapCurrentOverview.value;
+        if (!overview) {
+          drawMapMessage(context, "No realm overview yet.");
+          return;
+        }
+
+        const corner = contentToScreen(0, 0);
+        const width = mapContentWidth * mapTransform.scale;
+        const height = mapContentHeight * mapTransform.scale;
+        const hoveredZone = mapHover.value && mapHover.value.kind === "zone" ? mapHover.value.zone.id : 0;
+        // The client's own painted realm map is the overview: it is the picture that shows the zones connected.
+        // The zone pictures composed at the client's own squares are the second layer, for reading the terrain.
+        const realmLayer = overview.hasImage && mapLayer.value !== "zones";
+        if (realmLayer) {
+          const image = regionImage(overview);
           if (image) {
-            context.drawImage(image, corner.x, corner.y, width, height);
-            // A light veil keeps the map in the night palette and the dots readable on bright terrain.
-            context.fillStyle = "rgba(8, 12, 18, .22)";
+            const natural = image.naturalWidth || 256;
+            context.drawImage(image, 0, 0, natural, natural,
+              corner.x, corner.y, width, height);
+            context.fillStyle = "rgba(8, 12, 18, .12)";
             context.fillRect(corner.x, corner.y, width, height);
-            context.strokeStyle = "rgba(201, 168, 106, .18)";
-            context.lineWidth = 1;
-            context.strokeRect(corner.x + 0.5, corner.y + 0.5, Math.max(0, width - 1), Math.max(0, height - 1));
-            continue;
-          }
-          context.fillStyle = zoneFill(zone.realm);
-          context.fillRect(corner.x, corner.y, width, height);
-          context.strokeStyle = "rgba(201, 168, 106, .28)";
-          context.lineWidth = 1;
-          context.strokeRect(corner.x + 0.5, corner.y + 0.5, Math.max(0, width - 1), Math.max(0, height - 1));
-          if (width > 90 && height > 40) {
-            context.fillStyle = "rgba(147, 167, 187, .75)";
+          } else {
+            context.fillStyle = "rgba(12, 20, 30, .92)";
+            context.fillRect(corner.x, corner.y, width, height);
+            context.fillStyle = "rgba(224, 214, 194, .7)";
+            context.font = '14px "Segoe UI", system-ui, sans-serif';
             context.textAlign = "center";
             context.textBaseline = "middle";
-            context.fillText(zone.name, corner.x + width / 2, corner.y + height / 2, width - 12);
+            context.fillText("Loading the realm map…", corner.x + width / 2, corner.y + height / 2);
+            context.textAlign = "left";
+            context.textBaseline = "top";
           }
         }
 
-        // Bots on top.
-        for (const bot of mapBots.value) {
-          const point = worldToScreen(bot.x, bot.y, region);
-          if (point.x < -10 || point.y < -10 || point.x > cssWidth + 10 || point.y > cssHeight + 10) continue;
+        context.font = '11px "Segoe UI", system-ui, sans-serif';
+        context.textAlign = "left";
+        context.textBaseline = "top";
+        const offset = mapOffset();
+        for (const tile of overview.zones) {
+          const at = contentToScreen(offset.x + tile.left, offset.y + tile.top);
+          const tileWidth = tile.width * mapTransform.scale;
+          const tileHeight = tile.height * mapTransform.scale;
+          if (at.x + tileWidth < -24 || at.y + tileHeight < -24 || at.x > cssWidth + 24 || at.y > cssHeight + 24)
+            continue;
+
+          const hovered = hoveredZone === tile.id;
+          if (!realmLayer) {
+            const image = tile.hasMap ? zoneImage(tile.id, false) : null;
+            if (image) {
+              context.drawImage(image, at.x, at.y, tileWidth, tileHeight);
+              // A light veil keeps the map in the night palette and the dots readable on bright terrain.
+              context.fillStyle = "rgba(8, 12, 18, .2)";
+              context.fillRect(at.x, at.y, tileWidth, tileHeight);
+            } else {
+              context.fillStyle = zoneFill(tile.realm);
+              context.fillRect(at.x, at.y, tileWidth, tileHeight);
+            }
+          }
+
+          if (hovered) {
+            context.fillStyle = realmLayer ? "rgba(255, 236, 190, .18)" : "rgba(255, 236, 190, .13)";
+            context.fillRect(at.x, at.y, tileWidth, tileHeight);
+          }
+          // The zone squares are clickable in both layers; on the painted realm map they stay faint until hovered.
+          context.strokeStyle = hovered ? "rgba(236, 202, 133, .95)"
+            : realmLayer ? "rgba(201, 168, 106, .07)" : "rgba(201, 168, 106, .2)";
+          context.lineWidth = hovered ? 2 : 1;
+          context.strokeRect(at.x + 0.5, at.y + 0.5, Math.max(0, tileWidth - 1), Math.max(0, tileHeight - 1));
+
+          if (!realmLayer && tileWidth >= 96 && tileHeight >= 52) {
+            drawZoneChip(context, tile, at, tileWidth, hovered);
+          } else if (!realmLayer && !tile.hasMap && tileWidth >= 44 && tileHeight >= 26) {
+            context.fillStyle = "rgba(168, 187, 206, .8)";
+            context.fillText(tile.name, at.x + 4, at.y + 4, tileWidth - 8);
+          } else if (realmLayer && hovered) {
+            drawZoneChip(context, tile, at, tileWidth, true);
+          }
+        }
+      }
+      /** The zone's name chip: the composed tiles are painted maps, so the name has to be added on top. */
+      function drawZoneChip(context, tile, at, tileWidth, hovered) {
+        const name = tile.name;
+        const width = Math.min(tileWidth - 8, context.measureText(name).width + 12);
+        context.fillStyle = hovered ? "rgba(9, 14, 21, .92)" : "rgba(9, 14, 21, .68)";
+        context.fillRect(at.x + 4, at.y + 4, width, 17);
+        context.fillStyle = hovered ? "#f0dca6" : "rgba(230, 221, 201, .92)";
+        context.fillText(name, at.x + 10, at.y + 7, width - 12);
+        if (tile.online > 0) {
+          const badge = `${tile.online}`;
+          const badgeWidth = context.measureText(badge).width + 10;
+          context.fillStyle = "rgba(9, 14, 21, .85)";
+          context.fillRect(at.x + tileWidth - badgeWidth - 4, at.y + 4, badgeWidth, 17);
+          context.fillStyle = "#cfe2f2";
+          context.fillText(badge, at.x + tileWidth - badgeWidth + 1, at.y + 7);
+        }
+      }
+
+      function drawZoneMap(context) {
+        const zone = mapData.zone;
+        if (!zone) {
+          drawMapMessage(context, "No zone chosen.");
+          return;
+        }
+
+        const at = contentToScreen(0, 0);
+        const width = mapContentWidth * mapTransform.scale;
+        const height = mapContentHeight * mapTransform.scale;
+        const image = zoneImage(zone.id, true);
+        if (image) {
+          context.drawImage(image, at.x, at.y, width, height);
+        } else {
+          context.fillStyle = "rgba(12, 20, 30, .92)";
+          context.fillRect(at.x, at.y, width, height);
+          drawMapMessage(context, "Loading the painted zone map…");
+        }
+        context.strokeStyle = "rgba(201, 168, 106, .22)";
+        context.lineWidth = 1;
+        context.strokeRect(at.x + 0.5, at.y + 0.5, width, height);
+      }
+
+      function drawBotDots(context) {
+        const zoom = zoomFactor();
+        const hoveredBot = mapHover.value && mapHover.value.kind === "bot" ? mapHover.value.bot.id : 0;
+        for (const bot of mapData.bots) {
+          const point = botScreenPoint(bot);
+          if (!point) continue;
+          if (point.x < -14 || point.y < -14 || point.x > cssWidth + 14 || point.y > cssHeight + 14) continue;
+          const hovered = hoveredBot === bot.id;
+          const focused = mapFocusBotId.value === bot.id;
           const color = REALM_COLORS[bot.realm] || REALM_COLORS[0];
-          const highlighted = hover.value && hover.value.bot.id === bot.id;
-          const radius = highlighted ? 5 : 3.2;
+          const radius = Math.min(hovered ? 7.5 : 5.5,
+            Math.max(2.8, (hovered ? 4.4 : 3.1) * Math.sqrt(Math.max(1, zoom))));
+
+          context.beginPath();
+          context.arc(point.x, point.y, radius + 1.2, 0, Math.PI * 2);
+          context.fillStyle = "rgba(6, 9, 13, .78)";
+          context.fill();
+
           context.beginPath();
           context.arc(point.x, point.y, radius, 0, Math.PI * 2);
-          context.fillStyle = color;
-          context.shadowColor = color;
-          context.shadowBlur = highlighted ? 16 : 7;
-          context.fill();
-          context.shadowBlur = 0;
-          if (highlighted) {
-            context.beginPath();
-            context.arc(point.x, point.y, radius + 3.5, 0, Math.PI * 2);
-            context.strokeStyle = "rgba(255, 255, 255, .85)";
-            context.lineWidth = 1.2;
+          if (bot.alive) {
+            context.fillStyle = color;
+            context.shadowColor = color;
+            context.shadowBlur = hovered || focused ? 14 : 6;
+            context.fill();
+            context.shadowBlur = 0;
+          } else {
+            context.strokeStyle = color;
+            context.lineWidth = 1.5;
             context.stroke();
           }
-        }
 
-        context.restore();
+          if (hovered || focused) {
+            context.beginPath();
+            context.arc(point.x, point.y, radius + 2.8, 0, Math.PI * 2);
+            context.strokeStyle = focused ? "rgba(236, 202, 133, .95)" : "rgba(255, 255, 255, .85)";
+            context.lineWidth = 1.3;
+            context.stroke();
+            if (focused) drawBotNameTag(context, bot, point, radius);
+          }
+
+          mapDots.push({ bot, x: point.x, y: point.y });
+        }
+      }
+
+      /** The followed bot's name chip, so "Show on map" cannot be lost among the other dots. */
+      function drawBotNameTag(context, bot, point, radius) {
+        const name = bot.name;
+        if (!name) return;
+        context.font = '11px "Segoe UI", system-ui, sans-serif';
+        const width = context.measureText(name).width + 12;
+        const left = Math.max(2, Math.min(cssWidth - width - 2, point.x - width / 2));
+        const top = Math.min(cssHeight - 20, point.y + radius + 6);
+        context.fillStyle = "rgba(9, 14, 21, .92)";
+        context.fillRect(left, top, width, 17);
+        context.strokeStyle = "rgba(201, 168, 106, .8)";
+        context.lineWidth = 1;
+        context.strokeRect(left + 0.5, top + 0.5, width, 17);
+        context.fillStyle = "#f0dca6";
+        context.textAlign = "left";
+        context.textBaseline = "top";
+        context.fillText(name, left + 6, top + 3);
       }
 
       function zoneFill(realm) {
@@ -1197,16 +1540,16 @@
       }
 
       /**
-       * The painted zone map from the install, loaded once per zone. A missing image (many dungeons and battleground
-       * zones have none) falls back to the plain rectangle and is never asked for again.
+       * The painted map from the install, loaded once per zone and size. The overview tiles use the small 256px
+       * pictures; a zone's own view asks for the 4x one. A missing image is never asked for again.
        */
-      function zoneImage(zoneId, hasMap) {
-        if (!hasMap) return null;
-        let entry = zoneImages.get(zoneId);
+      function zoneImage(zoneId, full) {
+        const key = `${zoneId}:${full ? 1 : 0}`;
+        let entry = zoneImages.get(key);
         if (!entry) {
           const img = new Image();
           entry = { img, state: "loading" };
-          zoneImages.set(zoneId, entry);
+          zoneImages.set(key, entry);
           img.onload = () => {
             entry.state = "ready";
             if (tab.value === "map") draw();
@@ -1214,77 +1557,151 @@
           img.onerror = () => {
             entry.state = "missing";
           };
-          img.src = `zone-map/${zoneId}`;
+          img.src = full ? `zone-map/${zoneId}?full=1` : `zone-map/${zoneId}`;
         }
         return entry.state === "ready" ? entry.img : null;
       }
 
-      // ------------------------------------------------------------------ canvas: input
-      function onPointerMove(event) {
+      /** The painted realm map for an overview, loaded once per region. */
+      function regionImage(overview) {
+        const id = overview.regionId;
+        let entry = regionImages.get(id);
+        if (!entry) {
+          const img = new Image();
+          entry = { img, state: "loading" };
+          regionImages.set(id, entry);
+          img.onload = () => {
+            entry.state = "ready";
+            if (tab.value === "map") draw();
+          };
+          img.onerror = () => {
+            entry.state = "missing";
+          };
+          img.src = `region-map/${id}`;
+        }
+        return entry.state === "ready" ? entry.img : null;
+      }
+
+      watch(mapLayer, () => {
+        fittedView = "";
+        nextTick(() => {
+          updateSize();
+          resetView();
+        });
+      });
+
+      // ------------------------------------------------------------------ map: input
+      function botHitTolerance() {
+        return Math.max(11, 6 * Math.sqrt(Math.max(1, zoomFactor())));
+      }
+
+      function onMapPointerMove(event) {
+        if (!mapData.loaded) return;
         const point = canvasPoint(event);
         if (drag) {
-          view.offsetX = drag.offsetX + (point.x - drag.x);
-          view.offsetY = drag.offsetY + (point.y - drag.y);
-          drag.moved = true;
+          const dx = point.x - drag.x;
+          const dy = point.y - drag.y;
+          if (!drag.moved && Math.hypot(dx, dy) > 3) drag.moved = true;
+          if (drag.moved) {
+            mapTransform.offsetX = drag.offsetX + dx;
+            mapTransform.offsetY = drag.offsetY + dy;
+            draw();
+          }
+          return;
+        }
+
+        const bot = botAt(point, botHitTolerance());
+        if (bot) {
+          mapHover.value = { kind: "bot", bot, x: point.x, y: point.y };
+          mapCursor.value = "pointer";
           draw();
           return;
         }
-        const bot = botAt(point, 11);
-        if (bot) {
-          hover.value = { bot, x: point.x, y: point.y };
-          if (mapCanvas.value) mapCanvas.value.style.cursor = "pointer";
-        } else {
-          hover.value = null;
-          if (mapCanvas.value) mapCanvas.value.style.cursor = "grab";
+
+        const zone = zoneAt(point);
+        if (zone) {
+          mapHover.value = { kind: "zone", zone, x: point.x, y: point.y };
+          mapCursor.value = "pointer";
+          draw();
+          return;
         }
-        draw();
+
+        if (mapHover.value) {
+          mapHover.value = null;
+          draw();
+        }
+        mapCursor.value = "grab";
       }
 
-      function onPointerDown(event) {
-        if (event.button !== 0) return;
+      function onMapPointerDown(event) {
+        if (event.button !== 0 || !mapData.loaded) return;
         const point = canvasPoint(event);
-        drag = { x: point.x, y: point.y, offsetX: view.offsetX, offsetY: view.offsetY, moved: false };
+        drag = { x: point.x, y: point.y, offsetX: mapTransform.offsetX, offsetY: mapTransform.offsetY, moved: false };
+        mapFollowBotId = 0;
+        mapCursor.value = "grabbing";
         mapCanvas.value.setPointerCapture?.(event.pointerId);
-        mapCanvas.value.classList.add("dragging");
       }
 
-      function onPointerUp(event) {
-        if (drag && !drag.moved) {
-          const bot = botAt(canvasPoint(event), 11);
-          if (bot) focusInRoster(bot);
-        }
-        drag = null;
-        if (mapCanvas.value) {
-          mapCanvas.value.classList.remove("dragging");
-          mapCanvas.value.releasePointerCapture?.(event.pointerId);
-        }
-      }
-
-      function onPointerLeave() {
-        hover.value = null;
-        draw();
-      }
-
-      function onWheel(event) {
-        event.preventDefault();
+      function onMapPointerUp(event) {
+        if (!drag) return;
         const point = canvasPoint(event);
-        zoomAt(Math.exp(-event.deltaY * 0.0015), point.x, point.y);
+        const moved = drag.moved;
+        drag = null;
+        mapCursor.value = "grab";
+        mapCanvas.value?.releasePointerCapture?.(event.pointerId);
+        if (moved) return;
+
+        const bot = botAt(point, botHitTolerance());
+        if (bot) {
+          focusInRoster(bot);
+          return;
+        }
+
+        const zone = zoneAt(point);
+        if (zone) openZone(zone.id);
       }
 
-      // ------------------------------------------------------------------ navigation
+      function onMapPointerLeave() {
+        if (drag) return;
+        if (mapHover.value) {
+          mapHover.value = null;
+          draw();
+        }
+        mapCursor.value = "grab";
+      }
+
+      function onMapWheel(event) {
+        if (!mapData.loaded) return;
+        event.preventDefault();
+        mapFollowBotId = 0;
+        const point = canvasPoint(event);
+        zoomAt(Math.exp(-event.deltaY * 0.0013), point.x, point.y);
+      }
+
+      // ------------------------------------------------------------------ map: navigation
       function openMap() {
         tab.value = "map";
         nextTick(() => {
           updateSize();
-          if (!fittedFor) resetView();
+          if (fittedView !== mapData.view) resetView();
           else draw();
           refreshMap();
         });
       }
 
       function showOnMap(bot) {
-        mapRegionId.value = bot.regionId;
-        fittedFor = 0;
+        mapFocusBotId.value = bot.id;
+        mapFollowBotId = bot.id;
+        mapFocusPending = true;
+        // The overview that places the bot's zone; a capital or a dungeon has no overview, so its own map.
+        const next = bot.mapView || (bot.zoneId > 0 ? `zone:${bot.zoneId}` : "");
+        if (next && next !== mapData.view) {
+          mapData.view = next;
+          mapData.kind = next.startsWith("zone:") ? "zone" : "overview";
+          mapData.zone = null;
+          mapData.bots = [];
+          fittedView = "";
+        }
         openMap();
       }
 
@@ -1375,7 +1792,7 @@
         }, POLL_MAP_MS);
         clockTimer = window.setInterval(() => {
           now.value = Date.now();
-          if (hover.value) draw();
+          if (mapHover.value) draw();
         }, 1000);
         window.setInterval(() => {
           if (document.hidden) return;
@@ -1386,9 +1803,6 @@
           if (!document.hidden && tab.value === "stats") loadStats();
         }, 15000);
         document.addEventListener("keydown", keydown);
-        if (mapCanvas.value) {
-          mapCanvas.value.addEventListener("wheel", onWheel, { passive: false });
-        }
         if (mapStage.value && "ResizeObserver" in window) {
           observer = new ResizeObserver(() => updateSize());
           observer.observe(mapStage.value);
@@ -1436,9 +1850,10 @@
         pageBots, pageCount, pageWindow, goPage, filteredBots, selectedBot, selectedBotId,
         bots,
         // map
-        map, mapRegionId, mapStage, mapCanvas, zoomPercent, currentRegion, mapBots, mapRegionsOnline,
-        paintedMaps, hover, openMap, showOnMap, zoomBy, resetView,
-        onPointerMove, onPointerDown, onPointerUp, onPointerLeave,
+        mapData, mapStage, mapCanvas, mapZoom, mapHover, mapCursor, mapBots, mapCurrentOverview,
+        mapZonesWithBots, realmZoneGroups, currentZoneUnlisted, mapZonesOnline, mapSummary, tooltipStyle, mapLayer,
+        paintedMaps, openMap, showOnMap, selectMapView, openZone, mapOverviewName, zoomBy, resetView,
+        onMapPointerMove, onMapPointerDown, onMapPointerUp, onMapPointerLeave, onMapWheel,
       };
     },
   });

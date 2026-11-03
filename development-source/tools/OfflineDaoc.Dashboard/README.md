@@ -14,7 +14,8 @@ browser opens `http://127.0.0.1:10310/`:
 - **ENTER REALM** — starts the new Godot client logged in as the local account, as soon as port 10300 is ready.
 - **STOP SERVER** — asks the server to shut down and waits for it (the world saves first).
 - **Server tab** — live state, pid, memory, uptime, game-client detection and the server console log.
-- **Active Population / World Map** — the live roster and the live map that the previous dashboard had.
+- **Active Population / World Map** — the live roster, and the world map: a paintable, zoomable realm overview or any
+  zone's own map, with every online bot as a dot (see *The world map* below).
 
 Keep the console window open while you play: it is the launcher, and closing it stops the server. A second
 double-click does not start a second launcher; it brings the existing dashboard back up.
@@ -42,7 +43,8 @@ when the exe sits in `<playable>\runtime`.
 | `Program.cs` | Entry point: single instance, browser, lifecycle, clean shutdown. |
 | `LauncherHost.cs` | Server and client process control, content refresh, console buffer, status. |
 | `DashboardHost.cs` | The loopback HTTP host: static files, JSON data endpoints, launcher actions. |
-| `DashboardData.cs` | Roster + live overlay, counts, zone geometry, painted maps, region suggestion. |
+| `DashboardData.cs` | Roster + live overlay, counts, bot zone placement, and the world-map payload (`/api/world`). |
+| `MapCatalog.cs` | The client's painted map catalog (`godot/content/maps/maps.json`): painted zones and their squares on each realm map. |
 | `WorldReader.cs` | Read-only SQLite queries: bot roster and zones/regions. |
 | `LiveBots.cs` | The state-165 file-broker client for the live snapshot. |
 | `DashboardOptions.cs` | Command line and install/database/server/maps detection. |
@@ -78,6 +80,30 @@ Still to come (end of the migration):
 
 - Retire the WinForms project from the repository once parity is confirmed, and move the docs to the new launcher.
 - Keep and relic reset is deliberately absent: the current launcher no longer offers it to players either.
+
+## The world map
+
+The map is built from the new client's own painted maps, which every install already carries under
+`new-client/godot/content/maps` (`maps.json` lists the zones and where the client's realm maps place their squares):
+
+- **Realm overviews** (Albion, Avalon, Midgard, Aegir, Hibernia, Hy Brasil) draw the client's painted realm map and
+  put every online bot where it stands inside its zone's square. A second layer, *Zone maps*, draws the zone
+  pictures themselves composed at the same squares, so the terrain is readable too.
+- **Frontier overviews** (one per realm) cover the old frontiers, which the client's realm maps do not place: their
+  squares come from the world database.
+- **Zone maps** show one zone's painted map at full size, for every zone the client has a picture of: open world,
+  capitals and dungeons (a capital's picture covers only its playable square; bots outside it are not shown there).
+- The **filter** lists the realm and frontier overviews, and then only the zones that currently have bots in them,
+  with counts. Any zone on an overview can also be opened by clicking its square.
+- Hovering a bot shows its name, level, class, realm, zone, task and the "click to select" hint; hovering a zone
+  square shows its bot count and opens its map on click. Clicking a bot switches to Active Population with that bot
+  selected. `SHOW ON MAP` in the roster does the reverse: it opens the overview (or the capital/dungeon map) that
+  places the bot, zooms to it and follows it until the map is dragged or zoomed.
+- Wheel zooms around the cursor, dragging pans, **Reset view** fits the map again. The map polls only the view it
+  shows, so it stays small even with three thousand bots in the world.
+
+The painted maps are optional: without them the map falls back to zone outlines from the world database (the same
+six realm overviews, no zone pictures).
 
 ## Removing the launcher
 

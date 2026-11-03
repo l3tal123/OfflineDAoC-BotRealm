@@ -219,7 +219,7 @@ internal sealed class DashboardHost : IDisposable
                 {
                     "/api/overview" => _data.Overview(),
                     "/api/population" => _data.Population(),
-                    "/api/world" => _data.World(),
+                    "/api/world" => _data.Map(request.Query.GetValueOrDefault("view") ?? string.Empty),
                     "/api/health" => new { ok = true },
                     _ => null,
                 };
@@ -229,11 +229,30 @@ internal sealed class DashboardHost : IDisposable
                     return;
                 }
 
+                if (path.StartsWith("/region-map/", StringComparison.OrdinalIgnoreCase))
+                {
+                    // The new client's painted realm map, the picture the overview draws its zone squares on.
+                    byte[]? image = int.TryParse(path["/region-map/".Length..], out int regionId) && regionId > 0
+                        ? _data.RegionImage(regionId)
+                        : null;
+                    if (image == null)
+                    {
+                        await WriteResponseAsync(stream, 404, "text/plain; charset=utf-8",
+                            Encoding.UTF8.GetBytes("No painted realm map for that region"), head).ConfigureAwait(false);
+                        return;
+                    }
+
+                    await WriteResponseAsync(stream, 200, "image/png", image, head).ConfigureAwait(false);
+                    return;
+                }
+
                 if (path.StartsWith("/zone-map/", StringComparison.OrdinalIgnoreCase))
                 {
-                    // The new client's painted zone map for the world map tab, when the install carries them.
+                    // The new client's painted zone map for the world map tab, when the install carries them. The
+                    // overview tiles use the small picture; a zone's own view asks for the 4x one (?full=1).
+                    bool full = request.Query.GetValueOrDefault("full") is "1" or "true";
                     byte[]? image = int.TryParse(path["/zone-map/".Length..], out int zoneId) && zoneId > 0
-                        ? _data.ZoneImage(zoneId)
+                        ? _data.ZoneImage(zoneId, full)
                         : null;
                     if (image == null)
                     {
