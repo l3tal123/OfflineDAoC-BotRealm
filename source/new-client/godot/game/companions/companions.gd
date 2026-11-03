@@ -300,7 +300,7 @@ func _spawn(rec: Dictionary) -> void:
 	var p: Node3D = viewer.player
 	if gb == null or p == null:
 		if gb == null:
-			PlayerData.message.emit("(Companions need the .NET build of the game - start it from the Offline DAoC True 1.65 launcher.)", "error")
+			PlayerData.message.emit("(Companions need the .NET build of the game - start it from the BotRealm launcher.)", "error")
 		return
 	var id := int(info(rec).id)
 	if _foes.has(id):

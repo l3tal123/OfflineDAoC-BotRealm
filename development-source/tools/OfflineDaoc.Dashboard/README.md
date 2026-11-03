@@ -1,14 +1,14 @@
-# Offline DAoC BotRealm — launcher and live dashboard
+# BotRealm — launcher and live dashboard
 
 This folder is the launcher: a small .NET host plus a web UI that opens in your browser. It replaced the old WinForms
 launcher, which is no longer in the repository.
 
 ## Running it
 
-Double-click `runtime\OfflineDAoC.exe` in a playable folder (or use a shortcut). A console window appears and the
+Double-click `runtime\BotRealm.exe` in a playable folder (or use a shortcut). A console window appears and the
 browser opens `http://127.0.0.1:10310/`:
 
-- **START SERVER** — runs the True 1.65 pre-flight (mode check, content refresh with a database backup) and starts
+- **START SERVER** — runs the pre-flight (database check, content refresh from `runtime/botrealm` with a database backup) and starts
   `CoreServer.exe`, the same command the old launcher used.
 - **ENTER REALM** — starts the new Godot client logged in as the local account, as soon as port 10300 is ready.
 - **STOP SERVER** — asks the server to shut down and waits for it (the world saves first).
@@ -19,13 +19,13 @@ browser opens `http://127.0.0.1:10310/`:
 Keep the console window open while you play: it is the launcher, and closing it stops the server. A second
 double-click does not start a second launcher; it brings the existing dashboard back up.
 
-Options: `OfflineDAoC.exe --port 10310 --root <playable>\runtime --no-open`. `--root` is detected automatically
+Options: `BotRealm.exe --port 10310 --root <playable>\runtime --no-open`. `--root` is detected automatically
 when the exe sits in `<playable>\runtime`.
 
 ## What it is, technically
 
-- **The host** (this program, ~1,500 lines of C#): process control for the server and the game client, the True 1.65
-  mode marker and content refresh (the launcher's own `TrueMode` code, in `Launcher/`), the rolling server console
+- **The host** (this program, ~1,500 lines of C#): process control for the server and the game client, the world-mode
+  marker and content refresh (the launcher's own `TrueMode` code, in `Launcher/`), the rolling server console
   (`RollingServerLog`), the local login file, SQLite reads and writes, and the state-165 file broker that the server
   publishes its live snapshots to.
 - **The web UI** (`dashboard\wwwroot`): plain HTML/CSS/JS with Vue 3's browser build vendored, so there is no build
@@ -48,7 +48,7 @@ when the exe sits in `<playable>\runtime`.
 | `LiveBots.cs` | The state-165 file-broker client for the live snapshot. |
 | `DashboardOptions.cs` | Command line and install/database/server/maps detection. |
 | `wwwroot/` | The UI: `index.html`, `styles.css`, `app.js`, vendored Vue. |
-| `Launcher/` | The UI-free launcher logic that came from the old WinForms project: True 1.65 mode and content refresh, rolling console log, client launcher, XP rate, server-property writes, bot generator. |
+| `Launcher/` | The UI-free launcher logic that came from the old WinForms project: content refresh, rolling console log, client launcher, XP rate, server-property writes, bot generator. |
 | `../../server/GameServer/bots/autonomous/` | Two server files compiled in by path (`BotGoalSettings.cs`, `RealmEventRecordStore.cs`), so they cannot drift from the server. |
 
 ## Parity with the old launcher
@@ -107,6 +107,6 @@ six realm overviews, no zone pictures).
 
 ## Removing the launcher
 
-Restore the files backed up in `<playable>\deployment-backups\web-launcher-<timestamp>\` (the old `OfflineDAoC.*`
+Restore the files backed up in `<playable>\deployment-backups\web-launcher-<timestamp>\` (the old `BotRealm.*`
 files and the old `runtime\dashboard` folder) and delete `runtime\dashboard` to go back to whatever launcher that
 backup held. The old WinForms project is not in the repository any more, so there is nothing else to rebuild.

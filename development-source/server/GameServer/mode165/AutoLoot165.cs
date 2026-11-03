@@ -1,7 +1,7 @@
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode autoloot (owner 2026-11-01: "enable the autoloot feature for all the players and bots so the loot
+    /// BotRealm autoloot (owner 2026-11-01: "enable the autoloot feature for all the players and bots so the loot
     /// doesn't drop on the ground if the autoloot is enabled"). The inherited 1.65 loot rules left every coin and drop on
     /// the ground (AbstractServerRules.DropLoot) and made /autoloot a GM-only command. Now every player may turn it on
     /// with /autoloot on, every gamebot has it on by default, and a kill's reward is paid straight to its owner instead
@@ -14,7 +14,7 @@ namespace DOL.GS
     {
         /// <summary>
         /// Whether this kill-reward owner takes its coin and drops straight into its bags. False leaves the bag on the
-        /// ground for the owner to pick up by hand, as before. Only consulted in True 1.65 Mode; normal mode keeps the
+        /// ground for the owner to pick up by hand, as before. Only consulted in BotRealm; normal mode keeps the
         /// inherited unconditional autoloot.
         /// </summary>
         public static bool WantsLoot(IGameStaticItemOwner owner) => owner switch

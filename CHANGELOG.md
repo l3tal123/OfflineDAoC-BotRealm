@@ -2,10 +2,24 @@
 
 The newest version is first.
 
-Offline DAoC True 1.65 grew out of [Offline DAoC](https://github.com/shadowofze/OfflineDAoC) (0.3 to 0.37c, now on
+BotRealm grew out of [Offline DAoC](https://github.com/shadowofze/OfflineDAoC) (0.3 to 0.37c, now on
 hold). Its changelog has the history of everything this version inherits.
 
 ## Coming in 0.3
+
+### Branding: the project is now BotRealm
+
+- The game is called **BotRealm**. The "True 1.65" name is gone: the 1.65-era Classic and Shrouded Isles world is
+  the content base, and BotRealm adds its own bot systems, quality-of-life features and custom changes on top of it.
+- `BotRealm.exe` replaces `OfflineDAoC.exe`; the launcher console, the browser dashboard, the client's window title and
+  in-game messages, the docs and the release downloader all say BotRealm. `START BOTREALM.cmd` replaces the old start
+  script, and the downloader renames an existing install in place.
+- The world content folder moved from `runtime/true165` to `runtime/botrealm`; the launcher migrates an existing
+  install on its first start. Database tables, save files and internal identifiers keep their old `165` names, so
+  existing characters, bots, houses and settings keep working.
+- The server's name, Message of the Day and welcome message now say BotRealm.
+
+### Gameplay
 
 - Combat: a monster on its last sliver of health no longer falls over before the hit that kills it.
 - World: two Albion banners floating in the air over Camelot Hills are gone.

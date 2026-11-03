@@ -8,9 +8,9 @@ using DOL.GS.Quests;
 namespace DOL.GS
 {
     /// <summary>
-    /// The Horn Handler at each True 1.65 Mode traveler's inn (owner 2026-10-30, plan section 18): the Horn of Rallying.
+    /// The Horn Handler at each BotRealm traveler's inn (owner 2026-10-30, plan section 18): the Horn of Rallying.
     /// PvE realm events (the dragon, the epic dungeon, Summoner's Hall, Darkness Falls expeditions) never start on their
-    /// own in 1.65 Mode; a level-50 player who has turned in the horn's courier quest starts one here, in the horn
+    /// own; a level-50 player who has turned in the horn's courier quest starts one here, in the horn
     /// window (both clients, ops 20-23 of the hire window's packet), opened by right-clicking the horn. Relic raids and
     /// keep sieges are not on the horn: they keep happening by themselves and also start when a player attacks a keep.
     /// </summary>
@@ -219,8 +219,8 @@ namespace DOL.GS
 
 namespace DOL.GS.Commands
 {
-    /// <summary>The horn window's buttons (True 1.65 Mode): /horn list | sound &lt;index&gt; | close.</summary>
-    [CmdAttribute("&horn", ePrivLevel.Player, "True 1.65 Mode: the Horn of Rallying window", "/horn list|sound <index>|close")]
+    /// <summary>The horn window's buttons (BotRealm): /horn list | sound &lt;index&gt; | close.</summary>
+    [CmdAttribute("&horn", ePrivLevel.Player, "The Horn of Rallying window", "/horn list|sound <index>|close")]
     public sealed class HornCommandHandler : AbstractCommandHandler, ICommandHandler
     {
         public void OnCommand(GameClient client, string[] args)

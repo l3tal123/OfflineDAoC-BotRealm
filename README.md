@@ -1,5 +1,5 @@
 > **Disclaimer.** Dark Age of Camelot is the intellectual property of Electronic Arts and Broadsword
-> Online Games. Offline DAoC True 1.65 is not affiliated with, endorsed by, or connected to either company. The
+> Online Games. BotRealm is not affiliated with, endorsed by, or connected to either company. The
 > game client files, textures, models and other assets it uses belong to them, and this project is built on
 > top of that copyrighted work.
 >
@@ -20,11 +20,13 @@
 > **v0.2 is out**, with an in-place update for v0.1 players. Large parts of the game haven't been played through by a person.
 > Expect bugs, and keep a backup of your save. Bug reports are welcome in [Issues](https://github.com/shadowofze/OfflineDAoC-True165/issues).
 
-# Offline DAoC True 1.65: single-player Dark Age of Camelot as of patch 1.65
+# BotRealm: a single-player Dark Age of Camelot world built around autonomous bots
 
-Offline DAoC True 1.65 is a local, single-player Dark Age of Camelot that runs entirely on your own PC. It
-recreates the game as it was at **patch 1.65** (Classic and Shrouded Isles, November 2003), and fills the world
-with gamebots that level, group, trade, craft and fight on their own.
+BotRealm is a local, single-player Dark Age of Camelot that runs entirely on your own PC. Its content base is the
+Classic and Shrouded Isles game of the **1.65 era** (November 2003), and it fills the world with gamebots that
+level, group, trade, craft and fight on their own. On top of that base it adds the bot and companion systems, the
+Realm Exchange, and the owner's quality-of-life and custom changes; it is not a promise of a faithful 1.65
+reproduction.
 
 It grew out of [Offline DAoC](https://github.com/shadowofze/OfflineDAoC), which is now on hold. Everything this
 project adds to the OpenDAoC server was written by AI tools (Codex, then Claude), as was the whole new client. The
@@ -36,18 +38,18 @@ project owner, who has no game development or coding experience, directed and pl
 **Already playing v0.1?** The same downloader updates your game in place with a much smaller download (about 2.5 GB). Your
 account, characters, companions and bots stay as they are.
 
-1. On the release page, under **Assets**, download **`Download-OfflineDAoC-True165-v0.2.zip`** (just the
+1. On the release page, under **Assets**, download **`Download-BotRealm-v0.2.zip`** (just the
    downloader, a few KB).
-2. Put it in a folder with a short path, such as `C:\Games\OfflineDAoC`. Right-click it, choose **Extract All…**,
+2. Put it in a folder with a short path, such as `C:\Games\BotRealm`. Right-click it, choose **Extract All…**,
    and open the extracted folder.
-3. Close the game and the launcher if they're running. Then double-click **`GET-OFFLINE-DAOC-TRUE165.cmd`**. If
+3. Close the game and the launcher if they're running. Then double-click **`GET-BOTREALM.cmd`**. If
    Windows SmartScreen appears, click **More info → Run anyway**. It checks your PC and asks:
-   - **1 = Update my game:** it finds your `OfflineDAoC-True165` folder (or asks you to pick it), checks it, and
+   - **1 = Update my game:** it finds your `BotRealm` folder (or asks you to pick it), checks it, and
      updates it in place (about 2.5 GB);
    - **2 = New install:** the complete game, into a new folder (about 36 GB).
 
    If it stops, run it again; it continues where it stopped.
-4. In the `OfflineDAoC-True165` folder, double-click **`START OFFLINE DAOC TRUE 1.65.cmd`**. Click **START
+4. In the `BotRealm` folder, double-click **`START BOTREALM.cmd`**. Click **START
    SERVER**, wait for **RUNNING**, then click **ENTER REALM**. Your account is created the first time.
 
 What you need:
@@ -64,7 +66,7 @@ playable game.
 
 **Handy commands:** [QUICK COMMANDS.txt](QUICK%20COMMANDS.txt) has the everyday commands and the launcher
 shortcuts: hiring and managing companions, `/task`, `/questguide`, the Horn of Rallying, horse routes and training.
-Every command that works in True 1.65 is in [ALL SERVER COMMANDS.txt](ALL%20SERVER%20COMMANDS.txt), with the GM-only
+Every command is in [ALL SERVER COMMANDS.txt](ALL%20SERVER%20COMMANDS.txt), with the GM-only
 ones marked. Both files are in your game folder too.
 
 ## Built on OpenDAoC and Dawn of Light
@@ -72,8 +74,9 @@ ones marked. Both files are in your game folder too.
 The server is a modified [OpenDAoC](https://github.com/OpenDAoC/OpenDAoC-Core), which itself grew from
 [Dawn of Light](https://github.com/Dawn-of-Light/DOLSharp) (DOL), the long-running open-source DAoC server emulator.
 Their combat, spell, item, quest and world systems are the foundation everything here is built on, and their GPL
-license and credits carry over to this project. True 1.65 adds the bot systems, the hired companions and the 1.65
-rules on top, and replaces content that freeshards added later with period data.
+license and credits carry over to this project. BotRealm adds the bot systems, the hired companions, the Realm
+Exchange and its quality-of-life changes on top of the 1.65-era baseline, and replaces content that freeshards added
+later with period data.
 
 ## Built from period data
 
@@ -97,18 +100,18 @@ is the result: the world database and the content files built from it.
 
 ## How it differs from Offline DAoC
 
-| | Offline DAoC (0.37 and earlier) | Offline DAoC True 1.65 |
+| | Offline DAoC (0.37 and earlier) | BotRealm |
 |---|---|---|
-| **Rules** | OpenDAoC's freeshard ruleset, plus many custom additions | Patch 1.65 rules only, with no mode toggle |
+| **Rules** | OpenDAoC's freeshard ruleset, plus many custom additions | The 1.65-era rules as the starting baseline, plus BotRealm's quality-of-life changes |
 | **Client** | The original DAoC client, and a beta new client in 0.37c | The new client only, built in Godot 4 |
-| **Items and loot** | Freeshard items, random "ROG" drops, items with later stats | Period 1.65 items, drops and vendor stock only |
+| **Items and loot** | Freeshard items, random "ROG" drops, items with later stats | The 1.65-era items, drops and vendor stock, from period data |
 | **Leveling** | XP rate options, free levels, buff merchants, hasteners | XP fixed at 1x, with no shortcuts |
 | **Getting around** | Teleporters and `/tele` | Walking, horse routes and the period portals |
 | **Your group** | `/spawn` companion bots on demand | Hired companions that you level, spec and gear |
 | **Bots** | Separate bot rules | The same rules as players |
 | **Saves** | Progress transfers from every older version | A fresh start: no progress import from Offline DAoC |
 
-## What True 1.65 has
+## What BotRealm has
 
 **The 1.65 game:**
 - The Classic and Shrouded Isles world, with the three islands added in 1.65 and the Darkness Falls and Shrouded
@@ -142,7 +145,7 @@ is the result: the world database and the content files built from it.
 - Keep sieges and relic raids run on their own, and also start when you attack a keep.
 - PvE realm events start only when a player sounds the Horn of Rallying at an inn.
 
-**Kept on purpose, although they aren't from 1.65:**
+**BotRealm's own additions, on top of the 1.65-era base:**
 - The gamebots and the bot systems.
 - The Realm Exchange: an auction house where gamebots and players trade with each other. Bots list what they
   craft and loot, and buy from each other's listings and yours; you can list your own items and buy theirs. Prices
@@ -157,14 +160,14 @@ is the result: the world database and the content files built from it.
 - **Where to start:** [AGENTS.md](AGENTS.md) (also read by Claude as [CLAUDE.md](CLAUDE.md)) has the project rules
   and the layout.
 - **Guides:**
-  - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): building and testing the server and launcher, and how the True 1.65
+  - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): building and testing the server and launcher, and how the BotRealm world
     content reaches the world;
   - [source/new-client/README.md](source/new-client/README.md): the client and its content pipeline;
   - [docs/LLM-QUICKSTART.md](docs/LLM-QUICKSTART.md): customizing it with your own AI.
 - **Where the code is:**
-  - `development-source/server`: the game server, the True 1.65 rules (`GameServer/mode165`) and all bot AI.
+  - `development-source/server`: the game server, the world rules (`GameServer/mode165`) and all bot AI.
   - `development-source/tools`: the launcher and the navigation mesh builder.
-  - `tools/claude-version/true165` and `runtime/true165`: the generators and the True 1.65 world content they make.
+  - `tools/claude-version/botrealm` and `runtime/botrealm`: the generators and the world content they make.
   - `database`: the clean world database.
   - `source/new-client`: the new client (Godot 4 project and its content pipeline).
 - **Cloning on Windows:** clone into a short folder, such as `C:\src\`. If Git reports "Filename too long", turn on
@@ -202,5 +205,5 @@ code it is based on. Other parts keep their own licenses; see [THIRD_PARTY.md](T
 
 ## Changes
 
-See the [changelog](CHANGELOG.md), including what's coming in 0.2.
+See the [changelog](CHANGELOG.md), including what's coming next.
 

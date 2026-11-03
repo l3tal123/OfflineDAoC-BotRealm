@@ -7,7 +7,7 @@ using DOL.Database;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode solo ranged pulls (owner 2026-10-31: "let melee bots pull with range if they can against aggressive
+    /// BotRealm solo ranged pulls (owner 2026-10-31: "let melee bots pull with range if they can against aggressive
     /// mobs if they have a throwing weapon or arrows, etc. like warriors. wait for mob to get to them instead of face
     /// pulling"; "classes that can have a bow and arrow or use ranged spells to pull even if they are melee coded should
     /// do so like shaman"). A solo gamebot about to take on an aggressive monster opens with a ranged damage spell

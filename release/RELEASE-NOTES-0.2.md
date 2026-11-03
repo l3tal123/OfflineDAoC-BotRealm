@@ -1,6 +1,9 @@
 **Offline DAoC True 1.65 v0.2**: single-player Dark Age of Camelot as it was at patch 1.65 (Classic and Shrouded
 Isles, November 2003), with a world full of gamebots, hired companions, and a new client built in Godot 4.
 
+> **Historical note:** this release shipped under the earlier product name, "Offline DAoC True 1.65" (the project is
+> now BotRealm). The names and commands below are kept as published.
+
 > **This is an AI-made project.** All of the code was written by AI tools; the project owner has no coding
 > experience. Large parts of the game haven't been played through by a person. Expect bugs, and keep a backup of
 > your save.

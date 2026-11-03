@@ -5,7 +5,7 @@ using DOL.Database;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode reasons for a gamebot to go to town besides a full backpack (run 1, 2026-10-30: repairs, arrows and
+    /// BotRealm reasons for a gamebot to go to town besides a full backpack (run 1, 2026-10-30: repairs, arrows and
     /// crafting happened only on a merchant visit, and only a nearly full bag sent a bot to a merchant, so worn gear was
     /// never repaired and empty quivers never refilled). The visit itself runs the same merchant errand
     /// (BotBrain.TryHandleAutonomousMerchantService: repair, restock, craft). One errand trip per bot every 30 minutes, so

@@ -77,7 +77,7 @@ internal static class BotCharacterGenerator
     };
 
     /// <summary>
-    /// True 1.65 Mode (owner 2026-10-30): the base class a new bot starts as; the rolled advanced class becomes its
+    /// BotRealm's class rules (owner 2026-10-30): the base class a new bot starts as; the rolled advanced class becomes its
     /// pre-decided class, trained into at level 5 (the server's BaseClassBots165). Null for a class with no base.
     /// </summary>
     public static (int Id, string Name)? BaseClass(int classId) => classId switch
@@ -103,7 +103,7 @@ internal static class BotCharacterGenerator
     public static Identity Generate(int realm, ISet<string> reservedNames, bool classic165 = false)
     {
         int gender = Random.Shared.Next(1, 3);
-        // True 1.65 Mode rolls only 1.65 classes (no Sluaghbinder test class).
+        // BotRealm rolls only the classes of its content base (no Sluaghbinder test class).
         Choice[] pool = classic165 ? Choices[realm].Where(c => BaseClass(c.ClassId) != null).ToArray() : Choices[realm];
         Choice choice = pool[Random.Shared.Next(pool.Length)];
         var race = choice.Races[Random.Shared.Next(choice.Races.Length)];

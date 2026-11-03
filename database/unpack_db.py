@@ -1,4 +1,4 @@
-"""Unpacks the clean True 1.65 world database (database/opendaoc-165.sqlite3.zip) to runtime/data/opendaoc-165.sqlite3.db.
+"""Unpacks the clean BotRealm world database (database/opendaoc-165.sqlite3.zip) to runtime/data/opendaoc-165.sqlite3.db.
 Refuses to overwrite an existing world (that is someone's progress) unless --force is given.
 Usage (from the repository root): python database/unpack_db.py [--force]"""
 import os

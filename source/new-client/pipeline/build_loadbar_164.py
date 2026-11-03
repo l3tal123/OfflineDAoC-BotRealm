@@ -1,4 +1,4 @@
-"""True 1.65 Mode: the 1.64 client's loading bar (owner 2026-11-01: "you should use the classic loading bar").
+"""BotRealm: the 1.64 client's loading bar (owner 2026-11-01: "you should use the classic loading bar").
 1.64 game.dll (setup 0x4d4603, draw 0x4d4ba2 - read by the original-client research): data/LOADBAR1.tga is the empty
 bar (grey glass tube, gold end caps), data/LOADBAR2.tga the full one (pink-red), both 82 x 19; the bar sits 10 px in from
 the loading picture's bottom right corner and fills by revealing LOADBAR2's columns over LOADBAR1's, left to right,

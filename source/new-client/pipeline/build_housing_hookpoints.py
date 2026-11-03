@@ -1,4 +1,4 @@
-"""True 1.65 housing: where each house model's hookpoints are - the server places a hookpoint item (an NPC, a vault, a
+"""BotRealm housing: where each house model's hookpoints are - the server places a hookpoint item (an NPC, a vault, a
 bindstone, a tool table) at house X / Y + (X, Y) and Z 25000 + Z of its row in the world DB's househookpointoffset (DOL
 House.GetHookpointLocation; interior units, never turned by the house heading), and the client draws the hookpoint
 markers there ("two stacked white circles on the ground", 1.64 help) for /housepoints and their right-click menus.

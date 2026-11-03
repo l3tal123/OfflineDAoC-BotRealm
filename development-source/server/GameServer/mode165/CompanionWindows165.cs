@@ -9,7 +9,7 @@ using DOL.GS.Styles;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode companion windows, server side (owner 2026-10-30, plan 17h): gear, stats and XP, repairs. The new
+    /// BotRealm companion windows, server side (owner 2026-10-30, plan 17h): gear, stats and XP, repairs. The new
     /// client draws its own windows from these messages (DebugMode 0x21 'H', 128 bytes, Hire165.Send); the original client
     /// uses its native windows (trainer / vault), driven separately. "row" is the companion's roster row 0..6; the
     /// companion must be with the player (summoned).

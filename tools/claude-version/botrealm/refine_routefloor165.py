@@ -163,7 +163,7 @@ for pid, rows in routes.items():
                          'Z': int(p['Z']), 'MaxSpeed': p['MaxSpeed'] or 0, 'WaitTime': p['WaitTime'] or 0, 'LastTimeRowUpdated': now})
 print(tot)
 if write:
-    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'true165')):
+    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'botrealm')):
         json.dump({'table': 'PathPoints', 'key': 'PathPoints_ID',
                    'reason': src['reason'] if 'refine_routefloor165' in src['reason'] else
                              src['reason'] + '; refined for the clients\' floor pick, fewer points (refine_routefloor165.py)',

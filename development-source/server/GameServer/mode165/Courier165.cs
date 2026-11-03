@@ -10,7 +10,7 @@ using DOL.GS.Quests;
 namespace DOL.GS
 {
     /// <summary>
-    /// The True 1.65 Mode couriers (owner 2026-10-30; the old Rebuilt design's level-5 courier, plus the horn's level-50
+    /// The BotRealm couriers (owner 2026-10-30; the old Rebuilt design's level-5 courier, plus the horn's level-50
     /// messenger of plan section 18). On reaching level 5 (or logging in at 5+ without it), a realm-themed courier comes
     /// to the player, gives its message, and the quest goes straight into the quest log; then it leaves. The level-5
     /// quest is turned in at the traveler's inn's innkeeper, the level-50 one at its Horn Handler, which earns the right
@@ -154,7 +154,7 @@ namespace DOL.GS
 
 namespace DOL.GS.Quests
 {
-    /// <summary>True 1.65 Mode, level 5: the courier's word about the traveler's inn; turned in at its innkeeper.</summary>
+    /// <summary>BotRealm, level 5: the courier's word about the traveler's inn; turned in at its innkeeper.</summary>
     public class RoadsideInn165 : BaseQuest
     {
         public RoadsideInn165() : base() { }
@@ -193,7 +193,7 @@ namespace DOL.GS.Quests
         }
     }
 
-    /// <summary>True 1.65 Mode, level 50: the messenger's word about the Horn of Rallying; turned in at the Horn Handler,
+    /// <summary>BotRealm, level 50: the messenger's word about the Horn of Rallying; turned in at the Horn Handler,
     /// which earns the right to sound it.</summary>
     public class HornOfRallying165 : BaseQuest
     {

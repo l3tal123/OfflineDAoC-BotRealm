@@ -1,5 +1,5 @@
 /*
- * Offline DAoC BotRealm — web dashboard (preview).
+ * BotRealm — web dashboard.
  *
  * Vue 3 is vendored in wwwroot/vendor (no build step, no npm at run time). Everything this file reads is the
  * local read-only API: api/overview, api/population, api/world.

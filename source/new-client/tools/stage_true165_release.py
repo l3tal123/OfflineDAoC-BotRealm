@@ -1,4 +1,4 @@
-"""Stage the new client for an Offline DAoC True 1.65 release package.
+"""Stage the new client for a BotRealm release package.
 
     python tools/stage_true165_release.py --out <package folder>\\new-client [--version 0.1]
 
@@ -105,7 +105,7 @@ def main():
     print("Copying the engine...", flush=True)
     counts["tools/godot_net"] = copy_tree(engine, out / "tools/godot_net",
                                           lambda rel: not rel.name.lower().endswith(SKIP_SUFFIXES))
-    (out / "VERSION.txt").write_text(f"Offline DAoC True 1.65 v{args.version} new client\r\n", encoding="utf-8")
+    (out / "VERSION.txt").write_text(f"BotRealm v{args.version} new client\r\n", encoding="utf-8")
 
     bad = [p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file() and forbidden(p.name)]
     assert not bad, f"must not ship: {bad}"

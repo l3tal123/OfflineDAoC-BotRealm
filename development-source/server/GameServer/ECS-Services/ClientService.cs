@@ -759,7 +759,7 @@ namespace DOL.GS
 
         private static void CheckPingTimeout(GameClient client)
         {
-            // Offline DAoC is intentionally a local, single-player server. The legacy
+            // BotRealm is intentionally a local, single-player server. The legacy
             // client can stop sending its normal TCP ping while the player is idle in
             // /grind; do not turn that into a link-death on a loopback connection.
             // GameBots do not use this client path and retain their own AI/watchdog rules.

@@ -11,7 +11,7 @@ using DOL.GS.Realm;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode's companion hiring window (owner 2026-10-30, plan sections 17 and 17g): the server side of the window
+    /// BotRealm's companion hiring window (owner 2026-10-30, plan sections 17 and 17g): the server side of the window
     /// both clients draw at a traveler's inn. Layout shared by the original client's overlay (tools\hire_spec.py) and the
     /// new client (TRUE 1.65 MODE HIRE WINDOW PROTOCOL.md). DebugMode 0x21, fixed 128-byte body: [0]=0, [1]=0x48 'H', [2]=1 (version), [3]=op.
     ///   op 1 open:    [4] mode (0 innkeeper, 1 healer), [5] slots used, [6] slots open, [7] next slot level (0 = all open)

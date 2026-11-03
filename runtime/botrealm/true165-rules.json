@@ -1,5 +1,5 @@
 {
- "_about": "True 1.65 Mode database rules (owner 2026-10-30). Read by the launcher (C#) and derive_true165_database.py. Plan: Claude Takeover GitHub/1.65 MODE PLAN.md.",
+ "_about": "BotRealm database rules (owner 2026-10-30; rebranded 2026-11-03). The world content base is the 1.65-era Classic and Shrouded Isles game; BotRealm adds the bot systems, the Realm Exchange and the owner's quality-of-life and custom changes. Read by the launcher (C#) and derive_true165_database.py.",
  "settings": {
   "classic165_mode": "True",
   "enable_sluaghbinder": "False",
@@ -24,6 +24,8 @@
   "bot_use_town_teleporters": "False",
   "startup_ramp_minutes": "2",
   "starting_money": "10000",
+  "motd": "Welcome back to BotRealm. Adventure alone or alongside the autonomous player bots across the three realms.",
+  "starting_msg": "Welcome to BotRealm, a single-player Dark Age of Camelot world built to play alone or with player bot companions.",
   "disabled_regions": "27;165;233-242;244",
   "housing_rent_cottage": "200000",
   "housing_rent_house": "2000000",

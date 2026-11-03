@@ -1,4 +1,4 @@
-"""True 1.65 Mode: the period 1.64 pregame art for the new client (owner 2026-10-31: "figure out what the
+"""BotRealm: the period 1.64 pregame art for the new client (owner 2026-10-31: "figure out what the
 period 1.65 realm selection, character select screen, creation screen, play buttons, etc. actually looked like and plan
 to replace the current ones" - PERIOD PREGAME PLAN.md). From the owner's real 1.64 client zip:
   charman/*.tga        Main (character select), chooserealm (+ _but emblems), chargen (+ _Summ), the button sheets

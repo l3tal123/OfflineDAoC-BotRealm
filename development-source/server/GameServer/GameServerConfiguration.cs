@@ -360,8 +360,8 @@ namespace DOL.GS
 		/// </summary>
 		public GameServerConfiguration() : base()
 		{
-			m_ServerName = "Offline DAoC";
-			m_ServerNameShort = "DOLSERVER";
+			m_ServerName = "BotRealm";
+			m_ServerNameShort = "BotRealm";
 
 			if (Assembly.GetEntryAssembly() != null)
 				m_rootDirectory = new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName;

@@ -6,7 +6,7 @@ checks the 30 creation points against them) and the classes the server has switc
 disabled_classes). Read from the server's own source and database (pipeline/paths.py):
   <server source>/GameServer/playerclasses/*/Class*.cs
   <server source>/GameServer/Enums/eCharacterClass.cs, GlobalConstants.cs
-  <world DB> (the True 1.65 database, opendaoc-165.sqlite3.db), read only
+  <world DB> (the BotRealm database, opendaoc-165.sqlite3.db), read only
   (ServerProperty disabled_classes / disabled_races)
 Writes godot/content/rules/server_classes.json.
 

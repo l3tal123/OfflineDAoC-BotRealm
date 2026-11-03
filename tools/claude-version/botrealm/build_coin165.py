@@ -1,8 +1,8 @@
-"""Builds coin165.json, the True 1.65 coin rule (owner 2026-10-31: fix "coin drops on every kill").
+"""Builds coin165.json, the BotRealm coin rule (owner 2026-10-31: fix "coin drops on every kill").
 In 1.65 a monster either carried coin or not: Uthgard's measured kills are bimodal (238 of 415 animal types never drop
 coin, most humanoids always do). So: a monster Uthgard measured (>= 30 kills) uses its own measured coin-bag rate;
 any other monster uses its body type's average from the same data. Amounts are unchanged (LootGeneratorMoney).
-Read by the server (mode165/Coin165.cs) from runtime/true165/coin165.json. Development tool, read-only on its inputs."""
+Read by the server (mode165/Coin165.cs) from runtime/botrealm/coin165.json. Development tool, read-only on its inputs."""
 import collections, json, os, sqlite3, statistics, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +38,7 @@ for n, k in kills.items():
 defaults = {NAMES[t]: round(statistics.mean(v)) for t, v in sorted(per_type.items()) if t in NAMES}
 out = {"source": "Uthgard measured coin-bag rates per monster (>= %d kills); others use their body type's average" % MIN_KILLS,
        "body_type_default": defaults, "monsters": dict(sorted(monsters.items()))}
-for folder in (HERE,):   # installed into runtime	rue165 with the rest of the True 1.65 content
+for folder in (HERE,):   # installed into runtime/botrealm with the rest of the BotRealm content
     with open(os.path.join(folder, "coin165.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)
 print("monsters", len(monsters), "defaults", defaults)

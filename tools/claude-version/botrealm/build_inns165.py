@@ -1,4 +1,4 @@
-"""Builds add-inns165.json: the people of the three traveler's inns in True 1.65 Mode (owner 2026-10-30, plan sections
+"""Builds add-inns165.json: the people of the three traveler's inns in BotRealm (owner 2026-10-30, plan sections
 17b and 19). Development tool; the 1.65 database build (derive_true165_database.py and the launcher) only reads its
 output, as generic rows to add.
 

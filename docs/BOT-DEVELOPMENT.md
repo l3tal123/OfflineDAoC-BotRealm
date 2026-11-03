@@ -20,11 +20,11 @@ ported behaviour-quality layer and player group control; the server builds and t
 
 | Kind | Created by | Persistent? | Runs world AI? | Key code |
 |---|---|---|---|---|
-| Autonomous gamebot ("world bot") | Launcher ADD BOTS / `OfflineDAoC.exe --add-bots 1.65 <realm> <count> <level>` | yes, `offline_world_bots` | yes | `GameBot` with `IsAutonomousWorldBot`, driven by `AutonomousWorldBotController` |
+| Autonomous gamebot ("world bot") | Launcher ADD BOTS / `BotRealm.exe --add-bots 1.65 <realm> <count> <level>` | yes, `offline_world_bots` | yes | `GameBot` with `IsAutonomousWorldBot`, driven by `AutonomousWorldBotController` |
 | Hired companion | Innkeeper window (`Hire165`) at the traveler's inns | yes, `offline_hired_companions` | no; player-led | `HiredCompanions165`, `CompanionWindows165`, `GameBot.IsPlayerLedGroup` |
 | Temporary companion | `/spawn` leader/party helpers | no | no; player-led | `GameBot.IsTemporaryGroupHelper`, `TemporaryCompanion*` |
 
-`/spawn` and `/raid` are GM-only in True 1.65 (`Classic165Mode.GmOnlyCommands`), so temporary companions are a
+`/spawn` and `/raid` are GM-only in BotRealm (`Classic165Mode.GmOnlyCommands`), so temporary companions are a
 GM/dev path. `BotManager` (max 15 player-owned bots) and `BotCommand` are inherited from the older bot system.
 `BotCommand` has no `[CmdAttribute]` and `ScriptMgr` only registers attributed types, so `/bot` does not exist;
 its body only toggles `AutonomousPlayerPilot` (auto-play for a real player character), which therefore has **no
@@ -37,7 +37,7 @@ live caller** and is effectively dev-only code.
   `AutonomousRealmLoginBalancer`, and spawns real actors. `AutonomousBotRegistry` is the live set.
   `AutonomousPopulationProperties` holds the gates: `population_enabled`, `active_only`, `startup_ramp_minutes`,
   `ai_budget_ms`, `world_actor_only`, `allow_character_deletion`. `startup_ramp_minutes` (set to 2 in
-  `runtime/true165/true165-rules.json`) spreads every login evenly across that window; a ramp of five minutes or
+  `runtime/botrealm/true165-rules.json`) spreads every login evenly across that window; a ramp of five minutes or
   less is linear, a longer one still front-loads the first 33 percent into five minutes.
 - **Brain attach:** `GameBot` gets a `BotBrain` (`bots/BotBrain*.cs`, `partial`; 5.5k lines in the main file).
 - **Per-tick order in `BotBrain.Think()`** (`bots/BotBrain.cs:1286`): companion buff/engagement watch ->
@@ -135,7 +135,7 @@ relic campaigns to `rvr-relic-campaigns.json`, `AutonomousRelicShrine`, `Autonom
 realm events: 3 dragons (Golestandt, Gjalpinulva, Cuuldurach), 3 epic dungeons (Caer Sidi, Tuscaran Glacier,
 Galladoria), 3 Summoner's Hall and 3 Darkness Falls (Legion) expeditions.
 
-### 1.10 The True 1.65 rules layer (`GameServer/mode165`)
+### 1.10 The world rules layer (`GameServer/mode165`)
 
 | File | Role |
 |---|---|
@@ -281,9 +281,9 @@ coin-only monsters, DF seal stock, support-pet combat, login panel. See `README.
 - Never build while a server runs (it stalls the game loop, see AGENTS.md rule 10).
 
 **Headless harness**
-- Add a roster: `OfflineDAoC.exe --add-bots 1.65 <realm 1-3> <count> <level>` (writes `runtime/data/add-bots.log`);
-  same rows as the launcher's ADD BOTS. Content refresh only: `OfflineDAoC.exe --refresh-165`
-  (`runtime/data/true165-refresh.log`).
+- Add a roster: `BotRealm.exe --add-bots 1.65 <realm 1-3> <count> <level>` (writes `runtime/data/add-bots.log`);
+  same rows as the launcher's ADD BOTS. Content refresh runs from the dashboard's START SERVER; there is no
+  command-line content-refresh flag any more.
 - Run by hand: `cd runtime/server && CoreServer.exe --start -config=./config/serverconfig-165.xml`, type `exit`;
   the launcher's console log is `runtime/logs/server-console.log`.
 - Test-only overrides: `OFFLINE_DAOC_BOT_GOALS` (scratch `bot-goals.json`, logs `BOT_GOALS_OVERRIDE`),
@@ -298,7 +298,7 @@ coin-only monsters, DF seal stock, support-pet combat, login panel. See `README.
 folder instead. Paths come from `Classic165Mode.StatePath`/`StateDirectory`.
 
 **Settings**
-- `ServerProperty` / `runtime/true165/true165-rules.json`: `classic165_mode`, `population_enabled`,
+- `ServerProperty` / `runtime/botrealm/true165-rules.json`: `classic165_mode`, `population_enabled`,
   `active_target`, `startup_ramp_minutes`, `ai_budget_ms`, `bot_use_town_teleporters`.
 - `ServerProperty` `xp_rate_multiplier` (`XpRateMultiplier165`): the launcher's Options tab writes one rate (1 to 5000);
   it multiplies every experience gain for players and for every kind of gamebot (PvE, RvR, quests, tasks, missions,

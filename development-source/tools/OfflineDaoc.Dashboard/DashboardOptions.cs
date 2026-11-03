@@ -36,9 +36,9 @@ internal sealed class DashboardOptions
 
     internal static string Usage =>
         """
-        Offline DAoC BotRealm dashboard (preview)
+        BotRealm dashboard
 
-          OfflineDaoc.Dashboard.exe [options]
+          BotRealm.exe [options]
 
           --port <number>     Loopback port to listen on (default 10310). The UI is served at http://127.0.0.1:<port>/
           --root <folder>     A playable folder's runtime directory (the one holding data/ and server/).

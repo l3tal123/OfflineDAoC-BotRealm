@@ -6,7 +6,7 @@ using DOL.AI.Brain;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode death penalties for bots, as for players (owner 2026-10-31: "they will visit a healer and pay after
+    /// BotRealm death penalties for bots, as for players (owner 2026-10-31: "they will visit a healer and pay after
     /// death to get rid of those like a player or wait it out or skip if broke"). A bot killed in PvE that releases loses
     /// Constitution like a player (1, 2, then 3 points for its first, second and later deaths at a level, from
     /// pve_con_loss_level); a raise costs no Constitution. Coming back to life, by release or a raise, gives resurrection

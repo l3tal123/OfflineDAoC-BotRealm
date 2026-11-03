@@ -1,4 +1,4 @@
-"""Stable routes inside the True 1.65 housing zones (owner 2026-11-02: "make sure the stable routes inside the housing
+"""Stable routes inside the BotRealm housing zones (owner 2026-11-02: "make sure the stable routes inside the housing
 markets work too"; chose the partial network).
 
 The world DB has no housing horse routes at all: the 22 stable masters in the 12 period housing zones sell nothing. The
@@ -9,7 +9,7 @@ source for where they stood: only routes between masters that exist are built.
 Each route is planned on a 96-unit grid over the 1.64 client's own terrain (its zones' terrain.pcx/offset.pcx: the
 server has no navmesh for the housing zones), keeping clear of the house lots (a lot is a house to be), avoiding
 slopes, then straightened and given a point wherever the ground leaves the straight line by more than EPS. Output, both
-copies (tools and runtime\\true165):
+copies (tools and runtime\\botrealm):
   add-housingtickets165.json  ItemTemplate: one ticket per route (Item_Type 40, the realm's horse)
   add-housingpaths165.json    Path
   add-housingroutes165.json   PathPoints
@@ -255,7 +255,7 @@ if write:
            'add-housingpaths165.json': ('Path', 'PathID', paths),
            'add-housingroutes165.json': ('PathPoints', 'PathPoints_ID', points),
            'add-housingstables165.json': ('MerchantItem', 'MerchantItem_ID', rows_mi)}
-    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'true165')):
+    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'botrealm')):
         for fn, (table, key, rows) in out.items():
             json.dump({'table': table, 'key': key, 'reason': f'{TAG} the stable routes between the period housing zones\' '
                        'stable masters (build_housingroutes165.py)', 'rows': rows},

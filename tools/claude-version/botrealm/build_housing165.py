@@ -1,4 +1,4 @@
-"""True 1.65 housing: only the 1.64 client's housing areas and models (owner 2026-11-02: "i only want the real 1.65
+"""BotRealm housing: only the 1.64 client's housing areas and models (owner 2026-11-02: "i only want the real 1.65
 housing areas and models").
 
 The world DB (OpenDAoC) has 200 lots in each of 27 housing zones; the 1.64 client's zones.dat has 12 of them, 4 per
@@ -65,7 +65,7 @@ new = [
      'reason': f'{tag} market return tokens (not in 1.64/1.65: later emulator travel tokens)'},
 ]
 if write:
-    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'true165')):
+    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'botrealm')):
         rp = os.path.join(folder, 'true165-rules.json')
         raw = open(rp, 'rb').read()
         rules = json.loads(raw.decode('utf-8'))

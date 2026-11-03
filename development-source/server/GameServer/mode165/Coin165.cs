@@ -6,11 +6,12 @@ using System.Text.Json;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 coin (owner 2026-10-31: "coin drops on every kill" was wrong). In 1.65 a monster either carried coin or
-    /// it didn't: most animals, insects, reptiles and plants never did. Uthgard's measured kills show exactly that, so a
-    /// monster Uthgard measured uses its own coin rate and any other monster its body type's average.
-    /// Data: runtime\true165\coin165.json (tools\claude-version\true165\build_coin165.py). Amounts are unchanged.
-    /// Without the file (or outside True 1.65) every kill drops coin, as before.
+    /// BotRealm coin (owner 2026-10-31: "coin drops on every kill" was wrong). In the 1.65-era content base a monster
+    /// either carried coin or it didn't: most animals, insects, reptiles and plants never did. Uthgard's measured kills
+    /// show exactly that, so a monster Uthgard measured uses its own coin rate and any other monster its body type's
+    /// average.
+    /// Data: runtime\botrealm\coin165.json (tools\claude-version\botrealm\build_coin165.py). Amounts are unchanged.
+    /// Without the file every kill drops coin, as before.
     /// </summary>
     public static class Coin165
     {
@@ -23,7 +24,22 @@ namespace DOL.GS
         private static Dictionary<string, int> _monsters;
         private static Dictionary<string, int> _bodyDefaults;
 
-        public static string FilePath => Path.GetFullPath(Path.Combine(GameServer.Instance.Configuration.RootDirectory, "..", "true165", "coin165.json"));
+        /// <summary>
+        /// The content file: runtime/botrealm/coin165.json, or runtime/true165/coin165.json on an install the launcher has
+        /// not migrated to the new folder yet.
+        /// </summary>
+        public static string FilePath
+        {
+            get
+            {
+                string content = Path.GetFullPath(Path.Combine(GameServer.Instance.Configuration.RootDirectory, ".."));
+                string current = Path.Combine(content, "botrealm", "coin165.json");
+                if (File.Exists(current))
+                    return current;
+                string legacy = Path.Combine(content, "true165", "coin165.json");
+                return File.Exists(legacy) ? legacy : current;
+            }
+        }
 
         /// <summary>The chance in percent that this monster drops coin when killed (100 when no rule applies).</summary>
         public static int ChanceFor(GameNPC mob)
@@ -74,12 +90,12 @@ namespace DOL.GS
                         foreach (JsonProperty p in doc.RootElement.GetProperty("body_type_default").EnumerateObject())
                             defaults[p.Name] = p.Value.GetInt32();
                         loaded = true;
-                        Log.Info($"True 1.65 coin: {monsters.Count} measured monsters, {defaults.Count} body type defaults.");
+                        Log.Info($"BotRealm coin: {monsters.Count} measured monsters, {defaults.Count} body type defaults.");
                     }
                 }
                 catch (Exception e)
                 {
-                    Log.Error("True 1.65 coin: coin165.json could not be read; every kill drops coin.", e);
+                    Log.Error("BotRealm coin: coin165.json could not be read; every kill drops coin.", e);
                 }
                 _monsters = loaded ? monsters : null;
                 _bodyDefaults = defaults;

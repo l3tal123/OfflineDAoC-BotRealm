@@ -2119,7 +2119,7 @@ namespace DOL.GS.Quests.Hibernia
 			Trainers165.AddRange(Epics165.TrainersOf(Title165, 47, eRealm.Hibernia));
 			if (Trainers165.Count == 0)
 			{
-				log.Warn("True 1.65 Mode: no Last Heir trainers found, \"" + Title165 + " (level 50)\" not loaded");
+				log.Warn("BotRealm: no Last Heir trainers found, \"" + Title165 + " (level 50)\" not loaded");
 				return;
 			}
 			GameEventMgr.AddHandler(GamePlayerEvent.AcceptQuest, new DOLEventHandler(SubscribeQuest));
@@ -2129,7 +2129,7 @@ namespace DOL.GS.Quests.Hibernia
 				trainer.AddQuestToGive(typeof(Harmony_50));
 			}
 			if (log.IsInfoEnabled)
-				log.Info("Quest \"" + Title165 + " (level 50)\" initialized (True 1.65 Mode, " + Trainers165.Count + " trainers)");
+				log.Info("Quest \"" + Title165 + " (level 50)\" initialized (BotRealm, " + Trainers165.Count + " trainers)");
 		}
 
 		private static void Unload165()

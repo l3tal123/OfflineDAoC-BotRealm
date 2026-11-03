@@ -1,6 +1,7 @@
 # Existing projects and notices
 
-The server and navigation-builder source contain GPL version 3 license texts. Preserve these and all
+BotRealm keeps the credits and licenses of the projects it builds on. The server and navigation-builder source
+contain GPL version 3 license texts. Preserve these and all
 per-file notices; dependencies may have other licenses. The project's AI-developed additions do not remove
 upstream attribution.
 

@@ -1,12 +1,12 @@
 """Merchant pages pass: period Allakhazam merchant pages ("Goods for Sale") as the stock source for every period merchant.
-1. builds world165_post.db = snapshot + the integrated runtime\\true165 add files + true165-rules.json updates (a scratch copy in this folder)
+1. builds world165_post.db = snapshot + the integrated runtime\\botrealm add files + true165-rules.json updates (a scratch copy in this folder)
 2. parses Goods for Sale from wayback-allakhazam/period_mobs.jsonl.gz
 3. matches merchants, resolves goods to templates, proposes additions against the post-integration lists
 Outputs: merchant_goods_pages.json, merchant_goods_additions.json, merchant_goods_unresolved.json, merchant_goods_stats.json"""
 import collections, gzip, html, json, os, re, shutil, sqlite3, sys
 sys.stdout.reconfigure(encoding='utf-8')
 HERE = os.path.dirname(os.path.abspath(__file__))
-RT = os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..")), "runtime", "true165")  # found from this script
+RT = os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..")), "runtime", "botrealm")  # found from this script
 AR = os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..")), "development-source", "research", "period-data", "archive")  # found from this script
 POST = os.path.join(HERE, 'world165_post.db')
 

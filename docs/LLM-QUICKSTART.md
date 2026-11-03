@@ -1,6 +1,6 @@
-# Customize Offline DAoC True 1.65 with your own AI assistant
+# Customize BotRealm with your own AI assistant
 
-You can make Offline DAoC True 1.65 your own with an AI coding assistant such as Claude Code or Codex. You don't
+You can make BotRealm your own with an AI coding assistant such as Claude Code or Codex. You don't
 need the author's permission to fork it.
 
 ## 1. Get your own copy
@@ -14,8 +14,8 @@ need the author's permission to fork it.
 
 ## 2. Start your assistant with this prompt
 
-> This is my fork of Offline DAoC True 1.65, a single-player Dark Age of Camelot world as of patch 1.65 with
-> autonomous gamebots and hired companions. Read AGENTS.md, docs/DEVELOPMENT.md and source/new-client/README.md
+> This is my fork of BotRealm, a single-player Dark Age of Camelot world built around autonomous gamebots and hired companions, on a 1.65-era Classic and Shrouded Isles content
+> base with BotRealm's own quality-of-life changes. Read AGENTS.md, docs/DEVELOPMENT.md and source/new-client/README.md
 > first, and follow the project rules in AGENTS.md: period sources first, nothing from Trials of Atlantis or later,
 > no difficulty changes, bots on the player rules. My source checkout is this folder; my playable game is at
 > [path to playable folder]. Look at the current code before changing it. Don't start the server or replace files
@@ -27,19 +27,19 @@ need the author's permission to fork it.
 
 | To change… | Look in |
 |---|---|
-| True 1.65 rules: XP, crafting, charm, death penalties, GM-only commands | `development-source/server/GameServer/mode165` |
+| World rules: XP, crafting, charm, death penalties, GM-only commands | `development-source/server/GameServer/mode165` |
 | Hired companions, the traveler's inns, the Horn of Rallying | `development-source/server/GameServer/mode165` (`Hire165`, `HiredCompanions165`, `Innkeeper165`, `HornHandler165`) |
 | Autonomous gamebot goals, camps, groups, travel, RvR, relic raids | `development-source/server/GameServer/bots/autonomous` |
 | Gamebot and companion combat AI | `development-source/server/GameServer/bots` |
 | Commands, combat, spells, pets | `development-source/server/GameServer` |
-| World content: drops, item stats, spawns, merchants, inns | `runtime/true165` (the JSON) and the generator in `tools/claude-version/true165` that writes it |
+| World content: drops, item stats, spawns, merchants, inns | `runtime/botrealm` (the JSON) and the generator in `tools/claude-version/botrealm` that writes it |
 | The launcher | `development-source/tools/OfflineDaoc.Dashboard` |
 | The new client: interface, world, controls | `source/new-client/godot/game` (see its [README](../source/new-client/README.md)) |
 | The client's converted content | `source/new-client/pipeline` |
 
 ## Good habits
 
-- **Change content through the data.** Edit the JSON in `runtime/true165` (or its generator), then START SERVER: the
+- **Change content through the data.** Edit the JSON in `runtime/botrealm` (or its generator), then START SERVER: the
   launcher applies it and keeps every save. Don't hand-edit a world database.
 - **Test on a copy.** Use a copy of your playable folder, or at least back up
   `runtime/data/opendaoc-165.sqlite3.db` first.

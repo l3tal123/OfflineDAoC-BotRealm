@@ -1,6 +1,6 @@
 """Merchant pages pass (owner 2026-10-31): the period Allakhazam merchant pages' "Goods for Sale" lists as stock.
 Input: merchant_goods_additions.json (same record format as merchant_stock_additions.json). Output: add-merchantgoods165.json
-in both true165 folders, and its dead-row repoints as tagged updates in true165-rules.json. Run AFTER make_vendor_content.py
+in both botrealm folders, and its dead-row repoints as tagged updates in true165-rules.json. Run AFTER make_vendor_content.py
 and make_missing_merchants.py: free slots are checked against the snapshot plus every installed add-*.json MerchantItem row."""
 import json
 import os
@@ -10,8 +10,8 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 HERE = os.path.dirname(os.path.abspath(__file__))
 CV = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))  # found from this script
-RUNTIME = os.path.join(CV, 'runtime', 'true165')
-TARGETS = [os.path.join(CV, 'tools', 'claude-version', 'true165'), RUNTIME]
+RUNTIME = os.path.join(CV, 'runtime', 'botrealm')
+TARGETS = [os.path.join(CV, 'tools', 'claude-version', 'botrealm'), RUNTIME]
 TAG = '1.65 period merchant stock (merchant pages pass)'
 OUTFILE = 'add-merchantgoods165.json'
 

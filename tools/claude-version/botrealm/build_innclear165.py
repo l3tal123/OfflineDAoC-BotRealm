@@ -1,4 +1,4 @@
-"""True 1.65 Mode: clear the traveler's inn sites and the walk to them (owner 2026-10-30: bogmen wandered into the Albion
+"""BotRealm: clear the traveler's inn sites and the walk to them (owner 2026-10-30: bogmen wandered into the Albion
 inn yard and the guards kept fighting them; "no aggressive mobs on the route or nearby ... a low level player is
 expected to get there"). As the old Rebuilt project did (inns.json "moved"), the same monsters, levels and numbers
 stay; only where they stand changes:
@@ -8,7 +8,7 @@ stay; only where they stand changes:
 Each moved monster is set on the ground at its new spot (navmesh height; owner 2026-10-30: moved with its old height,
 a blodfelag oathbreaker floated 200 units up near Huginfell). A monster an earlier run moved that no longer needs moving (the site moved) is put back where it spawned originally.
 Positions come from the normal database (the original spawn spots). Writes the moves as "updates" into
-true165-rules.json (tools copy and runtime\\true165), replacing earlier inn-clearing entries, so the launcher's content
+true165-rules.json (tools copy and runtime\\botrealm), replacing earlier inn-clearing entries, so the launcher's content
 refresh applies them to the existing 1.65 world.
 
     python -I build_innclear165.py
@@ -28,7 +28,7 @@ MARGIN = 300
 ROUTE_CLEAR, ROUTE_MOVE_TO = 700, 900
 MAX_CLIMB = 300   # a moved spawn stays within this of its own height (not up on a cliff)
 TAG = '1.65 inn clearing:'
-RULES = [os.path.join(HERE, 'true165-rules.json'), os.path.join(ROOT, 'runtime', 'true165', 'true165-rules.json')]
+RULES = [os.path.join(HERE, 'true165-rules.json'), os.path.join(ROOT, 'runtime', 'botrealm', 'true165-rules.json')]
 
 
 def nearest_on_segment(px, py, ax, ay, bx, by):

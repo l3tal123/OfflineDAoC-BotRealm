@@ -1,6 +1,6 @@
 # The new client
 
-True 1.65 plays only in the new client, a game client built in Godot 4 for this project. The launcher's ENTER REALM
+BotRealm plays only in the new client, a game client built in Godot 4 for this project. The launcher's ENTER REALM
 starts it; you never start it by hand.
 
 ## What it is

@@ -5,7 +5,7 @@ using System.Linq;
 namespace DOL.GS
 {
     /// <summary>
-    /// What a hired companion says (True 1.65 Mode; owner 2026-10-30: "talks in /say which is fine but make sure they talk
+    /// What a hired companion says (BotRealm; owner 2026-10-30: "talks in /say which is fine but make sure they talk
     /// about relevant things"). A companion is not one of the world's wandering bots: it never joins their talk about camps,
     /// destinations or grouping up. Now and then, near its player and out of combat, it says something about what is
     /// actually going on: its own health or power, the fight just won, a level gained, the place they are in, the road

@@ -5,7 +5,7 @@ using DOL.Database.Attributes;
 
 namespace DOL.GS
 {
-    /// <summary>How many times a True 1.65 Mode exchange listing has been relisted (Exchange165).</summary>
+    /// <summary>How many times a BotRealm exchange listing has been relisted (Exchange165).</summary>
     [DataTable(TableName = "offline_true165_relists")]
     public sealed class OfflineTrue165RelistRecord : DataObject
     {
@@ -15,7 +15,7 @@ namespace DOL.GS
     }
 
     /// <summary>
-    /// True 1.65 Mode Realm Exchange rules for bot sellers (owner 2026-10-29/30, plan section 5).
+    /// BotRealm Realm Exchange rules for bot sellers (owner 2026-10-29/30, plan section 5).
     /// - Pricing: valuable items ask more, within reason: base by level x quality x bonuses, from the plan's level-50
     ///   table (96% plate chest about 200 gold, 99% about 320, masterpiece about 495, masterpiece with 4 gems about 640),
     ///   capped. Crafting materials keep the normal per-unit price.
@@ -62,7 +62,7 @@ namespace DOL.GS
         };
 
         /// <summary>
-        /// An unsold bot listing in 1.65 Mode: relisted at 90%, then 80% of its first price; after two relists it goes
+        /// An unsold bot listing in BotRealm: relisted at 90%, then 80% of its first price; after two relists it goes
         /// back to the bot's backpack (or is deleted when that is full, as in normal mode). Returns true when handled.
         /// </summary>
         public static bool HandleExpired(DbInventoryItem item, long botId)

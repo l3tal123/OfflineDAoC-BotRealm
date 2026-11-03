@@ -1,4 +1,4 @@
-"""True 1.65 Mode: the dropped-loot bag as the 1.64 client drew it (owner 2026-11-01: "add the old bags as drop since
+"""BotRealm: the dropped-loot bag as the 1.64 client drew it (owner 2026-11-01: "add the old bags as drop since
 the bags were updated around catacombs"). Model 488 "All purpose bag" is items/loot.NIF in both clients, but the later
 client's is a 460-triangle bag with lootbag.dds; the 1.64 client's (DAoC 1.64.zip items/loot.NIF) is the old
 62-triangle one with items/bag.dds. Converted next to the later one and named in weapons.json as the model's

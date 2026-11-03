@@ -5,19 +5,53 @@ using System.Text.Json;
 namespace OfflineDaoc.Launcher;
 
 /// <summary>
-/// True 1.65 Mode (owner 2026-10-30): Classic and Shrouded Isles as they were in patch 1.65. The only changes from the
-/// original game are the bot and companion systems and the Realm Exchange. It runs from its own database
-/// (data\opendaoc-165.sqlite3.db, built from the normal one the first time it is switched on), so its characters, bots,
-/// Realm Exchange, guilds, houses, keeps and relics are separate, and each mode keeps its own progress.
-/// The mode marker data\world-mode.txt (key=value lines) says which mode is active; the new client's launcher reads
-/// the same file. Switching only happens with the server stopped, after a backup of the database being left.
+/// BotRealm (owner 2026-11-03: the project is no longer branded as "True 1.65"): a single-player Dark Age of Camelot
+/// world whose content base is patch 1.65-era Classic and Shrouded Isles, with the bot and companion systems, the
+/// Realm Exchange and the owner's quality-of-life and custom changes on top. The class and file names still carry the
+/// old "165"/"TrueMode" wording because the database and the content files are shared with earlier builds; only the
+/// names a player sees changed. It runs from its own database (data\opendaoc-165.sqlite3.db, built from the normal one
+/// the first time it is switched on), so its characters, bots, Realm Exchange, guilds, houses, keeps and relics are
+/// separate. The mode marker data\world-mode.txt (key=value lines) says which database is active; the new client
+/// reads the same file. Switching only happens with the server stopped, after a backup of the database being left.
 /// </summary>
 internal static class TrueMode
 {
-    public const string Name = "True 1.65 Mode";
+    public const string Name = "BotRealm";
     public const string Summary =
-        "Classic and Shrouded Isles as they were in patch 1.65. The only changes from the original game are the bot " +
-        "and companion systems and the Realm Exchange.";
+        "A single-player Dark Age of Camelot world built around autonomous bots. Its content base is the Classic and " +
+        "Shrouded Isles game of the 1.65 era, with the bot and companion systems, the Realm Exchange and further " +
+        "quality-of-life and custom changes on top.";
+
+    /// <summary>The content folder in a playable install (owner 2026-11-03: renamed from the old "true165").</summary>
+    public const string ContentFolder = "botrealm";
+    public const string LegacyContentFolder = "true165";
+
+    /// <summary>
+    /// The folder holding the world content JSON. Prefers the current name and falls back to the old one, so an
+    /// install that has not been migrated yet still starts. <see cref="MigrateContentFolder"/> renames the old folder.
+    /// </summary>
+    public static string ContentDirectory(string root)
+    {
+        string current = Path.Combine(root, ContentFolder);
+        if (Directory.Exists(current))
+            return current;
+        string legacy = Path.Combine(root, LegacyContentFolder);
+        return Directory.Exists(legacy) ? legacy : current;
+    }
+
+    /// <summary>Renames an install's old true165 content folder to botrealm, once. Leaves a read-only install alone.</summary>
+    public static void MigrateContentFolder(string root)
+    {
+        try
+        {
+            string current = Path.Combine(root, ContentFolder);
+            string legacy = Path.Combine(root, LegacyContentFolder);
+            if (!Directory.Exists(current) && Directory.Exists(legacy))
+                Directory.Move(legacy, current);
+        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
+    }
     public const string NormalDatabase = "opendaoc.sqlite3.db";
     public const string Database165 = "opendaoc-165.sqlite3.db";
     public const string NormalConfig = @"config\serverconfig.xml";
@@ -29,7 +63,7 @@ internal static class TrueMode
     public static string MarkerPath(string root) => Path.Combine(root, "data", "world-mode.txt");
 
     /// <summary>
-    /// OfflineDAoC True 1.65 (owner 2026-10-31) has no normal mode: always True 1.65 Mode. The marker is kept at
+    /// The launcher (owner 2026-10-31) has no normal mode: always the BotRealm database. The marker is kept at
     /// mode=1.65 (the server and the new client read it); the normal-mode data is archived in normal-mode-archive\.
     /// </summary>
     public static Mode Read(string root)
@@ -80,7 +114,7 @@ internal static class TrueMode
     }
 
     /// <summary>
-    /// Switches mode: backs up the database being left, builds the True 1.65 database on the first switch-on, and writes
+    /// Switches mode: backs up the database being left, builds the BotRealm database on the first switch-on, and writes
     /// the marker last (temp file + rename), so a failure leaves the previous mode in place.
     /// </summary>
     private static void Backup(string root, Mode mode)
@@ -100,12 +134,12 @@ internal static class TrueMode
             File.Delete(old);
     }
 
-    // ---- building the True 1.65 database (the launcher copy of tools\claude-version\true165\derive_true165_database.py)
+    // ---- building the BotRealm database (the launcher copy of tools\claude-version\botrealm\derive_true165_database.py)
 
     private sealed record Rules(Dictionary<string, string> Settings, RemoveRules Remove, List<string> StarterGuilds,
         List<UpdateRule>? Updates);
 
-    /// <summary>A generic SQL update of period values (e.g. medallions worn on the neck in 1.65).</summary>
+    /// <summary>A generic SQL update of period values (e.g. medallions worn on the neck in the 1.65-era world).</summary>
     private sealed record UpdateRule(string Sql, string Reason);
 
     private sealed record RemoveRules(Dictionary<string, string> MobClasses, Dictionary<string, string> MobPackages,
@@ -117,7 +151,7 @@ internal static class TrueMode
 
     public static void Derive(string root, Action<string> progress)
     {
-        string folder = Path.Combine(root, "true165");
+        string folder = ContentDirectory(root);
         var json = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
         Rules rules = JsonSerializer.Deserialize<Rules>(File.ReadAllText(Path.Combine(folder, "true165-rules.json")), json)
                       ?? throw new InvalidDataException("true165-rules.json");
@@ -155,21 +189,21 @@ internal static class TrueMode
             Exec(dst, "VACUUM");
             using var check = new SQLiteCommand("PRAGMA quick_check", dst);
             if (check.ExecuteScalar() as string != "ok")
-                throw new InvalidDataException("The new True 1.65 database failed its check.");
+                throw new InvalidDataException("The new world database failed its check.");
         }
         SQLiteConnection.ClearAllPools();
         File.Move(tmp, target, true);
         WriteConfig(root);
     }
 
-    // ---- keeping an existing True 1.65 world up to date (owner 2026-10-30: test the new menus without losing the world)
+    // ---- keeping an existing world up to date (owner 2026-10-30: test the new menus without losing the world)
 
     private const string ContentTable = "offline_true165_content";
 
-    /// <summary>A fingerprint of the True 1.65 data files (rules, drops, add-*.json) the database was built from.</summary>
+    /// <summary>A fingerprint of the world content files (rules, drops, add-*.json) the database was built from.</summary>
     public static string ContentStamp(string root)
     {
-        string folder = Path.Combine(root, "true165");
+        string folder = ContentDirectory(root);
         using var sha = System.Security.Cryptography.SHA256.Create();
         foreach (string path in Directory.EnumerateFiles(folder, "*.json").Order(StringComparer.OrdinalIgnoreCase))
         {
@@ -200,7 +234,7 @@ internal static class TrueMode
     }
 
     /// <summary>
-    /// Brings an existing True 1.65 database up to the current data files without touching anyone's progress:
+    /// Brings an existing world database up to the current data files without touching anyone's progress:
     /// characters, companions, bots, the Realm Exchange, guilds, houses, keeps and relics stay as they are. Only the
     /// world content is re-applied (settings, removals, period updates, drops, and the added rows such as the inn
     /// people, whose changed values are written over). Runs only when the data files changed since the last build or
@@ -210,7 +244,7 @@ internal static class TrueMode
     public static bool Refresh(string root, Action<string> progress)
     {
         Mode mode = Read(root);
-        string folder = Path.Combine(root, "true165");
+        string folder = ContentDirectory(root);
         if (!mode.Is165 || !File.Exists(mode.DatabasePath) || !File.Exists(Path.Combine(folder, "true165-rules.json")))
             return false;
         string stamp = ContentStamp(root);
@@ -287,7 +321,7 @@ internal static class TrueMode
         int n = Exec(c, "UPDATE ServerProperty SET Value=@v WHERE lower(`Key`)=@k", ("@v", value), ("@k", key));
         if (n == 0)
             Exec(c, "INSERT INTO ServerProperty (`Key`,Value,DefaultValue,Category,Description,ServerProperty_ID,LastTimeRowUpdated) " +
-                    "VALUES (@k,@v,@v,'world','True 1.65 Mode setting',@k,@t)",
+                    "VALUES (@k,@v,@v,'world','BotRealm setting',@k,@t)",
                 ("@k", key), ("@v", value), ("@t", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")));
     }
 
@@ -310,7 +344,7 @@ internal static class TrueMode
     }
 
     /// <summary>
-    /// The period monster drops (drops165.json, from tools\claude-version\true165\build_drops165.py; content165.apply_drops
+    /// The period monster drops (drops165.json, from tools\claude-version\botrealm\build_drops165.py; content165.apply_drops
     /// does the same). Each item joins the monster's own loot template and its per-kill item cap is raised to fit.
     /// </summary>
     private static void AddDrops(SQLiteConnection c, string path)
@@ -372,7 +406,7 @@ internal static class TrueMode
     }
 
     /// <summary>
-    /// Generic True 1.65 rows to add: every add-*.json in the folder ({table, key, reason, rows}), e.g. the inn people
+    /// Generic content rows to add: every add-*.json in the folder ({table, key, reason, rows}), e.g. the inn people
     /// (content165.apply_additions does the same). A row whose key is already there is left alone.
     /// </summary>
     private static void AddRows(SQLiteConnection c, string folder)

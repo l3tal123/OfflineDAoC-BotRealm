@@ -27,7 +27,7 @@ func _ready() -> void:
 	box.add_theme_constant_override("separation", 10)
 	_panel.add_child(box)
 	var title := Label.new()
-	title.text = "Offline DAoC True 1.65"
+	title.text = "BotRealm"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 

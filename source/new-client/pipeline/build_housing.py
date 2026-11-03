@@ -1,4 +1,4 @@
-"""True 1.65 Mode: the PERIOD player-housing model library, from the real 1.64 client only (owner 2026-11-02: "i only
+"""BotRealm: the PERIOD player-housing model library, from the real 1.64 client only (owner 2026-11-02: "i only
 want the real 1.65 housing areas and models" - the 1.64 client's phousing data: its non-HD houses, its ph_houses.csv /
 ph_textures.csv and its 271 house items; no later-client HD / Tier 5 / Yule models, no post-1.64 furniture).
 

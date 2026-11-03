@@ -3,9 +3,9 @@ using DOL.GS.PacketHandler;
 namespace DOL.GS
 {
     /// <summary>
-    /// The innkeeper of a True 1.65 Mode traveler's inn (owner 2026-10-30): talking to them opens the companion hiring
-    /// window (Hire165), where companions are hired, summoned, dismissed and released. Placed only in the 1.65 database
-    /// (tools/claude-version/true165/build_inns165.py).
+    /// The innkeeper of a BotRealm traveler's inn (owner 2026-10-30): talking to them opens the companion hiring
+    /// window (Hire165), where companions are hired, summoned, dismissed and released. Placed only in the BotRealm database
+    /// (tools/claude-version/botrealm/build_inns165.py).
     /// </summary>
     public class Innkeeper165 : GameNPC
     {

@@ -1,4 +1,4 @@
-"""True 1.65 housing prices and decorator stock from period sources (housing research 2026-11-02).
+"""BotRealm housing prices and decorator stock from period sources (housing research 2026-11-02).
 
 - Rent: 2% of the deed price a week (Herald's revised Foundations price list, 2003-06-23, gamebanshee.com/fdah; the
   in-game help text "Paying Rent"): cottage 20g, house 200g, villa 800g, mansion 2p. The world had 20g / 35g / 60g / 1p.
@@ -80,7 +80,7 @@ for idn, price in PRICE_FIX.items():
 print(f'decorator templates {len(items)} ({sum(1 for i in items if "modelguess" in i["PackageID"])} model guesses), '
       f'deed and price updates {len(updates)}, rent settings {SETTINGS}')
 if write:
-    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'true165')):
+    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'botrealm')):
         json.dump({'table': 'ItemTemplate', 'key': 'Id_nb', 'reason': f'{TAG} the Albion and Midgard decorators\' period '
                    'paintings, tapestries and arches (build_housingshop165.py)', 'rows': items},
                   open(os.path.join(folder, 'add-housingdecor165.json'), 'w', encoding='utf-8', newline='\n'), indent=1)

@@ -1,7 +1,7 @@
-"""End-to-end test of the True 1.65 update path on a small fake game (no network, nothing outside --work).
+"""End-to-end test of the BotRealm update path on a small fake game (no network, nothing outside --work).
 
     python -I test_patch_true165.py --work <empty scratch folder> --world <a clean opendaoc-165.sqlite3.db>
-                                    --repo <the True165 repository>
+                                    --repo <this repository>
 
 It builds a fake v0.1 and v0.2 (changed, added and removed files in the game and the client), installs v0.1 with the
 downloader, adds a player's save (world, login, client settings), and checks the update: a changed file stops it (and
@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PS1 = HERE / "Get-OfflineDAoC-True165.ps1"
+PS1 = HERE / "Get-BotRealm.ps1"
 SAVE_FILES = ["runtime/data/opendaoc-165.sqlite3.db", "runtime/account.txt", "new-client/save/settings.cfg"]
 
 
@@ -53,11 +53,11 @@ def downloader(version, assets, *args, env=None, expect=0):
 
 def make_game(root: Path, world: Path, version: str):
     for rel, text in {
-        "START OFFLINE DAOC TRUE 1.65.cmd": "@echo off\r\n",
-        "runtime/OfflineDAoC.exe": "launcher", "runtime/server/CoreServer.exe": "server",
+        "START BOTREALM.cmd": "@echo off\r\n",
+        "runtime/BotRealm.exe": "launcher", "runtime/server/CoreServer.exe": "server",
         "runtime/server/config/serverconfig-165.xml": "<AutoAccountCreation>True</AutoAccountCreation>",
-        "runtime/true165/true165-rules.json": "{}", "runtime/true165/drops165.json": '{"drops": 1}',
-        "runtime/true165/old165.json": "removed in 0.2", "tools/dotnet/dotnet.exe": "dotnet",
+        "runtime/botrealm/true165-rules.json": "{}", "runtime/botrealm/drops165.json": '{"drops": 1}',
+        "runtime/botrealm/old165.json": "removed in 0.2", "tools/dotnet/dotnet.exe": "dotnet",
     }.items():
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
         (root / rel).write_text(text, encoding="utf-8")
@@ -67,7 +67,7 @@ def make_game(root: Path, world: Path, version: str):
 
 def make_client(root: Path, version: str):
     c = root / "new-client"
-    for rel, data in {"VERSION.txt": f"Offline DAoC True 1.65 v{version} new client\r\n".encode(),
+    for rel, data in {"VERSION.txt": f"BotRealm v{version} new client\r\n".encode(),
                       "godot/project.godot": b"x", "godot/content/.gdignore": b"",
                       "godot/.godot/mono/temp/bin/Debug/MMOEngine.dll": b"dll",
                       "godot/content/a.png": os.urandom(3_000_000), "godot/content/b.png": os.urandom(3_000_000),
@@ -93,11 +93,11 @@ def main():
     make_client(w / "client1", "0.1")
     shutil.copytree(w / "game1", w / "game2")
     shutil.copytree(w / "client1", w / "client2")
-    (w / "game2/runtime/true165/drops165.json").write_text('{"drops": 2}', encoding="utf-8")       # changed
-    (w / "game2/runtime/true165/new165.json").write_text("added in 0.2", encoding="utf-8")         # added
-    (w / "game2/runtime/true165/old165.json").unlink()                                             # removed
-    (w / "game2/VERSION.txt").write_text("Offline DAoC True 1.65 v0.2\r\n", encoding="utf-8")       # added
-    (w / "client2/new-client/VERSION.txt").write_text("Offline DAoC True 1.65 v0.2 new client\r\n", encoding="utf-8")
+    (w / "game2/runtime/botrealm/drops165.json").write_text('{"drops": 2}', encoding="utf-8")       # changed
+    (w / "game2/runtime/botrealm/new165.json").write_text("added in 0.2", encoding="utf-8")         # added
+    (w / "game2/runtime/botrealm/old165.json").unlink()                                             # removed
+    (w / "game2/VERSION.txt").write_text("BotRealm v0.2\r\n", encoding="utf-8")                      # added
+    (w / "client2/new-client/VERSION.txt").write_text("BotRealm v0.2 new client\r\n", encoding="utf-8")
     (w / "client2/new-client/godot/content/a.png").write_bytes(os.urandom(3_000_000))             # changed (big)
     for v, n in (("0.1", "1"), ("0.2", "2")):
         run(py + [str(HERE / "make_release_true165.py"), "--game", w / f"game{n}", "--client", w / f"client{n}",
@@ -128,13 +128,13 @@ def main():
             if rel in SAVE_FILES or rel.startswith("runtime/data/"):
                 continue
             assert have.get(rel) == h, f"{rel} is not the v0.2 file"
-        assert "runtime/true165/old165.json" not in have, "the removed file is still there"
+        assert "runtime/botrealm/old165.json" not in have, "the removed file is still there"
         for rel in SAVE_FILES:
             assert have.get(rel) == save[rel], f"the save file {rel} was changed"
 
     # ---- 1. a file changed on this PC: nothing is touched; the fresh install brings the save over
     g = install("g1")
-    (g / "runtime/true165/drops165.json").write_text("my own edit", encoding="utf-8")
+    (g / "runtime/botrealm/drops165.json").write_text("my own edit", encoding="utf-8")
     before = tree(g)
     out = downloader("0.2", w / "assets", "-Mode", "update", "-Update", g)
     assert "were changed on this PC" in out, out[-800:]
@@ -149,7 +149,7 @@ def main():
     # ---- 2. a failure halfway puts everything back
     g = install("g2")
     before = tree(g)
-    env = dict(os.environ, OFFLINEDAOC_TEST_FAIL_AFTER="2")
+    env = dict(os.environ, BOTREALM_TEST_FAIL_AFTER="2")
     out = downloader("0.2", w / "assets", "-Mode", "update", "-Update", g, env=env, expect=1)
     assert "back as it was" in out, out[-800:]
     assert tree(g) == before, "the failed update was not undone"
@@ -162,8 +162,8 @@ def main():
     assert "updated to" in out, out[-800:]
     check_is_v02(g, save)
     backups = list((g / "patch-backups").iterdir())
-    assert len(backups) == 1 and (backups[0] / "runtime/true165/drops165.json").read_text() == '{"drops": 1}'
-    assert (backups[0] / "runtime/true165/old165.json").is_file(), "the removed file was not backed up"
+    assert len(backups) == 1 and (backups[0] / "runtime/botrealm/drops165.json").read_text() == '{"drops": 1}'
+    assert (backups[0] / "runtime/botrealm/old165.json").is_file(), "the removed file was not backed up"
     print("3 ok: the update gives exactly v0.2, the save is untouched, the replaced files are backed up")
     out = downloader("0.2", w / "assets", "-Mode", "update", "-Update", g)
     assert "already up to date" in out, out[-800:]
@@ -172,7 +172,7 @@ def main():
     # ---- 5. a half-applied update (a crash after some files) finishes on the next run
     g = install("g5")
     save = {rel: sha(g / rel) for rel in SAVE_FILES}
-    shutil.copyfile(w / "game2/runtime/true165/drops165.json", g / "runtime/true165/drops165.json")
+    shutil.copyfile(w / "game2/runtime/botrealm/drops165.json", g / "runtime/botrealm/drops165.json")
     shutil.copyfile(w / "client2/new-client/VERSION.txt", g / "new-client/VERSION.txt")
     out = downloader("0.2", w / "assets", "-Mode", "update", "-Update", g)
     assert "updated to" in out, out[-800:]

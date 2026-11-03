@@ -1,7 +1,7 @@
 # Period 1.64 / 1.65 pregame - design note
 
 **Status: built** (`godot/game/pregame_164.gd`, art from `pipeline/build_pregame_164.py`): Choose Your Realm, character
-select, the one-page creation and the summary. The login panel is still the later client's. True 1.65 Mode only.
+select, the one-page creation and the summary. The login panel is still the later client's. BotRealm only.
 
 Goal: the realm selection, character select and creation screens as the period 1.64 / 1.65 client showed them, in place
 of the later client's 3D screens.
@@ -12,7 +12,7 @@ of the later client's 3D screens.
   `data\login.mpk`, `data\title.tga` / `camback.tga`, `charman\summary.mpk` (summary.txt), `charman\names.dat`, and its
   `DAoC Manual.pdf` (Character: Select & Create, pages 8-18).
 - The control positions, button sheet states and help texts, read from the 1.64 `game.dll` / `login.dll` (the layout
-  extract is kept in the True 1.65 work folder, `TRUE165_WORK/work/164/pregame-layout/1.64 PREGAME LAYOUT.txt`).
+  extract is kept in the BotRealm work folder, `TRUE165_WORK/work/164/pregame-layout/1.64 PREGAME LAYOUT.txt`).
 
 ## What the period pregame was
 
@@ -40,7 +40,7 @@ grey (normal), gold (hover), white, red (pressed).
 
 ## Decisions
 
-- True 1.65 Mode only, base classes only.
+- BotRealm only, base classes only.
 - Looks: the period choices only - face (the classic look), hair colour, height. The later client's Catacombs customize
   page is not used.
 - Attributes are spent at creation (Points Left + 8 stats). The client mirrors the server's rules exactly

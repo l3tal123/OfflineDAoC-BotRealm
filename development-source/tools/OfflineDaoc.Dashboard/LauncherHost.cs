@@ -6,9 +6,9 @@ using OfflineDaoc.Launcher;
 namespace OfflineDaoc.Dashboard;
 
 /// <summary>
-/// The launcher half of the program: it owns the game server process and the game client process, runs the True 1.65
-/// pre-flight (mode check + content refresh) before a start, keeps the redirected server console, and reports all of
-/// it as JSON for the web UI. It is the same behaviour the old WinForms launcher had, without the WinForms.
+/// The launcher half of the program: it owns the game server process and the game client process, runs the BotRealm
+/// pre-flight (world check + content refresh) before a start, keeps the redirected server console, and reports all of
+/// it as JSON for the web UI. It is the same behaviour the old launcher had, without the WinForms.
 /// </summary>
 internal sealed class LauncherHost : IDisposable
 {
@@ -50,7 +50,8 @@ internal sealed class LauncherHost : IDisposable
         _serverExecutable = Path.Combine(_serverDirectory, "CoreServer.exe");
         _logsDirectory = Path.Combine(_root, "logs");
         _database = options.DatabasePath;
-        _log.Add($"[launcher] Offline DAoC launcher {DisplayVersion} — {_root}");
+        TrueMode.MigrateContentFolder(_root);
+        _log.Add($"[launcher] BotRealm launcher {DisplayVersion} — {_root}");
     }
 
     internal IReadOnlyList<string> LogSince(long after, out long next) => _log.Since(after, out next);
@@ -185,16 +186,18 @@ internal sealed class LauncherHost : IDisposable
         try
         {
             TrueMode.Mode mode = TrueMode.Read(_root);
-            if (mode.Is165 && File.Exists(Path.Combine(_root, "true165", "true165-rules.json")))
+            TrueMode.MigrateContentFolder(_root);
+            string contentFolder = TrueMode.ContentDirectory(_root);
+            if (mode.Is165 && File.Exists(Path.Combine(contentFolder, "true165-rules.json")))
             {
                 try
                 {
                     if (TrueMode.Refresh(_root, message => _log.Add("[launcher] " + message)))
-                        _log.Add("[launcher] The True 1.65 world content was updated from the data files.");
+                        _log.Add("[launcher] The world content was updated from the data files.");
                 }
                 catch (Exception exception)
                 {
-                    _log.Add("[launcher] ERROR: the True 1.65 content update failed, so the server was not started: " + exception.Message);
+                    _log.Add("[launcher] ERROR: The world content update failed, so the server was not started: " + exception.Message);
                     _refreshRunning = false;
                     SetState("Stopped");
                     _lastNotice = "The content update failed. The database is unchanged; see the log.";

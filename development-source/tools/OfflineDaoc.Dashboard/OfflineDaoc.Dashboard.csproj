@@ -1,22 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    Offline DAoC BotRealm: the launcher and live dashboard. One program, two halves:
-      - this host: process control (server and game client), the True 1.65 pre-flight, SQLite reads/writes and the
+    BotRealm: the launcher and live dashboard. One program, two halves:
+      - this host: process control (server and game client), the BotRealm pre-flight, SQLite reads/writes and the
         state-165 file broker, all served as a small loopback HTTP API;
       - wwwroot/: the UI, plain HTML/CSS/JS with Vue 3 vendored, opened in the browser;
-      - Launcher/: the launcher-only logic (True 1.65 mode and content refresh, the rolling server console log, the
+      - Launcher/: the launcher-only logic (world content and refresh, the rolling server console log, the
         Godot client launcher, the XP-rate and server-property writes, the bot character generator). Those files carry
-        no UI and came over from the retired WinForms launcher, which is no longer in the repository.
+        no UI and came over from the retired old launcher, which is no longer in the repository.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>OfflineDAoC</AssemblyName>
+    <AssemblyName>BotRealm</AssemblyName>
     <RootNamespace>OfflineDaoc.Dashboard</RootNamespace>
-    <Product>Offline DAoC: Classic + Shrouded Isles</Product>
-    <AssemblyTitle>Offline DAoC Launcher and Dashboard</AssemblyTitle>
+    <Product>BotRealm</Product>
+    <AssemblyTitle>BotRealm Launcher and Dashboard</AssemblyTitle>
     <Version>0.3.0</Version>
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>

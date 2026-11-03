@@ -1,5 +1,5 @@
-"""True 1.65 period vendor items: ItemTemplate rows for the Allakhazam item pages (Wayback <= 2003-11) that list
-merchants and that the True 1.65 world does not have. Read-only on the world snapshot; writes only into this folder.
+"""BotRealm period vendor items: ItemTemplate rows for the Allakhazam item pages (Wayback <= 2003-11) that list
+merchants and that the BotRealm world does not have. Read-only on the world snapshot; writes only into this folder.
 
     python -I build_vendoritems165.py
  -> add-vendoritems165.json   (rows for the launcher's content loader: {table, key, reason, rows})
@@ -378,7 +378,7 @@ def main():
         rows.append(row)
 
     data = {'table': 'ItemTemplate', 'key': 'Id_nb',
-            'reason': 'True 1.65 period vendor items from Allakhazam item pages (Wayback <= 2003-11), stats from the page',
+            'reason': 'BotRealm period vendor items from Allakhazam item pages (Wayback <= 2003-11), stats from the page',
             'rows': rows}
     json.dump(data, open(OUT, 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
     json.dump(report, open(REPORT, 'w', encoding='utf-8'), indent=1, ensure_ascii=False)

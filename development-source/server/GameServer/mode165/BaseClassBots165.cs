@@ -3,7 +3,7 @@ using DOL.GS.PacketHandler;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode gamebots start as a base class, like a 1.65 player (owner 2026-10-30).
+    /// BotRealm gamebots start as a base class, like a 1.65 player (owner 2026-10-30).
     /// - The advanced class the launcher rolled for a new bot is its pre-decided class (record PlannedClassId). When the
     ///   fresh level-1 bot first enters the world it becomes that class's base class (Fighter, Acolyte, Viking, Seer,
     ///   Guardian, Naturalist...), so the launcher shows the base class.
@@ -18,7 +18,7 @@ namespace DOL.GS
         public const int PromotionLevel = 5;
         private static readonly DOL.Logging.Logger Log = DOL.Logging.LoggerManager.Create(typeof(BaseClassBots165));
 
-        /// <summary>A fresh, never-placed level-1 gamebot record in 1.65 Mode: keep the rolled class as the plan and
+        /// <summary>A fresh, never-placed level-1 gamebot record in BotRealm: keep the rolled class as the plan and
         /// start as its base class. Returns true when the record changed.</summary>
         public static bool PrepareFresh(OfflineWorldBotRecord record)
         {

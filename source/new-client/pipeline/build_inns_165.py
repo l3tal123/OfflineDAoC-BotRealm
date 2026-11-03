@@ -1,4 +1,4 @@
-"""True 1.65 Mode: the roadside inns' scenery, copied 1:1 from the original-client
+"""BotRealm: the roadside inns' scenery, copied 1:1 from the original-client
 layouts (<TRUE165_WORK>/layouts/inn_*.json, pipeline/paths.py - the fixture rows it writes into the original
 client's zone archives). The server's inn NPCs, props and horn click target stand on these spots.
 

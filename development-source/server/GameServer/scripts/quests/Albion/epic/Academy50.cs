@@ -1181,7 +1181,7 @@ namespace DOL.GS.Quests.Albion
 			Esmond = Epics165.FindNpc(Esmond165, eRealm.Albion, 1);
 			if (Esmond == null)
 			{
-				log.Warn("True 1.65 Mode: " + Esmond165 + " not found, \"" + questTitle + " (level 50)\" not loaded");
+				log.Warn("BotRealm: " + Esmond165 + " not found, \"" + questTitle + " (level 50)\" not loaded");
 				return;
 			}
 			RitualDagger165 = GameServer.Database.FindObjectByKey<DbItemTemplate>("cq_jeweled_ritual_dagger");
@@ -1190,7 +1190,7 @@ namespace DOL.GS.Quests.Albion
 			GameEventMgr.AddHandler(Esmond, GameObjectEvent.Interact, new DOLEventHandler(TalkToEsmond165));
 			Esmond.AddQuestToGive(typeof(Academy_50));
 			if (log.IsInfoEnabled)
-				log.Info("Quest \"" + questTitle + " (level 50)\" initialized (True 1.65 Mode, starts with " + Esmond165 + ")");
+				log.Info("Quest \"" + questTitle + " (level 50)\" initialized (BotRealm, starts with " + Esmond165 + ")");
 		}
 
 		private static void Unload165()

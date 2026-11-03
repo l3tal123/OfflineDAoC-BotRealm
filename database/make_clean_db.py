@@ -1,17 +1,17 @@
-"""Makes the CLEAN True 1.65 world database that ships with OfflineDAoC True 1.65 (and that this repository carries,
+"""Makes the CLEAN BotRealm world database that ships with BotRealm (and that this repository carries,
 zipped, as database/opendaoc-165.sqlite3.zip).
 
 It copies a world database with SQLite's backup API (the source is opened read-only and never changed), then gives the
 copy a fresh start, the same rules the launcher's TrueMode.FreshSlate uses:
-- every save table in runtime/true165/progress-policy.json emptied (accounts, characters, items, money, bots, hired
+- every save table in runtime/botrealm/progress-policy.json emptied (accounts, characters, items, money, bots, hired
   companions, guilds except the starter guilds, exchange listings/sales/escrow, houses, quests, tasks, effects) and
   every log/state table in its ClearTables (news, logs, run state...);
-- keeps, doors and relics back to their defaults (runtime/true165/release-world-defaults.json; relics on their home
+- keeps, doors and relics back to their defaults (runtime/botrealm/release-world-defaults.json; relics on their home
   shrines), houses unowned;
 - auto account creation on, experience 1x, nobody made GM, population target 0 (the launcher sets it when bots are
   added);
 - the content-tracking tables (offline_true165_content, offline_true165_added, offline_true165_removed) are KEPT, so
-  the first START SERVER doesn't apply the True 1.65 content again.
+  the first START SERVER doesn't apply the world content again.
 Then VACUUM, an integrity check, a check that no save table has rows left, and the zip.
 
 Usage (from the repository root, with the server stopped):
@@ -29,7 +29,7 @@ import zipfile
 from datetime import datetime
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-TRUE165 = os.path.join(ROOT, 'runtime', 'true165')
+CONTENT = os.path.join(ROOT, 'runtime', 'botrealm')
 DB_NAME = 'opendaoc-165.sqlite3.db'
 
 # Kept on purpose: content and its tracking, not progress.
@@ -49,9 +49,9 @@ def main():
     # Never copy a world the server has open (2026-10-31: copying a live database once locked the running server).
     if sys.platform == 'win32' and 'coreserver.exe' in subprocess.run(['tasklist'], capture_output=True, text=True).stdout.lower():
         sys.exit('The server (CoreServer.exe) is running. Stop it first.')
-    policy = json.load(open(os.path.join(TRUE165, 'progress-policy.json'), encoding='utf-8'))
-    defaults = json.load(open(os.path.join(TRUE165, 'release-world-defaults.json'), encoding='utf-8'))
-    rules = json.load(open(os.path.join(TRUE165, 'true165-rules.json'), encoding='utf-8'))
+    policy = json.load(open(os.path.join(CONTENT, 'progress-policy.json'), encoding='utf-8'))
+    defaults = json.load(open(os.path.join(CONTENT, 'release-world-defaults.json'), encoding='utf-8'))
+    rules = json.load(open(os.path.join(CONTENT, 'true165-rules.json'), encoding='utf-8'))
     starter = rules.get('starter_guilds') or []
 
     work = tempfile.mkdtemp(prefix='clean165-')

@@ -1,6 +1,6 @@
-# The True 1.65 new client - source
+# The BotRealm new client - source
 
-The new client is the game client for the Offline DAoC True 1.65 server, built in Godot 4.7.2 (.NET). It speaks the
+The new client is the game client for the BotRealm server, built in Godot 4.7.2 (.NET). It speaks the
 DAoC network protocol of the original client (game client version 1.127) to the server, which is the authority on
 everything: the client draws what the server's packets say. Players get it ready to play from the release download.
 
@@ -32,7 +32,7 @@ original game client's files and comes with the release download.
    `godot/content/.gdignore` must stay: Godot must not import the content folder.
 3. Build the C# code: `tools\build_csharp.ps1` (again after every change to a `.cs` file - starting the game with
    `--path` does not compile C#).
-4. Start the True 1.65 server (its launcher), then run
+4. Start the BotRealm server (its launcher), then run
    `Godot_v4.7.2-stable_mono_win64.exe --path godot -- --server=127.0.0.1 --account=<name> --password=<password> --world-mode=1.65`.
    `--world-mode=1.65` is required: without it the client falls back to code paths of the discontinued normal mode.
 
@@ -69,17 +69,17 @@ needs a missing one stops and says which):
 | Variable | What | Default |
 |---|---|---|
 | `DAOC_CLIENT` | the DAoC client's files (the 1.127-era client's `app` folder) | none in the repository - set it |
-| `OFFLINEDAOC_SERVER` | the True 1.65 server's tree (its source and runtime) | this repository's root |
-| `OFFLINEDAOC_WORLD_DB` | the True 1.65 world database | `<server>/runtime/data/opendaoc-165.sqlite3.db` (the repository has it compressed under `database/`) |
+| `OFFLINEDAOC_SERVER` | the BotRealm server's tree (its source and runtime) | this repository's root |
+| `OFFLINEDAOC_WORLD_DB` | the BotRealm world database | `<server>/runtime/data/opendaoc-165.sqlite3.db` (the repository has it compressed under `database/`) |
 | `PERIOD_DATA` | the period data archive (Allakhazam / Uthgard / Warcry pages) | not in the repository - set it |
 | `DAOC_164_ZIP` | the real 1.64 client, `DAoC 1.64.zip` | not in the repository - set it |
 | `TRUE165_WORK` | the 1.65 layouts and extracts (inn layouts, loading pictures) | not in the repository - set it |
 
-The database-built data the True 1.65 game reads while playing (classes, spells, styles, abilities for the tooltips;
-`content/items/model_slots.json`) is built from the True 1.65 world database; the rest of the database-built content
+The database-built data the BotRealm client reads while playing (classes, spells, styles, abilities for the tooltips;
+`content/items/model_slots.json`) is built from the BotRealm world database; the rest of the database-built content
 (items, quests, loot, NPC lists, monster spells) is only used by the client's offline test mode.
 
-The True 1.65 pieces come from the real 1.64 client (`DAoC 1.64.zip`): the classic figures (`build_classic_races.py`,
+The period content comes from the real 1.64 client (`DAoC 1.64.zip`): the classic figures (`build_classic_races.py`,
 `build_classic_armor.py`), the pregame art (`build_pregame_164.py`), and the spell table (`build_spell_fx_164.py` - the
 1.64 spells.csv / speffects.csv / spnifs.csv and effect NIFs over the later client's, written to
 `content/spells/spell_fx_165.json`). After a model or effect rebuild, repack the scenes:
@@ -87,7 +87,7 @@ The True 1.65 pieces come from the real 1.64 client (`DAoC 1.64.zip`): the class
 
 ## Rules for working on it (people and LLMs)
 
-- **True 1.65 Mode only.** Normal mode is discontinued; some of its code paths are still in the client (behind
+- **BotRealm only.** Normal mode is discontinued; some of its code paths are still in the client (behind
   `Server.world_mode`), but nothing new goes there.
 - **Period first.** The 1.64 / 1.65 client is the reference: its game.dll layouts, its art, its data tables (check the
   1.64 row before "fixing" a missing spell glow or sound - many differ from the later client's). Use the client's own
@@ -100,6 +100,6 @@ The True 1.65 pieces come from the real 1.64 client (`DAoC 1.64.zip`): the class
 - **Seamless zones.** At a zone crossing everything moves by the zone offset (`zone_viewer._cross` -> each system's
   `rebase(d)`); anything that holds world positions must implement `rebase`.
 - **UI text.** In-game interface text is ALL CAPS bold, as the client's; the pregame uses the 1.64 art and texts.
-- **Quest quality of life** (markers, objective colours, the quest guide) is the same in True 1.65 as it was in
+- **Quest quality of life** (markers, objective colours, the quest guide) is the same in BotRealm as it was in
   normal mode: never gate it by the mode.
 - **Performance.** See `docs/PERFORMANCE NOTES.md` (crowds of hundreds, draw ranges, pooled effects).

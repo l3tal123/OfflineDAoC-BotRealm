@@ -1,4 +1,4 @@
-OFFLINE DAOC TRUE 1.65 v0.1 - QUICK COMMANDS AND LAUNCHER SHORTCUTS
+BOTREALM - QUICK COMMANDS AND LAUNCHER SHORTCUTS
 
 On the launcher, click + Lv.1 under a realm to add gamebots:
   Normal click: +1 bot
@@ -94,11 +94,11 @@ REALM EXCHANGE (beside the traveler's inn)
 Right-click the broker, then click a choice (or /whisper it):
   [Browse the exchange]   [Manage my listings]   [Claim sale proceeds]
 
-GM ONLY IN TRUE 1.65
+GM ONLY
 /tele, /tc, /grind, /mobs, /spawn, /raid, /freelevel, /vault,
 /buff, /xp, /rp, /hardcore, /classrog, /bountylocation, /bountyrent, /dropmr, /api,
 /switch, /craftmacro, /faction, and the launcher's "Teleport to" on a bot
-  A normal player gets "That command does not exist in True 1.65 Mode."
+  A normal player gets "That command does not exist."
   Companions are hired at the inns instead of /spawn and /raid.
 
 These controls apply to your hired companions, not the autonomous gamebots.

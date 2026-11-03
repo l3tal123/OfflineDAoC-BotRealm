@@ -12,7 +12,7 @@ using DOL.GS.Realm;
 
 namespace DOL.GS
 {
-    /// <summary>A True 1.65 Mode test character still to be levelled at its first login (TestKit165).</summary>
+    /// <summary>A BotRealm test character still to be levelled at its first login (TestKit165).</summary>
     [DataTable(TableName = "offline_true165_testkit")]
     public sealed class OfflineTrue165TestKitRecord : DataObject
     {
@@ -22,7 +22,7 @@ namespace DOL.GS
     }
 
     /// <summary>
-    /// Owner test characters for True 1.65 Mode (owner 2026-10-30: a level 50 and a level 5 for every realm, to test the
+    /// Owner test characters for BotRealm (owner 2026-10-30: a level 50 and a level 5 for every realm, to test the
     /// companions, the horn and their courier quests freely). LOCAL TESTING ONLY: it runs only when the file
     /// data\true165-test-characters.json exists, which no release ships (releases have no accounts).
     /// At server start the missing characters are made as a character creation makes them (race stats plus 30 points,

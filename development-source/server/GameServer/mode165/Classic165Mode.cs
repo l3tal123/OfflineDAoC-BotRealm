@@ -7,24 +7,23 @@ using DOL.Logging;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode (owner 2026-10-29/30): the launcher toggle that runs the server as a true patch-1.65 game, Classic and
-    /// Shrouded Isles as on 1 November 2003, with everything freeshards added switched off. Only the bot systems, the
-    /// Realm Exchange and the bot-tuned bosses stay. It runs from its own database (opendaoc-165.sqlite3.db), which
-    /// carries the server property classic165_mode = True; normal mode's database has it False or absent. Every 1.65
-    /// rule in the code checks <see cref="IsOn"/>, so normal mode never changes.
-    /// Plan: DAOC HIATUS\Claude Takeover GitHub\1.65 MODE PLAN.md.
+    /// BotRealm (owner 2026-10-29/30): the launcher runs the server on the BotRealm database (opendaoc-165.sqlite3.db),
+    /// whose ServerProperty classic165_mode is True. Its content base is the Classic and Shrouded Isles game of the 1.65
+    /// era, with the freeshard additions switched off; on top of it the game adds the bot and companion systems, the Realm
+    /// Exchange and the owner's custom changes. The old names survive in the identifiers (the class, the property) on
+    /// purpose. Plan: DAOC HIATUS\Claude Takeover GitHub\1.65 MODE PLAN.md.
     /// </summary>
     public static class Classic165Mode
     {
         private static readonly Logger Log = LoggerManager.Create(MethodBase.GetCurrentMethod().DeclaringType);
         public const string StateFolderName = "state-165";
 
-        /// <summary>True when the database the server opened is a 1.65 Mode database.</summary>
+        /// <summary>True when the database the server opened is the BotRealm world database.</summary>
         public static bool IsOn => ServerProperties.Properties.CLASSIC165_MODE;
 
         /// <summary>
         /// Where the per-mode state files live (bot goals, the bot and RvR world snapshots, realm event records):
-        /// the server folder in normal mode, its state-165 subfolder in 1.65 Mode. The launcher-to-server request and
+        /// the server folder in normal mode, its state-165 subfolder in BotRealm. The launcher-to-server request and
         /// result files stay in the server folder in both modes, because only one mode runs at a time.
         /// </summary>
         public static string StateDirectory(string serverDirectory, bool on)
@@ -36,11 +35,11 @@ namespace DOL.GS
             return path;
         }
 
-        /// <summary>The XP rates in use: locked to 1x for players and bots in True 1.65 Mode (owner 2026-10-30), whatever the
+        /// <summary>The XP rates in use: locked to 1x for players and bots in BotRealm (owner 2026-10-30), whatever the
         /// launcher or a GM sets; normal mode uses the server properties as before.</summary>
         public static double PlayerXpRate => IsOn ? 1.0 : ServerProperties.Properties.XP_RATE;
 
-        /// <summary>RvR event musters and marches in 1.65 Mode: bots walk without hasteners (plan section 6), so the
+        /// <summary>RvR event musters and marches in BotRealm: bots walk without hasteners (plan section 6), so the
         /// travel-bound time limits are half again as long. Normal mode keeps its values.</summary>
         public static long TravelTime(long normal) => IsOn ? normal * 3 / 2 : normal;
         public static double BotXpRate => IsOn ? 1.0 : ServerProperties.Properties.BOT_XP_RATE;
@@ -75,7 +74,7 @@ namespace DOL.GS
             return false;
         }
 
-        // Freeshard cheat and convenience commands: GM-only in True 1.65 Mode (owner 2026-10-30, plan section 19). A normal
+        // Freeshard cheat and convenience commands: GM-only in BotRealm (owner 2026-10-30, plan section 19). A normal
         // player account is refused with a message; a GM account ("Make Me a GM") still has them, and the real GM commands
         // are untouched. Bot-system commands that play by the rules (hiring, companion stances, /pull) stay. /spawn conjures
         // a helper out of nowhere (1.65 companions are hired at the inns), so it is off too (owner 2026-10-30: "/spawn
@@ -99,7 +98,7 @@ namespace DOL.GS
         private static readonly Logging.Logger ClickLog = Logging.LoggerManager.Create(typeof(Classic165Mode));
 
         /// <summary>
-        /// True 1.65 Mode diagnostics (owner 2026-10-30: what the old client sends on right-clicking the Horn of Rallying):
+        /// BotRealm diagnostics (owner 2026-10-30: what the old client sends on right-clicking the Horn of Rallying):
         /// one log line per object click request, with the id the client sent and what it resolves to here.
         /// Grep the server log for "CLICK_165".
         /// </summary>
@@ -119,7 +118,7 @@ namespace DOL.GS
         /// <summary>
         /// The model word an NPC create packet carries. The 1.127 client reads model = word &amp; 0x7FF and an NPC's classic
         /// hair colour = (word &gt;&gt; 13) &amp; 7 (bits 11-12 are another flag; 2026-10-30, from the client's NPC
-        /// create handler). In True 1.65 Mode the hire preview figure and hired companions carry their chosen hair colour
+        /// create handler). In BotRealm the hire preview figure and hired companions carry their chosen hair colour
         /// there; every other NPC is sent as before.
         /// </summary>
         public static bool HairInModelWord = true;   // back on: the original client is dropped (owner 2026-10-30), the new client reads it
@@ -140,15 +139,15 @@ namespace DOL.GS
             return hair is > 0 and <= 7 ? (ushort)(model | (hair << 13)) : model;
         }
 
-        /// <summary>True when this command is refused for a normal player account in True 1.65 Mode.</summary>
+        /// <summary>True when this command is refused for a normal player account in BotRealm.</summary>
         public static bool IsGmOnlyCommand(string command) =>
             IsOn && command != null && Array.Exists(GmOnlyCommands, c => string.Equals(c, command, StringComparison.OrdinalIgnoreCase));
 
-        public const string GmOnlyCommandMessage = "That command does not exist in True 1.65 Mode.";
+        public const string GmOnlyCommandMessage = "That command does not exist.";
 
         /// <summary>
         /// True when a new character of this base class and race has a class to train into at level 5: an advanced class
-        /// of that base which is not disabled and allows the race. In True 1.65 Mode a base class with none is refused at
+        /// of that base which is not disabled and allows the race. In BotRealm a base class with none is refused at
         /// creation, so nobody is stuck at level 5. Example: an Inconnu Acolyte can only become a Heretic, which is disabled.
         /// The 1.64 client's own creation screen calls that "NOT SUPPORTED" (checked in the 1.64 client, 2026-10-30).
         /// </summary>
@@ -172,7 +171,7 @@ namespace DOL.GS
         }
 
         /// <summary>The region of each realm's traveler's inn (Avalon Marsh, West Svealand, Shannon Estuary), where the
-        /// Realm Exchange stands in True 1.65 Mode (owner 2026-10-30).</summary>
+        /// Realm Exchange stands in BotRealm (owner 2026-10-30).</summary>
         public static ushort InnRegion(eRealm realm) => realm switch
         {
             eRealm.Albion => 1,

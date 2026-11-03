@@ -1,4 +1,4 @@
-THE NEW CLIENT'S OWN COMMANDS AND KEYS (True 1.65)
+THE NEW CLIENT'S OWN COMMANDS AND KEYS (BotRealm)
 ==================================================
 
 The client handles these itself; every other line or /command goes to the server (its commands are in the server's

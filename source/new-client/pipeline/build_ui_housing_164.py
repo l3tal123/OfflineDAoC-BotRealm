@@ -1,4 +1,4 @@
-"""True 1.65 Mode housing windows: the 1.64 client's own housing UI art, which it keeps apart from data/ in
+"""BotRealm housing windows: the 1.64 client's own housing UI art, which it keeps apart from data/ in
 phousing/data/ (game.dll skin table indices 0x31-0x37, loaded from phousing/data/<skin>/ - research 2026-11-02,
 scratchpad housing/ui164.md): garden.bmp (House Garden Placement's frame, 375 x 417) and the garden grid's cell marks
 ctrlpoint_none / _full / _emptygr / _nonerd / _fullrd (20 x 20). The other housing windows use data/ bitmaps

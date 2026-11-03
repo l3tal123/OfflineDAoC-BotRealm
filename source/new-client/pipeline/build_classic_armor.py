@@ -1,4 +1,4 @@
-"""True 1.65 Mode: worn armour, cloaks and helms on the CLASSIC
+"""BotRealm: worn armour, cloaks and helms on the CLASSIC
 figures (build_classic_races.py), the original client's way. Spec: TRUE 1.65 MODE CLASSIC FIGURES.md.
 
     python build_classic_armor.py              # every objects.csv row with a classic skin (2,000+ models)

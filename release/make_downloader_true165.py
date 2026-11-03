@@ -2,8 +2,8 @@
 
     python -I make_downloader_true165.py --assets <assets folder with v<version>> [--version 0.1]
 
-Download-OfflineDAoC-True165-v<version>.zip holds one folder with GET-OFFLINE-DAOC-TRUE165.cmd (double-click it),
-Get-OfflineDAoC-True165.ps1 (what it runs) and READ ME.txt. Run make_release_true165.py first.
+Download-BotRealm-v<version>.zip holds one folder with GET-BOTREALM.cmd (double-click it),
+Get-BotRealm.ps1 (what it runs) and READ ME.txt. Run make_release_true165.py first.
 """
 from __future__ import annotations
 
@@ -13,15 +13,15 @@ import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-CMD = "GET-OFFLINE-DAOC-TRUE165.cmd"
-PS1 = "Get-OfflineDAoC-True165.ps1"
+CMD = "GET-BOTREALM.cmd"
+PS1 = "Get-BotRealm.ps1"
 
 
 def readme(version: str) -> str:
     lines = [
-        f"OFFLINE DAOC TRUE 1.65 v{version} - DOWNLOADER",
+        f"BOTREALM v{version} - DOWNLOADER",
         "",
-        "1. Put this folder somewhere with a short path, for example C:\\Games\\OfflineDAoC.",
+        "1. Put this folder somewhere with a short path, for example C:\\Games\\BotRealm.",
         "   (Not inside OneDrive, Program Files or a very deep folder.)",
         f"2. Double-click {CMD}.",
         "   If Windows SmartScreen says it protected your PC, click More info, then Run anyway.",
@@ -30,14 +30,14 @@ def readme(version: str) -> str:
         "       smaller download. Close the game and the launcher first. Your account, characters,",
         "       companions, bots and settings stay; the files it replaces are backed up in",
         "       patch-backups\\ in the game folder.",
-        "   2 = New install: the complete game, into a new folder, OfflineDAoC-True165, next to",
-        "       this downloader's folder (or C:\\Games\\OfflineDAoC-True165 if that path would be too",
+        "   2 = New install: the complete game, into a new folder, BotRealm, next to",
+        "       this downloader's folder (or C:\\Games\\BotRealm if that path would be too",
         "       long: the game needs a short path to keep its graphics cache).",
         "   It shows the download size and asks before it starts.",
         "4. If the download stops or you close the window, double-click the same file again:",
         "   it continues where it stopped.",
-        "5. When it's done, open the OfflineDAoC-True165 folder and double-click",
-        "   START OFFLINE DAOC TRUE 1.65.cmd. Then click START SERVER, wait for RUNNING, and click",
+        "5. When it's done, open the BotRealm folder and double-click",
+        "   START BOTREALM.cmd. Then click START SERVER, wait for RUNNING, and click",
         "   ENTER REALM.",
         "",
         "You need: 64-bit Windows 10 or 11, a CPU with AVX2, a graphics card with Vulkan",
@@ -45,7 +45,7 @@ def readme(version: str) -> str:
         "Nothing else to install: .NET comes with the game, and no original DAoC client is needed.",
         "",
         "Full guide and troubleshooting:",
-        "https://github.com/shadowofze/OfflineDAoC-True165/blob/main/docs/PLAY.md",
+        "https://github.com/l3tal123/OfflineDAoC-BotRealm/blob/main/docs/PLAY.md",
     ]
     return "\r\n".join(lines) + "\r\n"
 
@@ -68,7 +68,7 @@ def main():
     assert all(b < 128 for b in ps1), f"{PS1} must be plain ASCII (Windows PowerShell 5.1 reads it as ANSI)"
     text = ps1.decode("ascii")
     assert f"$ReleaseVersion = '{args.version}'" in text, f"{PS1}'s default ReleaseVersion is not {args.version}"
-    name = f"Download-OfflineDAoC-True165-v{args.version}"
+    name = f"Download-BotRealm-v{args.version}"
     archive = folder / f"{name}.zip"
     archive.unlink(missing_ok=True)
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zf:

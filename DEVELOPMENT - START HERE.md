@@ -1,10 +1,10 @@
 # Developer start
 
-Offline DAoC True 1.65 **v0.2**. One mode (True 1.65), one client (the new client).
+BotRealm **v0.2**. One world, one client (the new client).
 
 Read these first:
 - [AGENTS.md](AGENTS.md): the project rules and the layout.
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): building and testing the server and launcher, how the True 1.65 content
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): building and testing the server and launcher, how the BotRealm world content
   reaches the world, the generators, the clean database and the release runtime.
 - [source/new-client/README.md](source/new-client/README.md): the new client's source, how to run it, and its
   content pipeline.

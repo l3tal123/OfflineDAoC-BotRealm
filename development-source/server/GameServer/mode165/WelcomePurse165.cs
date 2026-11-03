@@ -7,8 +7,8 @@ using DOL.Events;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode: a new character starts with 1 gold, enough to buy basic gear (owner 2026-11-01). The rule is the
-    /// server property <c>starting_money</c> (10,000 copper, set in runtime/true165/true165-rules.json); this class pays
+    /// BotRealm: a new character starts with 1 gold, enough to buy basic gear (owner 2026-11-01). The rule is the
+    /// server property <c>starting_money</c> (10,000 copper, set in runtime/botrealm/true165-rules.json); this class pays
     /// the same 1 gold once to every character that already existed before the rule, and records a marker row per
     /// character so a restart, a restored backup or a crash never pays the same purse twice.
     /// World bots get the same purse (owner 2026-11-02): the launcher's ADD BOTS writes it into a new bot's

@@ -1,4 +1,4 @@
-"""Builds drops165.json, the True 1.65 Mode monster drops (owner 2026-10-30: "build what you can now, and when that
+"""Builds drops165.json, the BotRealm monster drops (owner 2026-10-30: "build what you can now, and when that
 data comes in you can tweak"). Development tool; the launcher and derive_true165_database.py only read its output.
 
 Source, first pass: Uthgard's measured drops (research/1.65-mode/loot/uthgard_mobs.json: per monster, kills and how

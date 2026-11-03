@@ -1,7 +1,7 @@
-"""Builds the True 1.65 Mode database from the normal one (owner 2026-10-30). Development tool; the launcher gets the
+"""Builds the BotRealm database from the normal one (owner 2026-10-30). Development tool; the launcher gets the
 same steps in C# for players.
 
-True 1.65 Mode: Classic and Shrouded Isles as they were in patch 1.65. The only changes from the original game are the
+BotRealm: the Classic and Shrouded Isles game of the 1.65 era. The only changes from the original game are the
 bot and companion systems and the Realm Exchange. It runs from its own database, so its characters, bots, Realm
 Exchange, guilds, houses, keeps and relics are separate from normal mode's, and each mode keeps its own progress.
 
@@ -13,7 +13,7 @@ Steps:
   1. A consistent copy of the normal database (SQLite backup API), built as a .tmp file.
   2. A fresh slate: every progress table emptied (players, bots, companions, inventories, Realm Exchange listings and
      sales, houses, guild progress), keeps / doors / relics back to their default owners, starter guilds only.
-  3. The True 1.65 Mode settings (classic165_mode = True and the period rules, see SETTINGS).
+  3. The BotRealm settings (classic165_mode = True and the period rules, see SETTINGS).
   4. Content removal (and 4b, the period monster drops from drops165.json): rows that did not exist in 1.65 are moved to the archive table offline_true165_removed (never
      deleted: the row's JSON is kept with the reason). See content165.py.
   5. VACUUM and quick_check, then the .tmp replaces the target; config/serverconfig-165.xml is written next to the
@@ -93,7 +93,7 @@ def main():
     if server_running():
         sys.exit("CoreServer is running; stop the server first.")
     if os.path.exists(TARGET) and not rebuild:
-        sys.exit(f"{TARGET} exists and holds True 1.65 Mode progress; use --rebuild to replace it (it is backed up).")
+        sys.exit(f"{TARGET} exists and holds BotRealm progress; use --rebuild to replace it (it is backed up).")
     tmp = TARGET + ".tmp"
     if os.path.exists(tmp):
         os.remove(tmp)
@@ -121,7 +121,7 @@ def main():
         stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         shutil.move(TARGET, os.path.join(DATA, f"opendaoc-165.sqlite3.before-rebuild-{stamp}.db"))
     os.replace(tmp, TARGET)
-    print(f"True 1.65 Mode database: {TARGET} ({os.path.getsize(TARGET) // 1048576} MB)")
+    print(f"BotRealm database: {TARGET} ({os.path.getsize(TARGET) // 1048576} MB)")
     print(f"server config: {write_config()}")
     for reason, count in removed.items():
         print(f"  {count:6} rows: {reason}")

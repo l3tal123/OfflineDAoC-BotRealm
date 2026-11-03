@@ -1,4 +1,4 @@
-"""True 1.65 Mode content removal, used by derive_true165_database.py (owner 2026-10-30; plan sections 3 and 19).
+"""BotRealm content removal, used by derive_true165_database.py (owner 2026-10-30; plan sections 3 and 19).
 
 Every removed row is moved to offline_true165_removed (source table, row key, reason, the row as JSON), never just
 deleted, so it can be restored. Only rows that did not exist in 1.65 go; the real 1.65 services stay:
@@ -92,7 +92,7 @@ def apply_drops(con, path):
 
 
 def apply_additions(con, folder):
-    """Generic True 1.65 rows to add: every add-*.json in the folder ({table, key, reason, rows}). Rows already there (same
+    """Generic BotRealm rows to add: every add-*.json in the folder ({table, key, reason, rows}). Rows already there (same
     key) are left alone, so a rebuild never doubles them. Added rows are listed in offline_true165_added."""
     import glob
     counts = {}

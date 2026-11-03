@@ -1792,7 +1792,7 @@ namespace DOL.GS.Quests.Albion
 			Rhodri = Epics165.FindNpc("Captain Rhodri", eRealm.Albion, 1);
 			if (Rhodri == null)
 			{
-				log.Warn("True 1.65 Mode: Captain Rhodri not found, \"" + Title165 + " (level 50)\" not loaded");
+				log.Warn("BotRealm: Captain Rhodri not found, \"" + Title165 + " (level 50)\" not loaded");
 				return;
 			}
 			GameEventMgr.AddHandler(GamePlayerEvent.AcceptQuest, new DOLEventHandler(SubscribeQuest));
@@ -1800,7 +1800,7 @@ namespace DOL.GS.Quests.Albion
 			GameEventMgr.AddHandler(Rhodri, GameObjectEvent.Interact, new DOLEventHandler(TalkToRhodri165));
 			Rhodri.AddQuestToGive(typeof(Shadows_50));
 			if (log.IsInfoEnabled)
-				log.Info("Quest \"" + Title165 + " (level 50)\" initialized (True 1.65 Mode)");
+				log.Info("Quest \"" + Title165 + " (level 50)\" initialized (BotRealm)");
 		}
 
 		private static void Unload165()

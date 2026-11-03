@@ -1,6 +1,6 @@
 class_name LoadingScreen
 extends CanvasLayer
-## Loading screen (owner 2026-10-09): the original Dark Age of Camelot box art as the full-screen background, "ENTERING OFFLINE DAOC", the client's bronze splash bar (data/splashloadbar1 empty, splashloadbar2 full) filling as the zone
+## Loading screen (owner 2026-10-09): the original Dark Age of Camelot box art as the full-screen background, "ENTERING BOTREALM", the client's bronze splash bar (data/splashloadbar1 empty, splashloadbar2 full) filling as the zone
 ## builds, and one of the client's own loading tips (data/loading/tips.dat, 1.65-appropriate ones) under the bar,
 ## changing every few seconds on long loads. Fades out when the world is ready.
 
@@ -78,7 +78,7 @@ func _init(zone_name: String, region := -1) -> void:
 	shade.stretch_mode = TextureRect.STRETCH_SCALE
 	_root.add_child(shade)
 	var label := Label.new()
-	label.text = "ENTERING OFFLINE DAOC"                 # owner 2026-10-09 (not the zone name)
+	label.text = "ENTERING BOTREALM"                 # owner 2026-10-09 (not the zone name)
 	var font := FontFile.new()
 	font.load_dynamic_font(ProjectSettings.globalize_path(UI + "/fonts/minionpro-bold.ttf"))
 	label.add_theme_font_override("font", font)

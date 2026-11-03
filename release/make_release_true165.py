@@ -1,21 +1,21 @@
-"""Pack Offline DAoC True 1.65 into GitHub release parts, and record its baseline.
+"""Pack BotRealm into GitHub release parts, and record its baseline.
 
     python -I make_release_true165.py --game <game folder> --client <client folder> --repo <this repository>
                                       --out <assets folder> [--version 0.1]
 
 What a player ends up with comes from three places, and none of them is written to:
-    --game     START OFFLINE DAOC TRUE 1.65.cmd, runtime\\ (the launcher, the server, the navigation meshes, the
-               True 1.65 content and the clean world) and tools\\dotnet\\ (the bundled .NET 10), made by
+    --game     START BOTREALM.cmd, runtime\\ (the launcher, the server, the navigation meshes, the
+               world content and the clean world) and tools\\dotnet\\ (the bundled .NET 10), made by
                development-source/tools/build_release_true165.py
     --client   a folder holding new-client\\ (godot\\ with its content, tools\\godot_net\\, VERSION.txt), made by the
                new client's packaging (source/new-client/tools)
     --repo     the player docs (PLAYER_DOCS), placed at the same paths in the game folder
 
 <assets folder>\\v<version>\\ gets:
-    OfflineDAoC-True165-v<version>-game[-partNN].zip     everything but new-client\\
-    OfflineDAoC-True165-v<version>-client-partNN.zip     new-client\\
-    download-manifest.json                              the parts, their sizes and SHA-256, for the downloader
-    SHA256SUMS.txt                                      every asset's SHA-256
+    BotRealm-v<version>-game[-partNN].zip     everything but new-client\\
+    BotRealm-v<version>-client-partNN.zip     new-client\\
+    download-manifest.json                    the parts, their sizes and SHA-256, for the downloader
+    SHA256SUMS.txt                            every asset's SHA-256
 and <assets folder>\\baseline-<version>.sha256 is the SHA-256 of every installed file. Commit it to the repository as
 release-baselines/<version>/package.sha256, so an install can be checked against it.
 
@@ -41,12 +41,12 @@ PLAYER_DOCS = ["READ ME FIRST.txt", "QUICK COMMANDS.txt", "ALL SERVER COMMANDS.t
 STORED = {".png", ".jpg", ".jpeg", ".ogg", ".mp3", ".zip", ".7z", ".webp", ".ctex", ".scn", ".res", ".pck"}
 
 REQUIRED = [
-    "START OFFLINE DAOC TRUE 1.65.cmd",
-    "runtime/OfflineDAoC.exe",
+    "START BOTREALM.cmd",
+    "runtime/BotRealm.exe",
     "runtime/server/CoreServer.exe",
     "runtime/server/config/serverconfig-165.xml",
     "runtime/data/opendaoc-165.sqlite3.db",
-    "runtime/true165/true165-rules.json",
+    "runtime/botrealm/true165-rules.json",
     "tools/dotnet/dotnet.exe",
     "READ ME FIRST.txt",
     "new-client/VERSION.txt",
@@ -262,7 +262,7 @@ def main():
             handle.write(f"{sha(files[rel])}  {rel}\n")
 
     release.mkdir(parents=True)
-    root = f"OfflineDAoC-True165-v{version}"
+    root = f"BotRealm-v{version}"
     game = {r: p for r, p in files.items() if not r.startswith("new-client/")}
     client = {r: p for r, p in files.items() if r.startswith("new-client/")}
     if args.like:
@@ -284,13 +284,13 @@ def main():
         client_parts = pack(client, root, release, f"{root}-client", True, args.part_budget)
 
     manifest = {
-        "Product": "Offline DAoC True 1.65",
+        "Product": "BotRealm",
         "Version": version,
         "RootFolder": root,
         "Parts": [dict(p, Kind="game") for p in game_parts] + [dict(p, Kind="client") for p in client_parts],
         "InstalledBytes": sum(p["UnpackedBytes"] for p in game_parts + client_parts),
         "InstalledFiles": len(files),
-        "Required": ["START OFFLINE DAOC TRUE 1.65.cmd", "runtime/OfflineDAoC.exe", "new-client/godot/project.godot",
+        "Required": ["START BOTREALM.cmd", "runtime/BotRealm.exe", "new-client/godot/project.godot",
                      "new-client/VERSION.txt"],
         "BaselineSHA256": sha(baseline).upper(),
     }

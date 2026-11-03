@@ -9,7 +9,7 @@ using DOL.GS.Movement;
 namespace DOL.GS
 {
     /// <summary>
-    /// The traveler's inns' adventurers (True 1.65 Mode; owner 2026-10-30, as in the old Rebuilt project): three per realm
+    /// The traveler's inns' adventurers (BotRealm; owner 2026-10-30, as in the old Rebuilt project): three per realm
     /// ("albion adventurer", "midgard adventurer", "hibernia adventurer"), level-15 guards of their realm with basic
     /// weapons, patrolling the road between the inn yard and the realm's nearby town (Hibernia: Connla; Albion: the near
     /// edge of the Marsh Town bridge; Midgard: Huginfell). Each idles around the yard, walks the road to the town, idles
@@ -256,7 +256,7 @@ namespace DOL.GS
     }
 
     /// <summary>
-    /// The inns' travelers (True 1.65 Mode; owner 2026-10-30): three peaceful townsfolk per inn ("albion traveler",
+    /// The inns' travelers (BotRealm; owner 2026-10-30): three peaceful townsfolk per inn ("albion traveler",
     /// "midgard traveler", "hibernia traveler") for ambience, wandering the inn's rooms, downstairs and up the stairs to
     /// the upstairs hallways, stopping a while at each spot. Spots come from the navmesh around the inn: reachable from
     /// where they stand (so never the roof), indoors (a floor or roof above them) and on the inn's floors, so they don't

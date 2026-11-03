@@ -80,10 +80,10 @@ internal static class SettingsAdmin
         connection.Open();
         using var transaction = connection.BeginTransaction();
         ServerPropertyWrite.Save(connection, transaction, "autonomous", "rvr_battleground_announcements",
-            "RvR and battleground announcements (keeps, relics, sieges), set in the Offline DAoC launcher.", "True",
+            "RvR and battleground announcements (keeps, relics, sieges), set in the BotRealm launcher.", "True",
             rvr ? "True" : "False");
         ServerPropertyWrite.Save(connection, transaction, "autonomous", "pve_realm_event_announcements",
-            "PvE realm event announcements (raids forming, raid final bosses), set in the Offline DAoC launcher.", "True",
+            "PvE realm event announcements (raids forming, raid final bosses), set in the BotRealm launcher.", "True",
             pve ? "True" : "False");
         using var retire = connection.CreateCommand();
         retire.Transaction = transaction;

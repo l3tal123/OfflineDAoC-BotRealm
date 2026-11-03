@@ -1,4 +1,4 @@
-"""The period merchants our world was missing (owner 2026-10-31: "deep dive them"), as True 1.65 content.
+"""The period merchants our world was missing (owner 2026-10-31: "deep dive them"), as BotRealm content.
 Spawns: positions from CapnBry (period radar data) via missing_merchants.json; Melanaha's town from the period pages, her
 spot beside the town's merchants (derived). Each spawn copies the nearest existing merchant of its region for the columns
 no source gives (model is the agent's derived pick), and sells only its period stock. Not placed: Somyr and Caryan
@@ -13,7 +13,7 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 HERE = os.path.dirname(os.path.abspath(__file__))
 CV = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))  # found from this script
-TARGETS = [os.path.join(CV, 'tools', 'claude-version', 'true165'), os.path.join(CV, 'runtime', 'true165')]
+TARGETS = [os.path.join(CV, 'tools', 'claude-version', 'botrealm'), os.path.join(CV, 'runtime', 'botrealm')]
 TAG = '1.65 period merchants (missing merchants)'
 SKIP = {'Somyr', 'Caryan', 'Rhodyn', 'Tempeste'}
 CLASS = {'Royd': 'DOL.GS.GameBountyMerchant'}   # bounty totems (our world's bounty merchants use this class)

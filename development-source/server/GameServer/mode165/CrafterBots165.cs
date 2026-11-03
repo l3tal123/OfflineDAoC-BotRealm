@@ -7,14 +7,14 @@ using DOL.Database;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode crafter gamebots (owner 2026-10-30, plan section 6: crafting for bots, a 1.65-Mode-only feature).
+    /// BotRealm crafter gamebots (owner 2026-10-30, plan section 6: crafting for bots, a BotRealm-only feature).
     /// - About one gamebot in five has a primary craft (record CraftSkill / CraftLevel): weapon, armour, tailoring,
     ///   fletching, spellcraft, alchemy or siegecraft.
     /// - On a town errand (between tasks, out of combat) a crafter buys the materials of a real recipe of its craft near
     ///   its skill (the recipe's own ingredient prices), crafts it at 94-99% quality, gains skill like a player (more
     ///   for harder recipes, none for grey ones), and puts the product on the Realm Exchange.
     /// - A siegecrafter builds siege kits instead (ram first, catapult and trebuchet as its skill grows) and keeps a few;
-    ///   siege crews buy them from it (SupplySiege). In 1.65 Mode there are no free siege engines and no frontier siege
+    ///   siege crews buy them from it (SupplySiege). In BotRealm there are no free siege engines and no frontier siege
     ///   merchants: period siege equipment was crafted (the 1.64 client's Siegecraft recipes).
     /// </summary>
     public static class CrafterBots165

@@ -4,7 +4,7 @@ using DOL.Database;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode supplies for bots (owner 2026-10-30, plan section 1: no unlimited ammo or poison, for players and
+    /// BotRealm supplies for bots (owner 2026-10-30, plan section 1: no unlimited ammo or poison, for players and
     /// bots alike). A bot's bow or crossbow shoots real arrows or bolts from its bag, one per shot (players already do);
     /// without them it can't use the bow. Gamebots restock on their town errands from a merchant that sells the right
     /// ammunition; hired companions don't shop: their player gives them arrows (gear window, the bag part).
@@ -101,7 +101,7 @@ namespace DOL.GS
                                               i.SlotPosition is >= (int)eInventorySlot.FirstBackpack and <= (int)eInventorySlot.LastBackpack)
                 .Sum(i => i.Count) ?? 0;
 
-        /// <summary>In 1.65 Mode a bow or crossbow is usable only with ammunition in the bag (thrown weapons are their own).</summary>
+        /// <summary>In BotRealm a bow or crossbow is usable only with ammunition in the bag (thrown weapons are their own).</summary>
         public static bool HasAmmoFor(GameBot bot, DbInventoryItem weapon) =>
             !Classic165Mode.IsOn || AmmoType(weapon) == null || RealAmmo(bot, weapon) != null;
 

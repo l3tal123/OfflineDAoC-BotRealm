@@ -1,4 +1,4 @@
-"""True 1.65 Mode: spell visuals and sounds from the REAL 1.64 client's own tables (owner 2026-10-31:
+"""BotRealm: spell visuals and sounds from the REAL 1.64 client's own tables (owner 2026-10-31:
 "Switch True 1.65 to the 1.64 spell table" - the later client's spells.csv gave e.g. the necromancer shade's Regenerate
 Flesh (9461) hand glows the period client never had; 673 of the 4,046 shared rows differ in glows, sounds, cast
 animations or hit / bolt / pulse effects).

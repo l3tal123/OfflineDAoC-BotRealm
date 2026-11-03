@@ -1,15 +1,15 @@
-# Offline DAoC True 1.65 downloader: installs the game into a NEW folder, or updates an installed game in place.
+# BotRealm downloader: installs the game into a NEW folder, or updates an installed game in place.
 #
-# GET-OFFLINE-DAOC-TRUE165.cmd runs this. It checks the PC, then either
+# GET-BOTREALM.cmd runs this. It checks the PC, then either
 #  - New install: downloads the complete game in verified parts (resuming if stopped) into a new folder, or
 #  - Update (from v0.2 on): updates an installed game in the folder it is in, with a small patch. Every file it would
 #    replace is checked against the released versions first; nothing is touched if any was changed. Everything it
 #    replaces is backed up in patch-backups\, and a failed update is undone. Saves are never touched.
-#  -Update can be narrowed to the client (-ClientOnly), which leaves the server, the launcher and runtime\true165 as
+#  -Update can be narrowed to the client (-ClientOnly), which leaves the server, the launcher and runtime\botrealm as
 #    they are; fork installs use that to take upstream's client without rebuilding or redownloading the whole game.
 param(
-    # New install: where the game goes (a new folder). Default: OfflineDAoC-True165 next to this downloader's folder,
-    # or <drive>:\Games\OfflineDAoC-True165 when that path would be too long.
+    # New install: where the game goes (a new folder). Default: BotRealm next to this downloader's folder,
+    # or <drive>:\Games\BotRealm when that path would be too long.
     [string]$Destination = '',
     # Update: the installed game folder ('pick' opens a folder picker). Default: ask.
     [string]$Update = '',
@@ -25,7 +25,7 @@ param(
     # content builds), after backing them up. The fork's builds have to be put back after the update; without the
     # switch the update stops and touches nothing.
     [switch]$AllowLocalChanges,
-    # Update only the new-client files from the patch. The server, the launcher and runtime\true165 are not planned at
+    # Update only the new-client files from the patch. The server, the launcher and runtime\botrealm are not planned at
     # all, so nothing under runtime\ is replaced and no fork build has to be put back.
     [switch]$ClientOnly
 )
@@ -33,9 +33,16 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$Repo = 'shadowofze/OfflineDAoC-True165'
-$Product = 'Offline DAoC True 1.65'
-$StartFile = 'START OFFLINE DAOC TRUE 1.65.cmd'
+$Repo = 'l3tal123/OfflineDAoC-BotRealm'
+$Product = 'BotRealm'
+# The start file name the current release ships. Releases before the BotRealm rename shipped $LegacyStartFile; both
+# are accepted when finding and updating an existing install, so an old folder updates in place.
+$StartFile = 'START BOTREALM.cmd'
+$LegacyStartFile = 'START OFFLINE DAOC TRUE 1.65.cmd'
+# New installs go into the first folder; the other is the folder name earlier releases used, still found and updated.
+$GameFolders = @('BotRealm', 'OfflineDAoC-True165')
+$LauncherExe = 'runtime\BotRealm.exe'
+$LegacyLauncherExe = 'runtime\OfflineDAoC.exe'
 # The new client keeps its graphics (shader) cache in new-client\save, up to 200 characters deeper, and Windows refuses
 # paths over 260. So the game folder's own path should stay within 42 characters, or every start recompiles the shaders.
 $MaxGamePath = 42
@@ -54,14 +61,22 @@ function Stop-Install([string]$why) {
 }
 function Get-Sha([string]$path) { return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() }
 
+# The start file of an installed game, current or pre-rename, or $null.
+function Get-StartFile([string]$game) {
+    foreach ($name in @($StartFile, $LegacyStartFile)) {
+        if (Test-Path -LiteralPath (Join-Path $game $name) -PathType Leaf) { return $name }
+    }
+    return $null
+}
+
 # ---------------------------------------------------------------- the PC
 Say "$Product v$ReleaseVersion - downloader"
 Say ''
 Say 'Checking your PC...'
 if (![Environment]::Is64BitOperatingSystem) { Stop-Install 'This game needs 64-bit Windows 10 or 11.' }
 if ([Environment]::OSVersion.Version.Major -lt 10) { Stop-Install 'This game needs Windows 10 or 11.' }
-Add-Type -Namespace OfflineDaoc -Name Cpu -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool IsProcessorFeaturePresent(uint feature);'
-if (![OfflineDaoc.Cpu]::IsProcessorFeaturePresent(40)) {   # 40 = PF_AVX2_INSTRUCTIONS_AVAILABLE
+Add-Type -Namespace BotRealm -Name Cpu -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool IsProcessorFeaturePresent(uint feature);'
+if (![BotRealm.Cpu]::IsProcessorFeaturePresent(40)) {   # 40 = PF_AVX2_INSTRUCTIONS_AVAILABLE
     Stop-Install 'Your CPU does not support AVX2, which the bots'' navigation needs (most CPUs from 2014 onward have it). The game cannot run on this PC.'
 }
 if (!(Test-Path -LiteralPath (Join-Path $env:SystemRoot 'System32\vulkan-1.dll'))) {
@@ -151,9 +166,9 @@ $patch = $manifest.Patch
 
 # ---------------------------------------------------------------- new install
 function Get-DefaultFolder {
-    $folder = Join-Path (Split-Path -Parent $PSScriptRoot) 'OfflineDAoC-True165'
+    $folder = Join-Path (Split-Path -Parent $PSScriptRoot) $GameFolders[0]
     if ([IO.Path]::GetFullPath($folder).Length -gt $MaxGamePath) {
-        $folder = Join-Path ([IO.Path]::GetPathRoot($PSScriptRoot)) 'Games\OfflineDAoC-True165'
+        $folder = Join-Path ([IO.Path]::GetPathRoot($PSScriptRoot)) ('Games\' + $GameFolders[0])
     }
     return [IO.Path]::GetFullPath($folder)
 }
@@ -163,26 +178,26 @@ function Test-Folder([string]$game) {
         Say ''
         Say "The game folder would be inside OneDrive: $game"
         Say 'OneDrive can move or lock the game''s files while it runs. A folder such as C:\Games is safer.'
-        if (!(Ask 'Install here anyway?')) { Stop-Install 'Nothing was downloaded. Move this downloader folder to a short path such as C:\Games\OfflineDAoC and run it again.' }
+        if (!(Ask 'Install here anyway?')) { Stop-Install 'Nothing was downloaded. Move this downloader folder to a short path such as C:\Games\BotRealm and run it again.' }
     }
     if ($game.Length -gt $MaxGamePath) {
         Say ''
         Say "The game folder's path is long ($($game.Length) characters): $game"
-        Say "The game works best within $MaxGamePath characters, such as C:\Games\OfflineDAoC-True165. With a longer path it"
+        Say "The game works best within $MaxGamePath characters, such as C:\Games\BotRealm. With a longer path it"
         Say 'still runs, but loads slowly (it cannot keep its graphics cache), and some files may not install.'
         if (!(Ask 'Install here anyway?')) { Stop-Install 'Nothing was downloaded. Run this again without choosing a folder, or choose a shorter one.' }
     }
     if ($game -match '[^\x20-\x7E]') {
         Say ''
         Say "The game folder's path has letters outside plain English ($game). Some tools the game uses may not handle that."
-        if (!(Ask 'Install here anyway?')) { Stop-Install 'Nothing was downloaded. Move this downloader folder to a path such as C:\Games\OfflineDAoC and run it again.' }
+        if (!(Ask 'Install here anyway?')) { Stop-Install 'Nothing was downloaded. Move this downloader folder to a path such as C:\Games\BotRealm and run it again.' }
     }
 }
 
 function Install-Game([string]$game) {
     $done = Join-Path $game '.install'
     if ((Test-Path -LiteralPath $game) -and !(Test-Path -LiteralPath $done)) {
-        if (Test-Path -LiteralPath (Join-Path $game $StartFile)) {
+        if (Get-StartFile $game) {
             Stop-Install "$Product is already installed in $game. To update it, run this file again and choose 1 (Update my game)."
         }
         Stop-Install "The folder $game already exists. Move or rename it, or run this downloader from another folder. An existing folder is never overwritten."
@@ -231,10 +246,13 @@ function Test-NeverTouch([string]$rel) {
 
 function Find-Installed {
     $found = @()
-    foreach ($folder in @((Join-Path (Split-Path -Parent $PSScriptRoot) 'OfflineDAoC-True165'),
-                          (Join-Path ([IO.Path]::GetPathRoot($PSScriptRoot)) 'Games\OfflineDAoC-True165'))) {
-        $full = [IO.Path]::GetFullPath($folder)
-        if ((Test-Path -LiteralPath (Join-Path $full $StartFile)) -and ($found -notcontains $full)) { $found += $full }
+    $parent = (Split-Path -Parent $PSScriptRoot)
+    $root = [IO.Path]::GetPathRoot($PSScriptRoot)
+    foreach ($name in $GameFolders) {
+        foreach ($folder in @((Join-Path $parent $name), (Join-Path $root ('Games\' + $name)))) {
+            $full = [IO.Path]::GetFullPath($folder)
+            if ((Get-StartFile $full) -and ($found -notcontains $full)) { $found += $full }
+        }
     }
     return $found
 }
@@ -299,7 +317,8 @@ function Copy-Progress([string]$old, [string]$new) {
 }
 
 function Update-Game([string]$game) {
-    if (!(Test-Path -LiteralPath (Join-Path $game $StartFile)) -or !(Test-Path -LiteralPath (Join-Path $game 'runtime\OfflineDAoC.exe'))) {
+    $startName = Get-StartFile $game
+    if (!$startName -or (!(Test-Path -LiteralPath (Join-Path $game $LauncherExe)) -and !(Test-Path -LiteralPath (Join-Path $game $LegacyLauncherExe)))) {
         Stop-Install "No $Product game was found in $game. Choose the folder that has $StartFile in it."
     }
     Stop-Running $game
@@ -354,7 +373,7 @@ function Update-Game([string]$game) {
         Say ''
         if ($ClientOnly) {
             Write-Host "The client in $game is already up to date (v$ReleaseVersion)." -ForegroundColor Green
-            Say 'The server, the launcher and runtime\true165 were not checked (-ClientOnly).'
+            Say 'The server, the launcher and runtime\botrealm were not checked (-ClientOnly).'
         } else {
             Write-Host "Your game is already up to date (v$ReleaseVersion)." -ForegroundColor Green
         }
@@ -370,7 +389,7 @@ function Update-Game([string]$game) {
     Say ("Update v{0} -> v{1}: {2} file(s) to update or add, {3} to remove. Download: {4:N0} MB." -f $from, $ReleaseVersion, $work.Count, $removes.Count, ($patch.Bytes / 1MB))
     if ($ClientOnly) {
         Say 'Client-only update (-ClientOnly): only the new-client files are replaced. The server, the launcher and'
-        Say 'runtime\true165 keep exactly what they have now, so no fork build has to be put back afterwards.'
+        Say 'runtime\botrealm keep exactly what they have now, so no fork build has to be put back afterwards.'
     }
     Say 'Everything it replaces is backed up first, and your saves are never touched.'
     if (!(Ask 'Update now?')) { Stop-Install 'Nothing was changed.' }
@@ -411,7 +430,7 @@ function Update-Game([string]$game) {
         'folder, replacing files, and delete ADDED-FILES.txt''s files. Delete this folder when you no longer need it.')
     $added = Join-Path $backup 'ADDED-FILES.txt'
     $applied = New-Object System.Collections.Generic.List[object]
-    $failAfter = [int]($env:OFFLINEDAOC_TEST_FAIL_AFTER)   # testing only: fail after N files to prove the undo
+    $failAfter = [int]($env:BOTREALM_TEST_FAIL_AFTER)   # testing only: fail after N files to prove the undo
     try {
         foreach ($item in $work) {
             $rel = $item.File.Path
@@ -424,7 +443,7 @@ function Update-Game([string]$game) {
                 }
             } else { Add-Content -LiteralPath $added -Value $rel -Encoding UTF8 }
             $applied.Add($item)
-            if ($failAfter -gt 0 -and $applied.Count -ge $failAfter) { throw 'test failure (OFFLINEDAOC_TEST_FAIL_AFTER)' }
+            if ($failAfter -gt 0 -and $applied.Count -ge $failAfter) { throw 'test failure (BOTREALM_TEST_FAIL_AFTER)' }
             [IO.Directory]::CreateDirectory((Split-Path -Parent $target)) | Out-Null
             [IO.File]::Copy((Join-Path $staging $rel), $target, $true)
         }
@@ -508,11 +527,11 @@ if ($choice -eq 'update') {
     Write-Host "$Product v$ReleaseVersion is installed in $game" -ForegroundColor Green
     if (!$NoShortcut -and (Ask 'Put a shortcut to the game on your desktop?')) {
         $shell = New-Object -ComObject WScript.Shell
-        $link = $shell.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Desktop')) 'Offline DAoC True 1.65.lnk'))
+        $link = $shell.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Desktop')) "$Product.lnk"))
         $link.TargetPath = Join-Path $game $StartFile
         $link.WorkingDirectory = $game
         $link.Save()
-        Say 'A shortcut "Offline DAoC True 1.65" is on your desktop.'
+        Say "A shortcut to $Product is on your desktop."
     }
 }
 Remove-Item -LiteralPath (Split-Path -Parent $cache) -Recurse -Force -ErrorAction SilentlyContinue

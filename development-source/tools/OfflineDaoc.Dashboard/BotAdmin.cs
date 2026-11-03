@@ -44,7 +44,7 @@ internal static class BotAdmin
             while (reader.Read()) reserved.Add(reader.GetString(0));
         }
 
-        // True 1.65 Mode: a new level-1 bot starts as the base class of the class it rolled, which it keeps as its
+        // BotRealm rules: a new level-1 bot starts as the base class of the class it rolled, which it keeps as its
         // planned class (column added by the server; until the server has run once, the server converts it instead).
         if (is165 && !HasColumn(connection, transaction, "offline_world_bots", "PlannedClassId"))
         {

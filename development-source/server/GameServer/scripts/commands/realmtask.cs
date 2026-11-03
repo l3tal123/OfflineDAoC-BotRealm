@@ -13,7 +13,7 @@ namespace DOL.GS.Scripts
         {
             if (Classic165Mode.IsOn)
             {
-                DisplayMessage(client, "There are no realm task bonuses in True 1.65 Mode.");
+                DisplayMessage(client, "There are no realm task bonuses.");
                 return;
             }
             if (!IsSpammingCommand(client.Player, "task"))

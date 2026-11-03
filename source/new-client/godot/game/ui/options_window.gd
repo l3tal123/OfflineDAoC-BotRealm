@@ -524,7 +524,7 @@ func _interface() -> void:
 	_hint("SHOW OR HIDE THE NAMES OVER YOUR COMPANIONS AND OVER THE GAMEBOTS, EACH ON ITS OWN. A BOT YOU CLICK ALWAYS SHOWS ITS NAME.")
 	_row("REALM BOTS ON MAP", _toggle(BotView.option("map_dots"), func(on: bool): _save("bots", "map_dots", on)))
 	_hint("YOUR REALM'S GAMEBOTS AND COMPANIONS AS GREEN DOTS ON YOUR MAP (ALSO IN DUNGEONS). ENEMY BOTS NEVER SHOW.")
-	_hint("THE BOT ROSTER AND THE SERVER SETTINGS (XP RATES, BOT GOALS AND THE REST) ARE IN THE OFFLINE DAOC TRUE 1.65 LAUNCHER.")
+	_hint("THE BOT ROSTER AND THE SERVER SETTINGS (XP RATES, BOT GOALS AND THE REST) ARE IN THE BOTREALM LAUNCHER.")
 
 
 ## CHAT: which message types the chat block's two boxes show (top = chat, bottom = system), one ON / OFF per box.

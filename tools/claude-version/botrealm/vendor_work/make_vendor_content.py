@@ -1,6 +1,6 @@
-"""Turn the vendor work into True 1.65 content (owner 2026-10-31: "do what you can now"; second pass when the crawl is done).
+"""Turn the vendor work into BotRealm content (owner 2026-10-31: "do what you can now"; second pass when the crawl is done).
 Inputs (this folder): merchant_stock_additions.json, add-vendoritems165.json (optional, the new period items).
-Outputs: add-vendoritems165.json + add-merchantstock165.json copied into both true165 folders, and the dead-row repoints
+Outputs: add-vendoritems165.json + add-merchantstock165.json copied into both botrealm folders, and the dead-row repoints
 added to true165-rules.json "updates" (both copies). Only high / medium confidence additions; low ones wait for pass 2."""
 import json
 import os
@@ -10,7 +10,7 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 HERE = os.path.dirname(os.path.abspath(__file__))
 CV = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))  # found from this script
-TARGETS = [os.path.join(CV, 'tools', 'claude-version', 'true165'), os.path.join(CV, 'runtime', 'true165')]
+TARGETS = [os.path.join(CV, 'tools', 'claude-version', 'botrealm'), os.path.join(CV, 'runtime', 'botrealm')]
 STOCK_REASON = ("True 1.65 period merchant stock: items the period Allakhazam item pages (Wayback <= 2003-11) say a "
                 "merchant sold, added to that merchant's list (vendor pass 1, 2026-10-31)")
 REPOINT_TAG = "1.65 period merchant stock (vendor pass 1): dead row repointed"

@@ -120,7 +120,7 @@ print('staves set from the tier table:', len(staff_updates), '| probe fixes:', l
 
 if write:
     TAGS = ('True 1.65 merchant focus staves:', 'True 1.65 lost bonuses restored:')
-    for folder in (HERE, os.path.join(ROOT, 'runtime', 'true165')):
+    for folder in (HERE, os.path.join(ROOT, 'runtime', 'botrealm')):
         p = os.path.join(folder, 'true165-rules.json')
         raw = open(p, 'rb').read()
         rules = json.loads(raw.decode('utf-8'))

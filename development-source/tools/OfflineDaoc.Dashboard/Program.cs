@@ -9,7 +9,7 @@ internal static class Program
     /// <summary>One launcher per install: the name carries a hash of the runtime folder, so a second install (a
     /// scratch copy used for testing, for example) can run its own launcher at the same time.</summary>
     private static string InstanceNameFor(DashboardOptions options) =>
-        @"Local\OfflineDAoC.Launcher." +
+        @"Local\BotRealm.Launcher." +
         Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
             System.Text.Encoding.UTF8.GetBytes(Path.GetFullPath(options.RuntimeDirectory))))[..16];
 
@@ -64,7 +64,7 @@ internal static class Program
         WriteLockFile(options, host.Url);
 
         Console.WriteLine();
-        Console.WriteLine($"  Offline DAoC BotRealm launcher {LauncherHost.DisplayVersion}");
+        Console.WriteLine($"  BotRealm launcher {LauncherHost.DisplayVersion}");
         Console.WriteLine();
         Console.WriteLine($"    Playable folder : {options.RuntimeDirectory}");
         Console.WriteLine($"    World database  : {options.DatabasePath}");

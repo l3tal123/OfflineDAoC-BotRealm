@@ -3,7 +3,7 @@
 Verification of a fresh checkout at `C:\Users\andro\Desktop\OfflineDaoc-BotRealm` (the downloaded ZIP export, now
 attached to `origin/main`; fork of `shadowofze/OfflineDAoC-True165`, origin `l3tal123/OfflineDAoC-BotRealm`). Nothing
 was deployed and no server or launcher was started. No game server was running before or after
-(`Get-Process -Name CoreServer,OfflineDAoC` empty).
+(`Get-Process -Name CoreServer,BotRealm` empty).
 
 ## Summary
 
@@ -72,12 +72,30 @@ NUnit suite, but it is **not** the documented `dotnet test` invocation, and it i
 dotnet build OfflineDaoc.Dashboard.csproj -c Release -p:RestoreBuildInParallel=false -p:BuildInParallel=false -m:1
   -> Build succeeded, 0 Warning(s), 0 Error(s), 2.3 s
 ```
-Outputs `bin/Release/net10.0/OfflineDAoC.exe` (162,816 B), `OfflineDAoC.dll` (317,440 B) and a `wwwroot/` folder. The
+Outputs `bin/Release/net10.0/BotRealm.exe`, `BotRealm.dll` and a `wwwroot/` folder. The
 launcher's UI-free logic now lives in its `Launcher/` folder (the old WinForms project is no longer in the repository),
 and its csproj still compiles the two server files (`BotGoalSettings.cs`, `RealmEventRecordStore.cs`) by relative path.
 Smoke test: run from the build output with `--port 10311 --root <playable>\runtime --no-open`; it reported launcher 0.3
 with the install detected, and `/`, `/app.js`, `/styles.css`, the vendored Vue build, `/api/health`, `/api/world` and
 `/api/population` all answered 200.
+
+### Rebrand re-verification (2026-11-03)
+
+Everything above was re-run on the renamed BotRealm tree; nothing was deployed to the playable install and no game
+server was started.
+```
+dotnet build "Dawn of Light.sln" -c Release -p:RestoreBuildInParallel=false -p:BuildInParallel=false -m:1
+  -> Build succeeded. 648 Warning(s) 0 Error(s), 00:16.25
+Tests (in-process NUnit engine, as above)
+  -> passed=3165 failed=0 skipped=69   (all skips Explicit; no VSTest result here)
+dotnet build OfflineDaoc.Dashboard.csproj -c Release ...
+  -> Build succeeded, 0 Warning(s), 0 Error(s), 0.93 s   (output: BotRealm.exe, BotRealm.dll)
+```
+Launcher smoke test on a throw-away copy of the world database and content (not the playable install):
+`BotRealm.exe --port 10312 --root <scratch>\runtime --no-open` printed `BotRealm launcher 0.3`, served
+`/`, `/app.js`, `/styles.css`, the vendored Vue build, `/api/health`, `/api/world`, `/api/population` and
+`/api/status` with 200, the page title and header read BotRealm, and the old `runtime/true165` content folder was
+renamed to `runtime/botrealm` on start as designed. The scratch copy and the throw-away test runner were deleted.
 
 ### Database (repo root)
 ```
@@ -121,5 +139,6 @@ unpacked database and `serverconfig.xml` are all git-ignored. Nothing was commit
    (MSB3030). This affects `Tests` too because it references `CoreServer`.
 4. Machine is **offline** for NuGet (`api.nuget.org` unreachable): every restore warns `NU1900`. Builds/tests still
    work from the local package cache; a machine without that cache cannot restore.
-5. Not verified here (out of scope / not run): server start, launcher start, content refresh, client build/run,
-   in-game checks, navmesh generation, content pipeline.
+5. Not verified here (out of scope / not run): server start, content refresh on a real install, client build/run,
+   in-game checks, navmesh generation, content pipeline. The launcher was started only on a throw-away copy of the
+   world for the endpoint smoke test, never against the playable install.

@@ -1,4 +1,4 @@
-"""Build the update patch for a new Offline DAoC True 1.65 version, and add it to that version's download manifest.
+"""Build the update patch for a new BotRealm version, and add it to that version's download manifest.
 
     python -I make_patch_true165.py --base 0.1=<release-baselines/0.1/package.sha256> [--base 0.2=...]
                                     --game <new game folder> --client <new client folder> --repo <repository>
@@ -6,7 +6,7 @@
 
 Run it AFTER make_release_true165.py has made the new version's full download in <assets folder>\\v<version>\\ (new
 players still get the full download). This adds:
-    OfflineDAoC-True165-v<version>-patch[-partNN].zip   only the files that changed since any released version
+    BotRealm-v<version>-patch[-partNN].zip   only the files that changed since any released version
 and a "Patch" section in download-manifest.json, then refreshes SHA256SUMS.txt.
 
 The patch is cumulative: it brings ANY released version (every --base) up to the new one, so a player who skipped a
@@ -15,7 +15,7 @@ released version ("From"). The downloader's update mode only replaces a file who
 (or already the new one); any other file was changed on that PC, and the update stops before touching anything.
 
 Never patched (the player's own data): NEVER_TOUCH. The world database there is the player's save; world content
-changes ship as runtime/true165 JSON instead, which the launcher applies at the next START SERVER, keeping every save.
+changes ship as runtime/botrealm JSON instead, which the launcher applies at the next START SERVER, keeping every save.
 """
 from __future__ import annotations
 
@@ -100,7 +100,7 @@ def main():
             continue
         removed.append({"Path": rel, "From": sorted({b[rel] for b in bases.values() if rel in b})})
 
-    root = f"OfflineDAoC-True165-v{version}-patch"
+    root = f"BotRealm-v{version}-patch"
     print(f"Packing the patch: {len(entries):,} changed or new file(s), {len(removed):,} removed...", flush=True)
     parts = mr.pack(changed, root, release, root, False, args.part_budget) if changed else []
     manifest["Patch"] = {

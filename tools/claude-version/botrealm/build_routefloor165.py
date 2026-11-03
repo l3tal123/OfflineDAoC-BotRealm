@@ -218,7 +218,7 @@ if write:
         for i, p in enumerate(out, 1):
             rows.append({'PathPoints_ID': f'p165floor-{pid}-{i}', 'PathID': pid, 'Step': i, 'X': p[1], 'Y': p[2], 'Z': p[3],
                          'MaxSpeed': p[4] or 0, 'WaitTime': p[5] or 0, 'LastTimeRowUpdated': now})
-    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'true165')):
+    for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'botrealm')):
         json.dump({'table': 'PathPoints', 'key': 'PathPoints_ID',
                    'reason': 'True 1.65 horse routes follow the floor over bridges and dips (build_routefloor165.py)',
                    'rows': rows}, open(os.path.join(folder, 'add-routefloor165.json'), 'w', encoding='utf-8', newline='\n'), indent=1)

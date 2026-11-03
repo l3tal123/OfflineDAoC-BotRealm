@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode looting (owner 2026-10-30, plan section 21; autoloot added 2026-11-01). A kill's loot and coin are
+    /// BotRealm looting (owner 2026-10-30, plan section 21; autoloot added 2026-11-01). A kill's loot and coin are
     /// paid straight to their owner when that owner has autoloot on (AutoLoot165: every player may turn it on with
     /// /autoloot, every gamebot has it on). A bag still reaches the ground when nobody who may take it has autoloot on,
     /// when the owner's backpack is full, or when the owner is offline; after the fight a gamebot walks to each such bag

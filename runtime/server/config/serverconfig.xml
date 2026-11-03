@@ -9,8 +9,8 @@
         <UdpPort>10400</UdpPort>
         <EnableUPnP>False</EnableUPnP>
         <DetectRegionIP>False</DetectRegionIP>
-        <ServerName>Offline DAoC: Bot Realm</ServerName>
-        <ServerNameShort>OfflineClassicBotRealm</ServerNameShort>
+        <ServerName>BotRealm</ServerName>
+        <ServerNameShort>BotRealm</ServerNameShort>
         <LogConfigFile>./config/logconfig.xml</LogConfigFile>
         <ScriptCompilationTarget>./lib/GameServerScripts.dll</ScriptCompilationTarget>
         <ScriptAssemblies> </ScriptAssemblies>

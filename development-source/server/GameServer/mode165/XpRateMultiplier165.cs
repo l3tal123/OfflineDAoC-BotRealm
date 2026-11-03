@@ -14,7 +14,7 @@ namespace DOL.GS
     public static class XpRateMultiplier165
     {
         [ServerProperty("rates", "xp_rate_multiplier",
-            "Multiplies experience earned from every source (players and every kind of gamebot) by this rate. 1 is normal, 2.5 is two and a half times. The Offline DAoC launcher sets it in Options; it accepts a number from 1 to 5000.", 1.0)]
+            "Multiplies experience earned from every source (players and every kind of gamebot) by this rate. 1 is normal, 2.5 is two and a half times. The BotRealm launcher sets it in Options; it accepts a number from 1 to 5000.", 1.0)]
         public static double XP_RATE_MULTIPLIER;
 
         /// <summary>The smallest rate the launcher accepts; 1 leaves experience unchanged.</summary>

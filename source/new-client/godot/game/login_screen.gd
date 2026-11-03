@@ -29,10 +29,10 @@ var _host_label: Label
 var _host_check := 0.0
 
 
-## The game's window title (owner 2026-10-31: "Offline DAoC True 1.65 v0.1" - True 1.65 is the game now). Set on the root window, which keeps it
+## The game's window title (owner 2026-11-03: "BotRealm v0.2"). Set on the root window, which keeps it
 ## (window_set_title alone was reset to the project name); a debug Godot binary - the one the launcher runs - adds
 ## " (DEBUG)" to a Window's title, so the screen's own title is set again without it once the window has applied its own.
-const GAME_TITLE := "Offline DAoC True 1.65 v0.2"
+const GAME_TITLE := "BotRealm v0.2"
 
 
 static func set_game_title(w: Window) -> void:
@@ -438,7 +438,7 @@ func _on_login() -> void:
 	_enter_world()
 
 
-## Started by the Offline DAoC Rebuilt launcher: no account screen - the launcher's account (account.txt) logs in to
+## Started by the BotRealm launcher: no account screen - the launcher's account (account.txt) logs in to
 ## its server by itself, as connect.exe did for game.dll, and the game goes straight to realm / character select.
 ## A failed login says why; Escape closes the game.
 func _server_login() -> void:

@@ -2,10 +2,10 @@ using System.Linq;
 namespace DOL.GS.Commands
 {
     /// <summary>
-    /// The hiring window's buttons (True 1.65 Mode, Hire165): every button in both clients sends one of these.
+    /// The hiring window's buttons (BotRealm, Hire165): every button in both clients sends one of these.
     /// /companionui test (GM) opens the window with sample data and a private preview figure.
     /// </summary>
-    [CmdAttribute("&companionui", ePrivLevel.Player, "True 1.65 Mode companion hiring window",
+    [CmdAttribute("&companionui", ePrivLevel.Player, "Companion hiring window",
         "/companionui race-|race+|class-|class+|gender|face-|face+|hair-|hair+|look|name [name]|hire|tab <n>|close",
         "/companionui summon|dismiss|release|revive <row>")]
     public sealed class CompanionUiCommandHandler : AbstractCommandHandler, ICommandHandler
@@ -23,7 +23,7 @@ namespace DOL.GS.Commands
                 log.Info($"COMPANIONUI_CMD player={player.Name} args=\"{string.Join(' ', args.Skip(1))}\"");
             if (!Classic165Mode.IsOn)
             {
-                DisplayMessage(client, "Companions are hired at the traveler's inns in True 1.65 Mode.");
+                DisplayMessage(client, "Companions are hired at the traveler's inns.");
                 return;
             }
             if (args.Length > 1 && args[1].Equals("test", System.StringComparison.OrdinalIgnoreCase))

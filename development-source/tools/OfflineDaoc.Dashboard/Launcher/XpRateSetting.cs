@@ -52,7 +52,7 @@ internal static class XpRateSetting
         connection.Open();
         using var transaction = connection.BeginTransaction();
         ServerPropertyWrite.Save(connection, transaction, "rates", PropertyKey,
-            "Multiplies experience earned from every source (players and every kind of gamebot) by this rate. 1 is normal. Set in the Offline DAoC launcher.",
+            "Multiplies experience earned from every source (players and every kind of gamebot) by this rate. 1 is normal. Set in the BotRealm launcher.",
             "1", Format(rate));
         transaction.Commit();
     }

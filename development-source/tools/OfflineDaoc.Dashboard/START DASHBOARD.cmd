@@ -1,7 +1,7 @@
 @echo off
-rem Offline DAoC BotRealm - launcher and dashboard.
+rem BotRealm - launcher and dashboard.
 rem Runs the launcher from the build output folder (bin\Release\net10.0).
-title Offline DAoC BotRealm - launcher
+title BotRealm - launcher
 cd /d "%~dp0"
-"%~dp0OfflineDAoC.exe" %*
+"%~dp0BotRealm.exe" %*
 if errorlevel 2 pause

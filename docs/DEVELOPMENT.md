@@ -1,6 +1,6 @@
-# Developing Offline DAoC True 1.65
+# Developing BotRealm
 
-How to build, test and run the server and launcher, how the True 1.65 content reaches the world, and how a release
+How to build, test and run the server and launcher, how the BotRealm world content reaches the world, and how a release
 is put together. The new client has its own guide: [source/new-client/README.md](../source/new-client/README.md).
 Read the project rules in [AGENTS.md](../AGENTS.md) (section 5 below repeats them in full) before you change
 anything.
@@ -8,10 +8,10 @@ anything.
 | Part | Where | What |
 |---|---|---|
 | Server | `development-source/server` | OpenDAoC fork ("Dawn of Light" solution), C#, `net10.0`. |
-| Launcher | `development-source/tools/OfflineDaoc.Dashboard` | The launcher `OfflineDAoC.exe` (`net10.0`): a .NET host plus the browser dashboard in `wwwroot/`. It starts the server and the client. |
+| Launcher | `development-source/tools/OfflineDaoc.Dashboard` | The launcher `BotRealm.exe` (`net10.0`): a .NET host plus the browser dashboard in `wwwroot/`. It starts the server and the client. |
 | Tools | `development-source/tools` | The navmesh builder (`OpenDAoC-BuildNav`) and other development tools. |
-| True 1.65 generators | `tools/claude-version/true165` | Python scripts that build the True 1.65 content files. |
-| True 1.65 content | `runtime/true165` | The JSON files the launcher writes into the world database. |
+| World-content generators | `tools/claude-version/botrealm` | Python scripts that build the BotRealm world content files. |
+| World content | `runtime/botrealm` | The JSON files the launcher writes into the world database. |
 | Clean world | `database/` | The clean world database (zipped) and the scripts that make and unpack it. |
 | New client | `source/new-client` | The Godot client. See its README. |
 
@@ -28,7 +28,7 @@ To get a game you can run from your clone:
 2. **Server and launcher:** build them (section 1), then copy the outputs into `runtime/server` (with `lib/` and
    `win-x64/`) and `runtime/`.
 3. **Navigation meshes:** the full set (`runtime/server/navmesh`, 2.1 GB) comes from the release download. You can
-   also rebuild it with `development-source/tools/OpenDAoC-BuildNav` from a DAoC client's zone data. The True 1.65
+   also rebuild it with `development-source/tools/OpenDAoC-BuildNav` from a DAoC client's zone data. The BotRealm
    inn zones' meshes are already in `runtime/server/navmesh-165`.
 4. **Client:** the new client's content (about 37 GB) comes from the release download, or from its pipeline. See its
    README.
@@ -70,7 +70,7 @@ cd development-source/tools/OfflineDaoc.Dashboard
 dotnet build OfflineDaoc.Dashboard.csproj -c Release
 ```
 
-- Output: `bin/Release/net10.0/OfflineDAoC.exe`, `OfflineDAoC.dll`, `.pdb`, `.deps.json`,
+- Output: `bin/Release/net10.0/BotRealm.exe`, `BotRealm.dll`, `.pdb`, `.deps.json`,
   `.runtimeconfig.json` and a `wwwroot/` folder. Deploy, with the launcher closed, by copying the five files into
   `runtime/` and `wwwroot/` into `runtime/dashboard/wwwroot/`. The launcher serves the UI at
   `http://127.0.0.1:10310/` and opens the browser; keep its console window open while playing (closing it stops the
@@ -86,7 +86,7 @@ dotnet build OfflineDaoc.Dashboard.csproj -c Release
 
 ## 2. Running the server
 
-Normally through the launcher (`runtime/OfflineDAoC.exe`):
+Normally through the launcher (`runtime/BotRealm.exe`):
 
 1. **START SERVER** checks the database flag (see below), runs the content refresh (section 3), then starts
    `runtime/server/CoreServer.exe --start -config=./config/serverconfig-165.xml` with `runtime/server` as the
@@ -94,7 +94,7 @@ Normally through the launcher (`runtime/OfflineDAoC.exe`):
 2. The server is "ready" when something listens on TCP port 10300. Then **ENTER REALM** is enabled.
 3. **STOP SERVER** writes `exit` to the server's standard input and waits up to 10 seconds.
 
-The launcher only runs True 1.65 Mode. There is no normal-mode switch:
+The launcher runs one world and has no normal-mode switch:
 
 - `TrueMode.Read` always rewrites `runtime/data/world-mode.txt` to:
   ```
@@ -144,25 +144,23 @@ cd runtime/server
 CoreServer.exe --start -config=./config/serverconfig-165.xml
 ```
 
-Type `exit` to stop it. Run `OfflineDAoC.exe --refresh-165` first if the content files changed.
+Type `exit` to stop it. The content refresh runs from the dashboard's **START SERVER** (section 3); there is no CLI
+refresh flag any more.
 
 Other headless launcher options (all refuse while `CoreServer` runs):
-
-- `OfflineDAoC.exe --refresh-165`: the content refresh only, then exit (code 0 = ok, 1 = failed). It writes
-  `runtime/data/true165-refresh.log`.
-- `OfflineDAoC.exe --add-bots 1.65 <realm 1-3> <count> <level>`: adds gamebot rows, the same rows the launcher's ADD
+- `BotRealm.exe --add-bots 1.65 <realm 1-3> <count> <level>`: adds gamebot rows, the same rows the launcher's ADD
   BOTS buttons write. It writes `runtime/data/add-bots.log`. `normal` is refused.
-- `OfflineDAoC.exe --set-xp-rate <1..5000>`: the Options tab's XP rate (`ServerProperty` `xp_rate_multiplier`, the
+- `BotRealm.exe --set-xp-rate <1..5000>`: the Options tab's XP rate (`ServerProperty` `xp_rate_multiplier`, the
   `XpRateSetting`/`XpRateMultiplier165` pair, 1 to 5000, clamped), then exit. It writes
   `runtime/data/set-xp-rate.log`.
 
 ---
 
-## 3. How the True 1.65 content reaches the world database
+## 3. How the BotRealm world content reaches the world database
 
 All of this is in `development-source/tools/OfflineDaoc.Dashboard/Launcher/TrueMode.cs`.
 
-### 3.1 The input files (`runtime/true165/`)
+### 3.1 The input files (`runtime/botrealm/`)
 
 | File | Used by | What it is |
 |---|---|---|
@@ -180,12 +178,12 @@ All of this is in `development-source/tools/OfflineDaoc.Dashboard/Launcher/TrueM
 - about 8,300 `updates` (period item stats, merchant stock repoints, levels, inn clearing, Shrouded Isles entrances
   and so on).
 
-### 3.2 START SERVER and `--refresh-165`: `TrueMode.Refresh`
+### 3.2 START SERVER: `TrueMode.Refresh`
 
-Both run the same code. It keeps all progress (characters, companions, bots, exchange, guilds, houses, keeps,
+START SERVER runs this. It keeps all progress (characters, companions, bots, exchange, guilds, houses, keeps,
 relics) and re-applies only the world content.
 
-1. **Content stamp.** A SHA-256 over every `*.json` in `runtime/true165` (lower-case file name, a newline, then the
+1. **Content stamp.** A SHA-256 over every `*.json` in `runtime/botrealm` (lower-case file name, a newline, then the
    bytes, files in case-insensitive name order). If it equals the `stamp` row in the table
    `offline_true165_content`, nothing happens. **Any** change to any JSON there triggers a refresh, even
    `coin165.json`.
@@ -217,9 +215,9 @@ Gotchas when you edit content:
   so rows added under the old reason stop being cleaned up by that file.
 - Keys must be unique and stable. The generators use prefixes such as `p165_item_<page key>`,
   `p165stock-...` and `p165floor-<path>-<n>`.
-- Keep the two copies (`tools/claude-version/true165` and `runtime/true165`) identical. The generators write both. Only the
+- Keep the two copies (`tools/claude-version/botrealm` and `runtime/botrealm`) identical. The generators write both. Only the
   runtime copy is hashed and applied.
-- Dry run before you install: `tools/claude-version/true165/audit_fix_2026-10-31/coord/dryrun.py <content folder> <source db>
+- Dry run before you install: `tools/claude-version/botrealm/audit_fix_2026-10-31/coord/dryrun.py <content folder> <source db>
   <out db>` runs the same steps in Python on a copy. A second refresh should change nothing, and `PRAGMA
   quick_check` should say `ok`.
 
@@ -233,7 +231,7 @@ Gotchas when you edit content:
 - VACUUM and `quick_check`;
 - writing `serverconfig-165.xml`.
 
-The Python twin is `tools/claude-version/true165/derive_true165_database.py` (with `content165.py`). Normal mode and its database
+The Python twin is `tools/claude-version/botrealm/derive_true165_database.py` (with `content165.py`). Normal mode and its database
 are archived, so nothing calls `Derive` now. v0.1 ships a ready clean world instead:
 - `database/make_clean_db.py <world db>` makes the zip. It applies the same fresh-slate rules, keeps the content
   tracking tables (so the first START SERVER does not re-apply everything), turns auto accounts on and checks that
@@ -242,7 +240,7 @@ are archived, so nothing calls `Derive` now. v0.1 ships a ready clean world inst
 
 ---
 
-## 4. The generators (`tools/claude-version/true165`)
+## 4. The generators (`tools/claude-version/botrealm`)
 
 They are development tools. They read research data or a **read-only copy** of a world database, and write JSON
 into both content folders. Run them with `python -I`. None of them write to a live database.
@@ -313,7 +311,7 @@ Reference outputs that only the tools copy has (not applied): `drops165-missing.
    - resting rates;
    - looting.
 
-   A `GameBot` is a `GameNPC`, so code that asks `is GamePlayer` gives bots the monster rules. In True 1.65 such checks
+   A `GameBot` is a `GameNPC`, so code that asks `is GamePlayer` gives bots the monster rules. In BotRealm such checks
    use `PlayerRules165.IsPlayerLike`. No bot-only shortcuts: no free arrows, no instant loot, no fast rest.
 5. **Quest QoL is kept as in normal mode.** Quest markers over NPCs, the yellow/red objective highlights and the quest
    guide (`/questguide`, `QuestGuide.cs`) work as before. Never gate them with `Classic165Mode.IsOn`, and never add
@@ -338,14 +336,14 @@ Reference outputs that only the tools copy has (not applied): `drops165-missing.
    - Deploy, refresh and database writes also wait for a stopped server.
 9. **CRLF line endings** and 4-space indents in C#, block-scoped namespaces (see `.editorconfig`). Keep a file's
    existing line endings when you edit it.
-10. Keep True 1.65 rules behind `Classic165Mode.IsOn` where the code is shared with the inherited server. Content
-    changes go in the `runtime/true165` data, not in hand edits to a world database.
+10. Keep the world rules behind `Classic165Mode.IsOn` where the code is shared with the inherited server. Content
+    changes go in the `runtime/botrealm` data, not in hand edits to a world database.
 
 ---
 
 ## 6. Key code map (`development-source/server/GameServer`)
 
-**`mode165/`**: the True 1.65 rules and systems.
+**`mode165/`**: the world rules and systems.
 
 | File | What |
 |---|---|
@@ -360,11 +358,11 @@ Reference outputs that only the tools copy has (not applied): `drops165-missing.
 | `XpRateMultiplier165.cs` | The launcher's Options XP rate (`ServerProperty` `xp_rate_multiplier`, 1 to 5000, default 1): one multiplier for every experience gain, players and every kind of gamebot; losses are never scaled. Applied in `GamePlayer.GainExperience`/`ForceGainExperience` and `GameBot.GainExperience`. |
 | `BotLootWalk165.cs` | The bags autoloot did not take: bots walk to the ones they may take; companions never loot. |
 | `BaseClassBots165.cs` | Gamebots start as a base class and are promoted at level 5 (`PlannedClassId`). |
-| `WelcomePurse165.cs` | New characters start with 1 gold (`ServerProperty` `starting_money` = 10,000 copper, from `runtime/true165/true165-rules.json`); characters that already existed get the same purse added once, recorded by a `OfflineWelcomePurse165` custom parameter per character so a restart never pays twice. World bots get the same 1 gold: the launcher writes it when it adds a bot, and a bot made before the rule is topped up to it once on the first roster read (`WelcomePursePaid` on its `offline_world_bots` record). |
+| `WelcomePurse165.cs` | New characters start with 1 gold (`ServerProperty` `starting_money` = 10,000 copper, from `runtime/botrealm/true165-rules.json`); characters that already existed get the same purse added once, recorded by a `OfflineWelcomePurse165` custom parameter per character so a restart never pays twice. World bots get the same 1 gold: the launcher writes it when it adds a bot, and a bot made before the rule is topped up to it once on the first roster read (`WelcomePursePaid` on its `offline_world_bots` record). |
 | `ServerStatistics165.cs` | The launcher's Server Stats tab: in-memory world counters (mobs killed, deaths, money looted, PvP kills, keeps captured) and four top-10 boards, counted for players and gamebots, served on demand through `server-stats.request` -> `state-165/server-stats.json` and saved to `state-165/server-stats-state.json`; realm points are read from the saved world. |
 | `CrafterBots165.cs` | About 1 in 5 gamebots craft real recipes and list the products on the Realm Exchange; siegecrafters build siege kits. |
 | `Charm165.cs` | Bots charm real monsters with learned charm spells only. |
-| `Coin165.cs` | Per-monster coin chance from `runtime/true165/coin165.json`. |
+| `Coin165.cs` | Per-monster coin chance from `runtime/botrealm/coin165.json`. |
 | `HiredCompanions165.cs`, `Hire165.cs`, `CompanionWindows165.cs`, `CompanionGearVault165.cs`, `CompanionUiCommand.cs`, `CompanionChat165.cs` | Hired companions: hiring window (DebugMode 0x21 'H' packets), gear/spec/stats windows, `/companionui`, persistence (`offline_hired_companions`). |
 | `Innkeeper165.cs`, `HornHandler165.cs`, `Adventurer165.cs` (`Adventurer165`, `Traveler165`), `Courier165.cs`, `InnQuestMarkers165.cs` | The traveler's inns: innkeeper (hiring), Horn of Rallying (player-started PvE events), road patrols and inn travelers, the level-5/50 courier quests and their map markers. |
 | `Exchange165.cs` | Realm Exchange pricing and relisting (90%, 80%, then returned). |
@@ -403,8 +401,8 @@ way; the tools and the steps are in [release/README.md](../release/README.md), a
 `release-baselines/0.1/`.
 
 `development-source/tools/build_release_true165.py` builds the game package from a working install: `runtime/`
-(the launcher, server, both navmesh sets, the True 1.65 content and the clean world), `tools/dotnet` (.NET 10:
-the host and the NETCore, WindowsDesktop and AspNetCore runtimes) and `START OFFLINE DAOC TRUE 1.65.cmd`. It leaves
+(the launcher, server, both navmesh sets, the BotRealm world content and the clean world), `tools/dotnet` (.NET 10:
+the host and the NETCore, WindowsDesktop and AspNetCore runtimes) and `START BOTREALM.cmd`. It leaves
 out everything in the never-ships list below. The new client is packaged separately into `new-client/` beside
 `runtime/`.
 
@@ -414,12 +412,12 @@ out everything in the never-ships list below. The new client is packaged separat
 - the configs, with `AutoAccountCreation` set to **True** in `serverconfig-165.xml`;
 - the full `navmesh` and `navmesh-165`;
 - the content files (`classic-quests.json`, `classic-quest-guides.json`, `classic-otd.json`);
-- `runtime/true165`;
+- `runtime/botrealm`;
 - the clean world from `database/make_clean_db.py`;
 - the new client (`new-client/`, with no `save/` folder and no `dev_mode.txt`);
 - a bundled .NET 10 in `tools/dotnet`;
-- `START OFFLINE DAOC TRUE 1.65.cmd`, which sets `DOTNET_ROOT`, `DOTNET_ROOT_X64` and `DOTNET_MULTILEVEL_LOOKUP=0`,
-  then starts `runtime/OfflineDAoC.exe`.
+- `START BOTREALM.cmd`, which sets `DOTNET_ROOT`, `DOTNET_ROOT_X64` and `DOTNET_MULTILEVEL_LOOKUP=0`,
+  then starts `runtime/BotRealm.exe`.
 
 **Never ships:**
 - logs, every `*.before-*` backup, `deployment-backups`, `mode-switch-backups`, `keep-relic-reset-backups`;

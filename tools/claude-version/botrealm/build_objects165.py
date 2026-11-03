@@ -1,4 +1,4 @@
-"""True 1.65 Mode: the inns' server-placed objects (owner 2026-10-30).
+"""BotRealm: the inns' server-placed objects (owner 2026-10-30).
 
 Reads the inn layout files (DAOC HIATUS/1.65 MODE CLIENT (local only)/layouts/inn_*.json,
 "server_world_objects": the Horn of Rallying on its platform, the realm banners, props) and writes
@@ -59,7 +59,7 @@ def main():
     }
     target = os.path.join(HERE, 'add-objects165.json')
     json.dump(out, open(target, 'w', encoding='utf-8'), indent=1)
-    runtime = os.path.join(ROOT, 'runtime', 'true165')
+    runtime = os.path.join(ROOT, 'runtime', 'botrealm')
     if os.path.isdir(runtime):
         shutil.copyfile(target, os.path.join(runtime, 'add-objects165.json'))
     horns = sum(1 for r in rows if r['ClassType'])

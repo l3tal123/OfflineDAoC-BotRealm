@@ -513,9 +513,9 @@ public static class AutonomousPopulationController
             client.Player?.ObjectState != GameObject.eObjectState.Active)
             throw new InvalidOperationException($"Account '{command.RequestedByAccount}' has no character currently in the game.");
 
-        // True 1.65 Mode: the launcher's teleport is a GM tool, like /tele (owner 2026-11-01).
+        // BotRealm: the launcher's teleport is a GM tool, like /tele (owner 2026-11-01).
         if (Classic165Mode.IsOn && client.Account.PrivLevel < (uint)ePrivLevel.GM)
-            throw new InvalidOperationException("In True 1.65 only a GM can teleport to a bot.");
+            throw new InvalidOperationException("Only a GM can teleport to a bot.");
 
         if (!AutonomousBotRegistry.TryGet(command.BotId, out GameBot bot))
             throw new InvalidOperationException($"Playerbot {command.BotId} is no longer online.");

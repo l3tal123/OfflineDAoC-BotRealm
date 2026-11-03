@@ -6,8 +6,8 @@ using DOL.GS.PacketHandler;
 namespace DOL.GS.Quests
 {
     /// <summary>
-    /// True 1.65 Mode (plan section 4, epic quests): helpers for the three level 50 finales that run as the period quests
-    /// in 1.65 Mode, rebuilt from the period walkthroughs (Camelot Warcry spoilers, Allakhazam quest pages):
+    /// BotRealm (plan section 4, epic quests): helpers for the three level 50 finales that run as the period quests
+    /// in BotRealm, rebuilt from the period walkthroughs (Camelot Warcry spoilers, Allakhazam quest pages):
     /// Shadows50 = Lord of Deceit (Captain Rhodri, Lord Elidyn), Academy50 = Symbol of the Broken (started by Veteran
     /// Guardsman Esmond at Cornwall Station), Harmony50 = Last Heir (Cailean, Donnchadh, Chieftess Niamh, Talriese).
     /// Normal mode never calls these.

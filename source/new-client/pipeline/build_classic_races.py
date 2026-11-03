@@ -1,4 +1,4 @@
-"""True 1.65 Mode: every player race and gender as the CLASSIC figure
+"""BotRealm: every player race and gender as the CLASSIC figure
 the original client draws when its figure version is Classic (user.dat [character_version] 0 - the 1.65 profile). Spec: TRUE 1.65 MODE CLASSIC FIGURES.md.
 
     python build_classic_races.py                 # all figures -> godot/content/characters/classic/<prefix>/

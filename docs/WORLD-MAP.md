@@ -65,7 +65,7 @@ you replace — AGENTS.md rules 10 and 11):
 1. **Server** – build `development-source/server` Release and copy `Release/lib/GameServer.dll` and
    `Release/lib/CoreDatabase.dll` into the playable `runtime/server/`, `runtime/server/lib/` and
    `runtime/server/win-x64/`.
-2. **Launcher** – build `development-source/tools/OfflineDaoc.Dashboard` Release and copy `OfflineDAoC.*` and
+2. **Launcher** – build `development-source/tools/OfflineDaoc.Dashboard` Release and copy `BotRealm.*` and
    `wwwroot/` from `bin/Release/net10.0/` into the playable `runtime/` and `runtime/dashboard/wwwroot/`.
 3. Start the server, then the launcher: the **World Map** tab appears between **Active Population** and
    **Active Groups**.
@@ -89,7 +89,7 @@ uses the painted maps. The client does not need to be running; only the server m
   painted dot raised the bot's id while a double-click on empty map raised nothing. Renders were inspected as images
   (`world-map-overview-zoom.png`, `world-map-albion-zoom.png`). The same checks pass against the Release build that is
   deployed.
-- Launcher hand-off probe: the installed `OfflineDAoC.dll` was loaded into a headless harness run from the install's
+- Launcher hand-off probe: the installed `BotRealm.dll` was loaded into a headless harness run from the install's
   own `runtime/` folder (so it found the real database, server folder and client), the real `MainForm` was constructed
   without being shown, and it verified: the World Map tab exists in second position and holds the map control, the
   toolbar's `+`/`−`/`RESET` buttons drive the zoom percentage (125% → 100%), a synthetic row with a filter that hides
@@ -103,7 +103,7 @@ uses the painted maps. The client does not need to be running; only the server m
 ## Verification done (2026-11-02: show on map, smaller dots, 1000% zoom)
 
 - Launcher build: 0 errors.
-- The headless launcher probe was extended and run against the **deployed** `runtime/OfflineDAoC.dll` (same harness
+- The headless launcher probe was extended and run against the **deployed** `runtime/BotRealm.dll` (same harness
   as above; it constructs the real `MainForm` from the playable install and never shows a window):
   - the Active Population right-click menu lists **Show on map** (before "Inspect bot");
   - Show on map switches to the World Map tab, selects the bot's region, sets 300%, updates the `ZOOM` label and the

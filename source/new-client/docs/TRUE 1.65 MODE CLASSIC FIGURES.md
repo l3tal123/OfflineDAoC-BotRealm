@@ -1,4 +1,4 @@
-# True 1.65 Mode: classic figures
+# BotRealm: classic figures
 
 Research report, 2026-10-30.
 The csvs it names are in the client's gamedata.mpk.

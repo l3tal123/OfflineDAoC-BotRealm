@@ -6,7 +6,7 @@ using DOL.GS.Spells;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode charming for bots, gamebots and hired companions alike (owner 2026-10-30, plan section 25): no
+    /// BotRealm charming for bots, gamebots and hired companions alike (owner 2026-10-30, plan section 25): no
     /// made-up pets. A bot charms a real monster, and only with a charm spell it has really learned from its own spec
     /// lines (some classes' charm is deep in an advanced line). It charms the first valid target it meets in combat that
     /// cons at least green: the right creature type for the spell, within the spell's level limit, nobody's pet.

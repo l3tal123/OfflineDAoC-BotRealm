@@ -1,6 +1,6 @@
 # This fork: setup, syncing with upstream, and development workflow
 
-This checkout is the development repository for **Offline DAoC BotRealm**, a fork of
+This checkout is the development repository for **BotRealm**, a fork of
 [shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165) whose development focus is the
 **bot system**: quality-of-life for the player managing bots, and extending the bots' autonomy until they can
 complete the whole game by themselves. The game itself, its rules and its content are described in
@@ -16,7 +16,7 @@ complete the whole game by themselves. The game itself, its rules and its conten
 
 Everything in [AGENTS.md](../AGENTS.md) still applies: period sources first, nothing from Trials of Atlantis or
 later, never change difficulty or combat numbers, bots follow the player rules, content changes go in
-`runtime/true165` through the generator, never commit a played database or player data.
+`runtime/botrealm` through the generator, never commit a played database or player data.
 
 ## 1. Remotes and branch model
 
@@ -108,7 +108,7 @@ behaviour, horse sizing, companion teleport/death handling, death logging). When
 2. Resolve each conflicted file **keeping both sides' intent**: upstream's correctness/compatibility changes plus the
    fork's bot work. Never accept one side wholesale to "get past" a conflict, and do not silently drop one of two
    implementations of the same feature - pick the newer/cleaner one and say so in the commit message.
-3. For content files (`runtime/true165/*.json`, `tools/claude-version/true165` outputs), prefer the generator:
+3. For content files (`runtime/botrealm/*.json`, `tools/claude-version/botrealm` outputs), prefer the generator:
    regenerate from the merged generator sources rather than hand-merging thousands of JSON rows, and keep the two
    copies of each content file identical (AGENTS.md rule 7).
 4. Build and test before committing (section 3), then `git add` the resolved files, `git commit --no-edit`,
@@ -156,7 +156,7 @@ machine without that cache cannot restore.
 
 Do not build or test while a server is running (AGENTS.md rule 10). The first build is the long one; later builds
 are incremental. The launcher has its own project in `development-source/tools/OfflineDaoc.Dashboard`: build it
-with `dotnet build OfflineDaoc.Dashboard.csproj -c Release`, then copy `OfflineDAoC.*` into `runtime\` and
+with `dotnet build OfflineDaoc.Dashboard.csproj -c Release`, then copy `BotRealm.*` into `runtime\` and
 `wwwroot\` into `runtime\dashboard\wwwroot\` with the launcher closed. The launcher's UI-free logic lives in that
 project's `Launcher\` folder; the old WinForms project is no longer in the repository.
 
@@ -177,8 +177,8 @@ rule 8).
 
 ### 3.2 Updating the playable folder to a new upstream release
 
-The playable folder is updated with the release downloader that ships with the fork, `release\GET-OFFLINE-DAOC-TRUE165.cmd`
-(its current release version is in `release\Get-OfflineDAoC-True165.ps1`). It is the player-facing installer:
+The playable folder is updated with the release downloader that ships with the fork, `release\GET-BOTREALM.cmd`
+(its current release version is in `release\Get-BotRealm.ps1`). It is the player-facing installer:
 verified parts, SHA-256 checks, `patch-backups\` before replacing anything, an undo on failure, and it never touches
 `runtime/data`, `runtime/account.txt`, the logs, `runtime/server/state-165` or `new-client/save`. It has two
 fork-specific switches: **`-ClientOnly`** (the client alone - the common case, see below) and **`-AllowLocalChanges`**
@@ -189,12 +189,12 @@ the newest release.
 #### Client-only updates
 
 The client moves with upstream's releases and contains none of the fork's work, so it does not need the whole-folder
-path below. To take just the released client - keeping the server, the launcher/dashboard and `runtime\true165`
+path below. To take just the released client - keeping the server, the launcher/dashboard and `runtime\botrealm`
 exactly as they are - double-click **`release\UPDATE-CLIENT-ONLY.cmd`** (it finds the playable folder in the usual
 place and asks before changing anything; pass `-Update "<folder>"` if it is elsewhere), or run:
 
 ```
-release\GET-OFFLINE-DAOC-TRUE165.cmd -Mode update -Update "<playable folder>" -ClientOnly
+release\GET-BOTREALM.cmd -Mode update -Update "<playable folder>" -ClientOnly
 ```
 
 - It uses the same verified **release patch** (about 2.4 GB for v0.1 to v0.2) instead of the complete install (about
@@ -216,22 +216,22 @@ release\GET-OFFLINE-DAOC-TRUE165.cmd -Mode update -Update "<playable folder>" -C
 3. Run the updater against the folder:
 
    ```
-   release\GET-OFFLINE-DAOC-TRUE165.cmd -Mode update -Update "<playable folder>" -AllowLocalChanges
+   release\GET-BOTREALM.cmd -Mode update -Update "<playable folder>" -AllowLocalChanges
    ```
 
    Without `-AllowLocalChanges` the updater refuses a fork install: it checks every file it would replace against the
    released versions, and the fork's own launcher, server and content files never match, so it stops and changes
    nothing (it then offers a fresh install with the save copied over). With the switch it treats those files like any
    other replacement - it backs them up and replaces them - and prints which files those were. It is a fork addition
-   in `release/Get-OfflineDAoC-True165.ps1`; keep it when merging upstream.
+   in `release/Get-BotRealm.ps1`; keep it when merging upstream.
 4. Put the fork's builds back over the updated folder, after backing up what is replaced in
    `deployment-backups\<change>-<date>-\`:
-   - launcher: `runtime\OfflineDAoC.exe`, `runtime\OfflineDAoC.dll`, `runtime\OfflineDAoC.pdb`,
-     `runtime\OfflineDAoC.deps.json`, `runtime\OfflineDAoC.runtimeconfig.json`, and everything in
+   - launcher: `runtime\BotRealm.exe`, `runtime\BotRealm.dll`, `runtime\BotRealm.pdb`,
+     `runtime\BotRealm.deps.json`, `runtime\BotRealm.runtimeconfig.json`, and everything in
      `runtime\dashboard\wwwroot\` (the web UI);
    - server: `GameServer`, `CoreServer`, `CoreDatabase` and `CoreBase` (DLL and PDB) in `runtime\server`,
      `runtime\server\lib` and, where the install has it, `runtime\server\win-x64`;
-   - content: the merged `runtime\true165\*.json`;
+   - content: the merged `runtime\botrealm\*.json`;
    - any other changed content under `runtime\server` (for example `serverconfig.xml`).
    Back up `runtime\data\opendaoc-165.sqlite3.db` (with `-wal`/`-shm` if present) before the first START SERVER after
    an update, because the new server can migrate the save.
@@ -271,12 +271,12 @@ the commands in section 2.
 
 - `docs/FORK.md` (this page), `docs/BOT-DEVELOPMENT.md`, `docs/DEV-ENVIRONMENT.md`, `docs/WORLD-MAP.md` (the
   launcher dashboard's live world map);
-- `development-source/tools/OfflineDaoc.Dashboard/`: **the launcher**. A .NET host (`OfflineDAoC.exe`) plus a web UI
-  in `wwwroot` that it serves on `http://127.0.0.1:10310/`: start/stop server, True 1.65 pre-flight and content
+- `development-source/tools/OfflineDaoc.Dashboard/`: **the launcher**. A .NET host (`BotRealm.exe`) plus a web UI
+  in `wwwroot` that it serves on `http://127.0.0.1:10310/`: start/stop server, world pre-flight and content
   refresh, ENTER REALM (Godot client), server console, live population and world map. Its `Launcher/` folder holds
-  the UI-free logic (True 1.65 mode and content refresh, rolling console log, client launcher, XP-rate and
+  the UI-free logic (content refresh, rolling console log, client launcher, XP-rate and
   server-property writes, bot generator); the retired WinForms launcher it replaced is no longer in the repository;
-- `release/Get-OfflineDAoC-True165.ps1`: the `-ClientOnly` and `-AllowLocalChanges` switches for updating a fork
+- `release/Get-BotRealm.ps1`: the `-ClientOnly` and `-AllowLocalChanges` switches for updating a fork
   install (3.2), and `release/UPDATE-CLIENT-ONLY.cmd`, the double-click helper for a client-only update;
 - a fork note appended to `AGENTS.md`;
 - git-ignored local material: the release downloader cache (`release/.downloads/`), reference repositories

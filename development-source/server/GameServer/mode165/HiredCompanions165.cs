@@ -10,7 +10,7 @@ using DOL.GS.PacketHandler;
 
 namespace DOL.GS
 {
-    /// <summary>One hired companion: a persistent gamebot record owned by one player character (True 1.65 Mode). A side
+    /// <summary>One hired companion: a persistent gamebot record owned by one player character in BotRealm. A side
     /// table, so the launcher's offline_world_bots roster table is untouched (the guild-membership pattern).</summary>
     [DataTable(TableName = "offline_hired_companions")]
     public sealed class OfflineHiredCompanionRecord : DataObject
@@ -33,7 +33,7 @@ namespace DOL.GS
     }
 
     /// <summary>
-    /// True 1.65 Mode hired companions (owner 2026-10-30, plan sections 17, 17a, 17g, 17h, 24). They replace /spawn and
+    /// BotRealm hired companions (owner 2026-10-30, plan sections 17, 17a, 17g, 17h, 24). They replace /spawn and
     /// /raid there. Each is a real persistent gamebot record (level, XP, specs, inventory, coin), hired at level 5 with a
     /// training weapon and nothing else, that joins its owner's group as a player-led gamebot (BotGroupInvite) and levels
     /// only by fighting beside the owner. The population controller never logs them in on its own.
@@ -125,7 +125,7 @@ namespace DOL.GS
         public static string Hire(GamePlayer player, Hire165.Design d)
         {
             if (!Classic165Mode.IsOn)
-                return "Companions are hired in True 1.65 Mode.";
+                return "Companions are hired at the traveler's inns.";
             List<OfflineHiredCompanionRecord> roster = RosterOf(player);
             int open = OpenSlots(player.Level);
             if (roster.Count >= open)

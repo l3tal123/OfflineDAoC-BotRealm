@@ -1,6 +1,6 @@
 """Item looks (inventory icons) that match the item (owner 2026-11-02: "boar tusk" showed a boot, "raw pork" a vial).
 
-About 1,400 True 1.65 items were added with the look of "the closest existing sibling item", a guess. No archive keeps
+About 1,400 BotRealm items were added with the look of "the closest existing sibling item", a guess. No archive keeps
 their real model numbers (Uthgard and the 2003 Allakhazam pages show none), so the 1.64 client's own model list
 (gamedata objects.csv: model -> client name -> icon) decides, backed by same-name items of the original database:
 615 "tusk" for tusks, 102 "Meat" for meat, 106 "Tooth/Claw", 100 "Animal Skin", 108 "Spider Legs", gems by colour...
@@ -10,7 +10,7 @@ exists in the 1.64 client; client/period picks first; a weak pick only where tod
 or both passes agree; today's model is kept where its client name already fits the item.
 
 The items are created by add files, which the launcher writes AFTER the rules "updates" (an update would be overwritten
-every refresh), so the Model goes into the add-file rows themselves, both copies (tools and runtime\\true165).
+every refresh), so the Model goes into the add-file rows themselves, both copies (tools and runtime\\botrealm).
 Usage: python -I build_itemmodels165.py [--write]"""
 import json, os, sys
 
@@ -19,7 +19,7 @@ write = '--write' in sys.argv
 decisions = json.load(open(os.path.join(HERE, 'itemmodels165_decisions.json'), encoding='utf-8'))
 want = {k.lower(): v['to'] for k, v in decisions.items()}
 seen = set()
-for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'true165')):
+for folder in (HERE, os.path.join(HERE, '..', '..', '..', 'runtime', 'botrealm')):
     for name in sorted(os.listdir(folder)):
         if not (name.startswith('add-') and name.endswith('.json')):
             continue

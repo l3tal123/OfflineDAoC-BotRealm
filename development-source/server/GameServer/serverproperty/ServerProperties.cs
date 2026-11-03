@@ -482,13 +482,13 @@ namespace DOL.GS.ServerProperties
 		/// <summary>
 		/// The Server Message of the Day
 		/// </summary>
-		[ServerProperty("server", "motd", "The Server Message of the Day - Edit this to set what is displayed when a level 2+ character enters the game for the first time, set to \"\" for nothing", "Welcome back to Offline DAoC. Adventure alone or alongside autonomous player bots across the three realms.")]
+		[ServerProperty("server", "motd", "The Server Message of the Day - Edit this to set what is displayed when a level 2+ character enters the game for the first time, set to \"\" for nothing", "Welcome back to BotRealm. Adventure alone or alongside autonomous player bots across the three realms.")]
 		public static string MOTD;
 
 		/// <summary>
 		/// The message players get when they enter the game past level 1
 		/// </summary>
-		[ServerProperty("server", "starting_msg", "The Starting Mesage - Edit this to set what is displayed when a level 1 character enters the game for the first time, set to \"\" for nothing", "Welcome to Offline DAoC, a private Classic and Shrouded Isles world built to play alone or with player bot companions.")]
+		[ServerProperty("server", "starting_msg", "The Starting Mesage - Edit this to set what is displayed when a level 1 character enters the game for the first time, set to \"\" for nothing", "Welcome to BotRealm, a single-player Classic and Shrouded Isles world built around autonomous bots, hired companions and the Realm Exchange.")]
 		public static string STARTING_MSG;
 
 		/// <summary>
@@ -626,11 +626,11 @@ namespace DOL.GS.ServerProperties
 		public static bool DISABLE_TUTORIAL;
 
 		/// <summary>
-		/// True 1.65 Mode (owner 2026-10-30): set only in the 1.65 Mode database the launcher builds. Classic and Shrouded
-		/// Isles as in patch 1.65; the only changes from the original game are the bot and companion systems and the
-		/// Realm Exchange. See Classic165Mode.
+		/// BotRealm world flag (owner 2026-10-30): set only in the BotRealm database the launcher builds. The content base is
+		/// the Classic and Shrouded Isles game of the 1.65 era; the game adds the bot and companion systems, the Realm
+		/// Exchange and the owner's custom changes. The property name is historical. See Classic165Mode.
 		/// </summary>
-		[ServerProperty("world", "classic165_mode", "True 1.65 Mode: Classic and Shrouded Isles as in patch 1.65 (set only in the 1.65 Mode database)", false)]
+		[ServerProperty("world", "classic165_mode", "BotRealm world: the Classic and Shrouded Isles content base (1.65-era) plus the bot and companion systems. Set only in the BotRealm database.", false)]
 		public static bool CLASSIC165_MODE;
 
 		[ServerProperty("world", "world_item_decay_time", "How long (milliseconds) will an item dropped on the ground stay in the world.", (uint) 180000)]

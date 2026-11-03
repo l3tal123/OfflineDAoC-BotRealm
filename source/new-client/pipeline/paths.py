@@ -5,8 +5,8 @@ layout. A script that needs a missing input stops with need(), saying what is mi
 | Variable            | What                                                    | Repository layout / development layout          |
 |---------------------|---------------------------------------------------------|-------------------------------------------------|
 | DAOC_CLIENT         | the DAoC client's files (1.127-era, its app folder)     | (no default in the repository)                  |
-| OFFLINEDAOC_SERVER  | the True 1.65 server's tree (source, runtime, data)     | the repository root / ../new class test - CLAUDE VERSION |
-| OFFLINEDAOC_WORLD_DB| the True 1.65 world database                            | <server>/runtime/data/opendaoc-165.sqlite3.db    |
+| OFFLINEDAOC_SERVER  | the BotRealm server's tree (source, runtime, data)      | the repository root / ../new class test - CLAUDE VERSION |
+| OFFLINEDAOC_WORLD_DB| the BotRealm world database                             | <server>/runtime/data/opendaoc-165.sqlite3.db    |
 | PERIOD_DATA         | the period data archive (Allakhazam, Uthgard, guides)   | not in the repository / <server>/development-source/research/period-data |
 | DAOC_164_ZIP        | the real 1.64 client (DAoC 1.64.zip)                    | not in the repository / ../1.64 real client/DAoC 1.64.zip |
 | TRUE165_WORK        | the 1.65 layouts and extracts (inn layouts, loading,    | not in the repository / ../1.65 MODE CLIENT (local only) |
@@ -62,8 +62,8 @@ def zone_dir(zone_id):
 
 
 _WHAT = {'CLIENT': 'the DAoC client files (set DAOC_CLIENT to the client\'s app folder)',
-         'SERVER': 'the True 1.65 server tree (set OFFLINEDAOC_SERVER)',
-         'WORLD_DB': 'the True 1.65 world database (set OFFLINEDAOC_WORLD_DB; the repository has it compressed under database/)',
+         'SERVER': 'the BotRealm server tree (set OFFLINEDAOC_SERVER)',
+         'WORLD_DB': 'the BotRealm world database (set OFFLINEDAOC_WORLD_DB; the repository has it compressed under database/)',
          'PERIOD_DATA': 'the period data archive (set PERIOD_DATA - it is not in the repository)',
          'ZIP_164': 'the real 1.64 client, DAoC 1.64.zip (set DAOC_164_ZIP - it is not in the repository)',
          'TRUE165_WORK': 'the 1.65 layouts / extracts folder (set TRUE165_WORK - it is not in the repository)'}

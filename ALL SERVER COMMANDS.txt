@@ -1,14 +1,14 @@
-OFFLINE DAOC TRUE 1.65 v0.1 - SERVER COMMAND REFERENCE
+BOTREALM - SERVER COMMAND REFERENCE
 
-277 commands listed, read from the True 1.65 server source
+277 commands listed, read from the BotRealm server source
 (290 registrations; the 13 left out are explained at the end).
-This list is for True 1.65 Mode, the only mode of this game.
+This list is for BotRealm. There is only one world and no mode switch.
 Normal commands can still have level, realm, cooldown or state requirements.
 GM/admin commands can change or delete game data. Back up before using them.
 
-COMMON TRUE 1.65 COMMANDS
+COMMON COMMANDS
 Companions are hired at the innkeeper of your realm's traveler's inn (right-click).
-/spawn and /raid are GM only in True 1.65; there is no conjured helper.
+/spawn and /raid are GM only in BotRealm; there is no conjured helper.
 /companionui runs the hiring and companion windows (their buttons send it).
 /pull, /aggressive and /defensive control your companions.
 /task asks guards and townsfolk for tasks (levels 1-19). /questguide opens quest walkthroughs.
@@ -247,7 +247,7 @@ NORMAL PLAYER COMMANDS
   /cower
   Handler: DOL.GS.Commands.EmoteCommandHandler
 
-/craftmacro   (GM ONLY in True 1.65: not in the 1.64 client command list or the DAoC manual)
+/craftmacro   (GM ONLY: not in the 1.64 client command list or the DAoC manual)
   Crafting macros and utilities
   '/craftmacro set <#>' to set how many items you want to craft
   '/craftmacro clear' to reset to crafting once
@@ -298,7 +298,7 @@ NORMAL PLAYER COMMANDS
   /dismisspet
   Handler: DOL.GS.Commands.DismissPetCommandHandler
 
-/dismount   (no player horses in True 1.65: none are sold, so this does nothing)
+/dismount   (no player horses in BotRealm: none are sold, so this does nothing)
   Gets off your horse or steed.
   /dismount
   Handler: DOL.GS.Commands.RideDismountCommandHandler
@@ -338,7 +338,7 @@ NORMAL PLAYER COMMANDS
   /faceloc [x] [y]
   Handler: DOL.GS.Commands.LocFaceCommandHandler
 
-/faction   (GM ONLY in True 1.65: not in the 1.64 client command list or the DAoC manual)
+/faction   (GM ONLY: not in the 1.64 client command list or the DAoC manual)
   Talks to the players and gamebots of your realm.
   /faction <message>
   Handler: DOL.GS.Commands.FactionChatCommand
@@ -412,7 +412,7 @@ NORMAL PLAYER COMMANDS
   /horn close
   Handler: DOL.GS.Commands.HornCommandHandler
 
-/horse   (no player horses in True 1.65: none are sold, so this does nothing)
+/horse   (no player horses in BotRealm: none are sold, so this does nothing)
   Horse emotes while riding.
   /horse <emote>
   Handler: DOL.GS.Commands.HorseEmoteCommandHandler
@@ -520,7 +520,7 @@ NORMAL PLAYER COMMANDS
   /monty
   Handler: DOL.GS.Commands.EmoteCommandHandler
 
-/namemount   (no player horses in True 1.65: none are sold, so this does nothing)
+/namemount   (no player horses in BotRealm: none are sold, so this does nothing)
   Names your horse.
   /namemount <name>
   Handler: DOL.GS.Commands.NameHorseCommandHandler
@@ -840,7 +840,7 @@ NORMAL PLAYER COMMANDS
   /stuck
   Handler: DOL.GS.Commands.StuckCommandHandler
 
-/summon   (no player horses in True 1.65: none are sold, so this does nothing)
+/summon   (no player horses in BotRealm: none are sold, so this does nothing)
   Calls the horse in your horse slot and rides it.
   /summon
   Handler: DOL.GS.Commands.SummonHorseCommandHandler
@@ -855,7 +855,7 @@ NORMAL PLAYER COMMANDS
   /sweat
   Handler: DOL.GS.Commands.EmoteCommandHandler
 
-/switch   (GM ONLY in True 1.65: not in the 1.64 client command list or the DAoC manual)
+/switch   (GM ONLY: not in the 1.64 client command list or the DAoC manual)
   Equip Weapons from bag. (/switch 1h 1, will replace your mainhand weapon with the first slot in your backpack)
   /switch 1h <slot>
   /switch offhand <slot>
@@ -1021,7 +1021,7 @@ Your hired companion
   Drag an item onto it: it wears the item, or puts it in its 10-slot bag.
   /say near it: a companion may answer; say its name and that one answers.
 
-GM ONLY IN TRUE 1.65 (normal players are told "That command does not exist in True 1.65 Mode.")
+GM ONLY IN BOTREALM (normal players are told "That command does not exist.")
 ===============================================================================================
 Also GM only (listed with the player commands above, marked GM ONLY): /switch, /craftmacro, /faction.
 The launcher's right-click "Teleport to" on a bot is GM only too (it shows with "Make Me a GM" on).
@@ -1956,14 +1956,14 @@ ADMIN ONLY COMMANDS
 
 LEFT OUT OF THIS LIST
 =====================
-These player commands are in the server but do nothing useful in True 1.65:
+These player commands are in the server but do nothing useful in BotRealm:
   /backupstyle - switched off (allow_auto_backup_styles is off)
   /discard - card game: /deal and /shuffle are not in the server, so there are never cards
   /groundassist - switched off in the server code
   /held - card game: /deal and /shuffle are not in the server, so there are never cards
   /language - players may not change language (allow_change_language is off)
-  /level - switched off for everyone (slash_level_target is 0); also GM only in True 1.65
-  /realmtask - True 1.65 Mode has no realm task bonuses (the command says so and stops)
+  /level - switched off for everyone (slash_level_target is 0); also GM only in BotRealm
+  /realmtask - BotRealm has no realm task bonuses (the command says so and stops)
   /report - bug reports are switched off (disable_bug_reports is on)
   /show - card game: /deal and /shuffle are not in the server, so there are never cards
   /viewreports - bug reports are switched off, so there is nothing to view
@@ -1980,4 +1980,4 @@ UNVERIFIED
 /appeal and /checkappeal work, but only a GM account can answer appeals.
 /vote works only while a GM runs a vote (/gmvote).
 /boat, /house, /rent and the other housing commands are in the server and not switched
-  off in True 1.65. Not tested in True 1.65.
+  off in BotRealm. Not tested in BotRealm.

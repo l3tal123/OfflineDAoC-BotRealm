@@ -1,5 +1,5 @@
-# OfflineDAoC True 1.65 - what stays local.
-# Tracked on purpose: runtime/true165/, runtime/server/navmesh-165/, runtime/server/config/, the runtime/server/*.json
+# BotRealm - what stays local.
+# Tracked on purpose: runtime/botrealm/, runtime/server/navmesh-165/, runtime/server/config/, the runtime/server/*.json
 # content files, database/ (the clean world, zipped), and all source and tools.
 
 # Build output
@@ -88,6 +88,7 @@ references/
 
 # The playable install (client content, engine, saves, binaries; ~38 GB) lives inside this checkout but is never
 # repository source. It is rebuilt from the release download and the fork build.
+BotRealm/
 OfflineDAoC-True165/
 
 # Local scratch space for tool tests (dashboard harness, screenshots, throwaway world copies)

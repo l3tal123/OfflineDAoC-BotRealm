@@ -509,12 +509,12 @@ namespace DOL.GS.PacketHandler.Client.v168
                 return true;
             }
 
-            // True 1.65 Mode: no base class that leads nowhere for this race (the Inconnu Acolyte, whose only career is Heretic).
+            // BotRealm: no base class that leads nowhere for this race (the Inconnu Acolyte, whose only career is Heretic).
             if (Classic165Mode.IsOn && (ePrivLevel)client.Account.PrivLevel == ePrivLevel.Player &&
                 Enum.IsDefined(typeof(eCharacterClass), (eCharacterClass)ch.Class) && !Classic165Mode.BaseClassHasCareer(ch.Class, ch.Race))
             {
                 if (log.IsInfoEnabled)
-                    log.Info($"Client {client.Account.Name} tried to create a {(eRace)ch.Race} {(eCharacterClass)ch.Class}, which has no class to train into in True 1.65 Mode");
+                    log.Info($"Client {client.Account.Name} tried to create a {(eRace)ch.Race} {(eCharacterClass)ch.Class}, which has no class to train into");
 
                 return true;
             }

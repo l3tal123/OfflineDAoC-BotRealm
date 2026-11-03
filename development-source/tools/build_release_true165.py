@@ -1,11 +1,11 @@
-"""Builds the OfflineDAoC True 1.65 release package (server + launcher + bundled .NET) from a working install.
+"""Builds the BotRealm release package (server + launcher + bundled .NET) from a working install.
 
     python build_release_true165.py --install <install root, the folder holding runtime\\>
-                                    --repo <OfflineDAoC-True165 clone> --out <new staging folder>
+                                    --repo <BotRealm clone> --out <new staging folder>
 
 Package layout:
-    START OFFLINE DAOC TRUE 1.65.cmd   sets DOTNET_ROOT to the bundled .NET, starts runtime\\OfflineDAoC.exe
-    runtime\\                          launcher, server (with the full navmesh and navmesh-165), True 1.65 content, the
+    START BOTREALM.cmd                sets DOTNET_ROOT to the bundled .NET, starts runtime\\BotRealm.exe
+    runtime\\                         launcher, server (with the full navmesh and navmesh-165), BotRealm content, the
                                       clean world database
     tools\\dotnet\\                     .NET 10 (host fxr + Microsoft.NETCore.App, WindowsDesktop.App, AspNetCore.App)
     new-client\\                       NOT made here: the new client's own package unzips beside runtime\\ (the launcher
@@ -39,7 +39,7 @@ DOTNET_VERSION = "10.0.11"
 DOTNET_PARTS = (f"host/fxr/{DOTNET_VERSION}", f"shared/Microsoft.NETCore.App/{DOTNET_VERSION}",
                 f"shared/Microsoft.WindowsDesktop.App/{DOTNET_VERSION}", f"shared/Microsoft.AspNetCore.App/{DOTNET_VERSION}")
 DB_NAME = "opendaoc-165.sqlite3.db"
-START_CMD = "START OFFLINE DAOC TRUE 1.65.cmd"
+START_CMD = "START BOTREALM.cmd"
 
 # Folders that never ship (anywhere in runtime\), and top-level runtime folders that don't.
 EXCLUDED_DIRS = {"logs", "backups", "deployment-backups", "mode-switch-backups", "keep-relic-reset-backups",
@@ -54,9 +54,9 @@ EXCLUDED_NAMES = {"account.txt", "ruleset.txt", "bot-world.request", "bot-goals.
 EXCLUDED_SUFFIXES = (".log", ".dmp", ".gcdump", ".bak", ".tmp", ".db", ".db-wal", ".db-shm", ".db-journal",
                      ".sqlite3", ".sqlite3-wal", ".sqlite3-shm")
 FORBIDDEN_SUFFIXES = (".on", ".off", ".dmp", ".gcdump", ".log")
-REQUIRED = ("OfflineDAoC.exe", "OfflineDAoC.dll", "server/CoreServer.exe", "server/GameServer.dll", "server/lib/GameServer.dll",
+REQUIRED = ("BotRealm.exe", "BotRealm.dll", "server/CoreServer.exe", "server/GameServer.dll", "server/lib/GameServer.dll",
             "server/config/serverconfig-165.xml", "server/navmesh/roads.json", "server/navmesh/seams.json",
-            "server/navmesh-165/zone009.nav", "true165/true165-rules.json", "true165/progress-policy.json",
+            "server/navmesh-165/zone009.nav", "botrealm/true165-rules.json", "botrealm/progress-policy.json",
             f"data/{DB_NAME}", "data/world-mode.txt")
 
 
@@ -105,7 +105,7 @@ def main():
     parser.add_argument("--install", type=Path, required=True)
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--version", help='writes VERSION.txt = "Offline DAoC True 1.65 v<version>" (the downloader reads it)')
+    parser.add_argument("--version", help='writes VERSION.txt = "BotRealm v<version>" (the downloader reads it)')
     args = parser.parse_args()
     install, repo, out = args.install.resolve(), args.repo.resolve(), args.out.resolve()
     if out.exists():
@@ -151,21 +151,21 @@ def main():
         "@echo off\r\n"
         "setlocal\r\n"
         "cd /d \"%~dp0\"\r\n"
-        "rem OfflineDAoC True 1.65: the launcher, with the .NET 10 bundled in tools\\dotnet (no install needed).\r\n"
+        "rem BotRealm: the launcher, with the .NET 10 bundled in tools\\dotnet (no install needed).\r\n"
         "rem The new client goes in new-client\\ beside runtime\\; the launcher finds it there.\r\n"
-        "if not exist \"%~dp0runtime\\OfflineDAoC.exe\" (\r\n"
-        "  echo runtime\\OfflineDAoC.exe is missing: unzip the whole OfflineDAoC True 1.65 package here.\r\n"
+        "if not exist \"%~dp0runtime\\BotRealm.exe\" (\r\n"
+        "  echo runtime\\BotRealm.exe is missing: unzip the whole BotRealm package here.\r\n"
         "  pause\r\n"
         "  exit /b 1\r\n"
         ")\r\n"
         "set \"DOTNET_ROOT=%~dp0tools\\dotnet\"\r\n"
         "set \"DOTNET_ROOT_X64=%~dp0tools\\dotnet\"\r\n"
         "set \"DOTNET_MULTILEVEL_LOOKUP=0\"\r\n"
-        "start \"\" /d \"%~dp0runtime\" \"%~dp0runtime\\OfflineDAoC.exe\"\r\n"
+        "start \"\" /d \"%~dp0runtime\" \"%~dp0runtime\\BotRealm.exe\"\r\n"
         "exit /b 0\r\n").encode("ascii"))
 
     if args.version:
-        (out / "VERSION.txt").write_bytes(f"Offline DAoC True 1.65 v{args.version}".encode("ascii"))
+        (out / "VERSION.txt").write_bytes(f"BotRealm v{args.version}".encode("ascii"))
 
     print("Checking the package...", flush=True)
     bad = [p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file() and (

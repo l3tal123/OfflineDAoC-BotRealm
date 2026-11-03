@@ -5,7 +5,7 @@ using DOL.Database;
 namespace DOL.GS
 {
     /// <summary>
-    /// True 1.65 Mode gear wear for bots (owner 2026-10-30, plan sections 1 and 17h/2c): gamebots' and hired companions'
+    /// BotRealm gear wear for bots (owner 2026-10-30, plan sections 1 and 17h/2c): gamebots' and hired companions'
     /// weapons and armour lose condition exactly like a player's (GameInventoryItem.OnStrikeTarget / OnStruckByEnemy:
     /// the item_condition_loss_chance, con-based amount, doubled below 91%, down to 70%). Players' own gear already
     /// wears through GameInventoryItem; bots' items are plain inventory rows, so this covers them. Gamebots pay a smith
