@@ -17,7 +17,7 @@
 > **This is an AI-made project.** All of its code was written by AI tools (Codex, then Claude). The project owner
 > has no game development or coding experience: they directed the work and play-tested it. Expect bugs.
 >
-> **BotRealm is a fork** of [shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165),
+> **BotRealm began as a fork** of [shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165),
 > itself built on the author's earlier Offline DAoC. The last public release from the original project is **v0.2**;
 > BotRealm builds are published from this repository's Releases page. Large parts of the game haven't been played
 > through by a person. Expect bugs, keep a backup of your save, and report problems in
@@ -303,7 +303,7 @@ is the result: the world database and the content files built from it.
 
 BotRealm stands on other people's work. All of it stays credited:
 
-- **The original project and its creator: [shadowofze](https://github.com/shadowofze).** BotRealm is a fork of
+- **The original project and its creator: [shadowofze](https://github.com/shadowofze).** BotRealm began as a fork of
   [shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165), which grew out of the earlier
   [Offline DAoC](https://github.com/shadowofze/OfflineDAoC). The 1.65-era world, the content pipeline, the release
   tooling, the bot foundations and much of what makes this playable are his work and his project's.

@@ -1,7 +1,8 @@
-# Fork developer environment (verified 2026-11-01)
+# Developer environment (verified 2026-11-01)
 
 Verification of a fresh checkout at `C:\Users\andro\Desktop\OfflineDaoc-BotRealm` (the downloaded ZIP export, now
-attached to `origin/main`; fork of `shadowofze/OfflineDAoC-True165`, origin `l3tal123/OfflineDAoC-BotRealm`). Nothing
+attached to `origin/main`; a standalone repository that began as a fork of `shadowofze/OfflineDAoC-True165`, origin
+`l3tal123/OfflineDAoC-BotRealm`). Nothing
 was deployed and no server or launcher was started. No game server was running before or after
 (`Get-Process -Name CoreServer,BotRealm` empty).
 
@@ -107,7 +108,7 @@ Python `sqlite3` check: `PRAGMA quick_check` = `ok`, `PRAGMA integrity_check` = 
 
 ### Git state
 `git status` before writing this file: `M .gitignore`, `M AGENTS.md`, untracked `.github/`, `docs/BOT-DEVELOPMENT.md`,
-`docs/FORK.md`, `scripts/`. These are local fork additions, not produced by this verification. Build outputs, the
+`docs/FORK.md` (later removed), `scripts/`. These were local BotRealm additions, not produced by this verification. Build outputs, the
 unpacked database and `serverconfig.xml` are all git-ignored. Nothing was committed.
 
 ## What is missing or needs installing

@@ -14,7 +14,7 @@ need the author's permission to fork it.
 
 ## 2. Start your assistant with this prompt
 
-> This is my fork of BotRealm, a single-player Dark Age of Camelot world built around autonomous gamebots and hired companions, on a 1.65-era Classic and Shrouded Isles content
+> This is my copy of BotRealm, a single-player Dark Age of Camelot world built around autonomous gamebots and hired companions, on a 1.65-era Classic and Shrouded Isles content
 > base with BotRealm's own quality-of-life changes. Read AGENTS.md, docs/DEVELOPMENT.md and source/new-client/README.md
 > first, and follow the project rules in AGENTS.md: period sources first, nothing from Trials of Atlantis or later,
 > no difficulty changes, bots on the player rules. My source checkout is this folder; my playable game is at

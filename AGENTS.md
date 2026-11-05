@@ -130,7 +130,7 @@ decides on, and changing the baseline is his call, not a silent choice for an as
 12. **Navigation:** don't rebuild or replace navmeshes globally to fix one route without evidence.
 13. **Be honest in reports.** Report automated tests separately from in-game checks.
 14. **Keep the credits and licenses.** See [THIRD_PARTY.md](THIRD_PARTY.md), and credit fork fixes under its
-    "Fork credits". BotRealm is a fork of shadowofze/OfflineDAoC-True165; that attribution stays.
+    "Fork credits". BotRealm began as a fork of shadowofze/OfflineDAoC-True165; that attribution stays.
 15. **Code style:** CRLF line endings and 4-space indents in the server's C# (`.editorconfig`). Keep a file's
     existing line endings.
 
@@ -154,14 +154,14 @@ decides on, and changing the baseline is his call, not a silent choice for an as
 - **Server settings** are in the `ServerProperty` table (set by `true165-rules.json`), the
   `offline_population_settings` and `offline_local_options` tables, and `runtime/server/state-165/bot-goals.json`.
 
-The person you work for may change these rules for their fork. They're safety defaults, not a ban on changes they
+The person you work for may change these rules for their repository. They're safety defaults, not a ban on changes they
 ask for.
 
 ## Some names are older than the brand
 
 BotRealm was previously branded "Offline DAoC True 1.65" and then "Offline DAoC BotRealm". The 2026-11 rename is a
 branding change only: player-visible names (exe, window titles, dashboard, docs, downloader) say BotRealm, while these
-keep their old names on purpose because existing databases, saves and upstream merges depend on them:
+keep their old names on purpose because existing databases, saves and the inherited code depend on them:
 - the server property `classic165_mode` and its `True`/`False` values;
 - the database `runtime/data/opendaoc-165.sqlite3.db` and the `offline_true165_*` tables;
 - the content file names (`true165-rules.json`, `drops165.json`, `add-*165.json`) inside `runtime/botrealm` and
@@ -172,12 +172,13 @@ keep their old names on purpose because existing databases, saves and upstream m
 An install that still has the old `runtime/true165` content folder is migrated to `runtime/botrealm` by the launcher
 on start.
 
-## This fork (BotRealm)
+## This repository (BotRealm)
 
-This repository is a fork of [shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165); the
-fork's development focus is the bot system (player quality-of-life for managing bots, and bot autonomy towards
-completing the whole game). Fork mechanics - remotes, syncing with upstream, branch/merge policy, toolchain,
-working copies - are in [docs/FORK.md](docs/FORK.md); the bot subsystem map, its capabilities and its gaps are in
+BotRealm is a standalone repository. It began as a fork of
+[shadowofze/OfflineDAoC-True165](https://github.com/shadowofze/OfflineDAoC-True165) and left the GitHub fork network on
+2026-11-05; the original project stays credited for everything inherited from it, but nothing is synced between the
+two repositories. BotRealm's development focus is the bot system (player quality-of-life for managing bots, and bot
+autonomy towards completing the whole game). The bot subsystem map, its capabilities and its gaps are in
 [docs/BOT-DEVELOPMENT.md](docs/BOT-DEVELOPMENT.md), and the verified toolchain in
-[docs/DEV-ENVIRONMENT.md](docs/DEV-ENVIRONMENT.md). Keep fork additions in new files where possible so upstream
-merges stay clean, and keep the rules above unchanged unless the person you work for asks otherwise.
+[docs/DEV-ENVIRONMENT.md](docs/DEV-ENVIRONMENT.md). Keep BotRealm's additions in new files where possible, and keep
+the rules above unchanged unless the person you work for asks otherwise.

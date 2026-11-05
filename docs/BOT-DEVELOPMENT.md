@@ -1,6 +1,6 @@
 # Bot subsystem: architecture map, capabilities and gaps
 
-This is the fork's working document for the bot system. It describes how a bot thinks and acts today, what the
+This is the repository's working document for the bot system. It describes how a bot thinks and acts today, what the
 system can already do, and where the real weak points are. Read
 [AGENTS.md](../AGENTS.md) and [DEVELOPMENT.md](DEVELOPMENT.md) first; the rules there are binding.
 
@@ -164,7 +164,7 @@ the server folder.
 
 ### 1.12 Behaviour-quality layer (ported from the Living Server reference, 2026-11-01)
 
-The reference's behaviour-quality fixes are now in the fork. All of them only change bot *choices*; none changes
+The reference's behaviour-quality fixes are now in this repository. All of them only change bot *choices*; none changes
 a combat, XP or monster number, and each has its own `ServerProperty` switch.
 
 | File | What it does |

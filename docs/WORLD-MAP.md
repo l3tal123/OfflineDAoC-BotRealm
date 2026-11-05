@@ -1,6 +1,6 @@
 # Launcher dashboard: live world map
 
-The launcher's **World Map** tab is a fork addition (2026-11-01) that shows every online autonomous gamebot in the
+The launcher's **World Map** tab is a BotRealm addition (2026-11-01) that shows every online autonomous gamebot in the
 world as a dot, live, with a tooltip. It is read-only: it reads the same live snapshot the Active Population tab
 already uses and never changes game state.
 
