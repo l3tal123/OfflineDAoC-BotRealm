@@ -3,16 +3,17 @@
     python -I test_patch_true165.py --work <empty scratch folder> --world <a clean opendaoc-165.sqlite3.db>
                                     --repo <this repository>
 
-It builds a fake v0.1 and v0.2 (changed, added and removed files in the game and the client), installs v0.1 with the
-downloader, adds a player's save (world, login, client settings), and checks the update: a changed file stops it (and
-the fresh-install-with-save path works), a failure halfway puts everything back, a good run gives exactly v0.2 with
-the save untouched and a backup of what it replaced, a second run says "already up to date", and a half-applied update
-finishes on the next run.
+It builds a fake v0.1 and v0.2 (changed, added and removed game files), installs v0.1 with the downloader, adds a
+player's save (world, login) and a client the player supplied in new-client\, and checks the update: a changed file
+stops it (and the fresh-install-with-save path works), a failure halfway puts everything back, a good run gives exactly
+v0.2 with the save and the client untouched and a backup of what it replaced, a second run says "already up to date",
+and a half-applied update finishes on the next run.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -22,6 +23,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PS1 = HERE / "Get-BotRealm.ps1"
 SAVE_FILES = ["runtime/data/opendaoc-165.sqlite3.db", "runtime/account.txt", "new-client/save/settings.cfg"]
+# Files of the client the player supplied; no update may add, replace or remove any of them.
+CLIENT_FILES = ["new-client/VERSION.txt", "new-client/content/asset.bin", "new-client/save/settings.cfg"]
 
 
 def sha(path: Path) -> str:
@@ -65,15 +68,18 @@ def make_game(root: Path, world: Path, version: str):
     shutil.copyfile(world, root / "runtime/data/opendaoc-165.sqlite3.db")
 
 
-def make_client(root: Path, version: str):
-    c = root / "new-client"
-    for rel, data in {"VERSION.txt": f"BotRealm v{version} new client\r\n".encode(),
-                      "godot/project.godot": b"x", "godot/content/.gdignore": b"",
-                      "godot/.godot/mono/temp/bin/Debug/MMOEngine.dll": b"dll",
-                      "godot/content/a.png": os.urandom(3_000_000), "godot/content/b.png": os.urandom(3_000_000),
-                      "tools/godot_net/Godot_v4.7.2-stable_mono_win64.exe": b"godot"}.items():
+def make_client(game: Path, version: str):
+    """The client the player supplies: not downloaded, just placed in new-client\\ beside runtime\\. It also holds the
+    player's client settings under save\\, which no update may touch."""
+    c = game / "new-client"
+    for rel, data in {"VERSION.txt": f"BotRealm v{version} client\r\n".encode(),
+                      "client.bin": b"x", "content/.gdignore": b"",
+                      "content/asset.bin": os.urandom(1_000_000),
+                      "tools/engine.exe": b"engine"}.items():
         (c / rel).parent.mkdir(parents=True, exist_ok=True)
         (c / rel).write_bytes(data)
+    (c / "save").mkdir(parents=True, exist_ok=True)
+    (c / "save/settings.cfg").write_text("player settings", encoding="utf-8")
 
 
 def main():
@@ -90,20 +96,16 @@ def main():
 
     # ---- v0.1 and v0.2
     make_game(w / "game1", args.world, "0.1")
-    make_client(w / "client1", "0.1")
     shutil.copytree(w / "game1", w / "game2")
-    shutil.copytree(w / "client1", w / "client2")
     (w / "game2/runtime/botrealm/drops165.json").write_text('{"drops": 2}', encoding="utf-8")       # changed
     (w / "game2/runtime/botrealm/new165.json").write_text("added in 0.2", encoding="utf-8")         # added
     (w / "game2/runtime/botrealm/old165.json").unlink()                                             # removed
     (w / "game2/VERSION.txt").write_text("BotRealm v0.2\r\n", encoding="utf-8")                      # added
-    (w / "client2/new-client/VERSION.txt").write_text("BotRealm v0.2 new client\r\n", encoding="utf-8")
-    (w / "client2/new-client/godot/content/a.png").write_bytes(os.urandom(3_000_000))             # changed (big)
     for v, n in (("0.1", "1"), ("0.2", "2")):
-        run(py + [str(HERE / "make_release_true165.py"), "--game", w / f"game{n}", "--client", w / f"client{n}",
+        run(py + [str(HERE / "make_release_true165.py"), "--game", w / f"game{n}",
                   "--repo", args.repo, "--out", w / "assets", "--version", v, "--part-budget", "4000000"])
     run(py + [str(HERE / "make_patch_true165.py"), "--base", f"0.1={w / 'assets/baseline-0.1.sha256'}",
-              "--game", w / "game2", "--client", w / "client2", "--repo", args.repo, "--out", w / "assets",
+              "--game", w / "game2", "--repo", args.repo, "--out", w / "assets",
               "--version", "0.2", "--part-budget", "4000000"])
     print("built v0.1, v0.2 and the 0.1 -> 0.2 patch")
 
@@ -111,8 +113,7 @@ def main():
         target = w / name
         downloader("0.1", w / "assets", "-Mode", "install", "-Destination", target)
         (target / "runtime/account.txt").write_text("Account: player123456\nPassword: x\n", encoding="utf-8")
-        (target / "new-client/save").mkdir(parents=True, exist_ok=True)
-        (target / "new-client/save/settings.cfg").write_text("player settings", encoding="utf-8")
+        make_client(target, "0.1")   # the player supplies the client; the downloader never fetched it
         with open(target / "runtime/data/opendaoc-165.sqlite3.db", "ab") as db:
             db.write(b"played")   # stands in for a played world
         return target
@@ -121,6 +122,11 @@ def main():
     for line in (w / "assets/baseline-0.2.sha256").read_text(encoding="utf-8").splitlines():
         h, rel = line.split("  ", 1)
         v02[rel] = h
+    assert not any(rel.startswith("new-client/") for rel in v02), "the release must not ship a client"
+    patch = json.loads((w / "assets/v0.2/download-manifest.json").read_text(encoding="utf-8"))
+    assert all(p["Kind"] == "game" for p in patch["Parts"]), "the release must have no client parts"
+    assert not any(f["Path"].startswith("new-client/") for f in patch["Patch"]["Files"]), "the patch must not carry the client"
+    assert not any(r["Path"].startswith("new-client/") for r in patch["Patch"]["Remove"]), "the patch must not remove the client"
 
     def check_is_v02(game: Path, save: dict):
         have = tree(game)
@@ -131,6 +137,8 @@ def main():
         assert "runtime/botrealm/old165.json" not in have, "the removed file is still there"
         for rel in SAVE_FILES:
             assert have.get(rel) == save[rel], f"the save file {rel} was changed"
+        for rel in CLIENT_FILES:
+            assert have.get(rel) == save[rel], f"the player's client file {rel} was changed"
 
     # ---- 1. a file changed on this PC: nothing is touched; the fresh install brings the save over
     g = install("g1")
@@ -157,7 +165,7 @@ def main():
     print("2 ok: a failure halfway is undone")
 
     # ---- 3. a good update, and 4. a second run
-    save = {rel: before[rel] for rel in SAVE_FILES}
+    save = {rel: before[rel] for rel in SAVE_FILES + CLIENT_FILES}
     out = downloader("0.2", w / "assets", "-Mode", "update", "-Update", g)
     assert "updated to" in out, out[-800:]
     check_is_v02(g, save)
@@ -171,9 +179,8 @@ def main():
 
     # ---- 5. a half-applied update (a crash after some files) finishes on the next run
     g = install("g5")
-    save = {rel: sha(g / rel) for rel in SAVE_FILES}
+    save = {rel: sha(g / rel) for rel in SAVE_FILES + CLIENT_FILES}
     shutil.copyfile(w / "game2/runtime/botrealm/drops165.json", g / "runtime/botrealm/drops165.json")
-    shutil.copyfile(w / "client2/new-client/VERSION.txt", g / "new-client/VERSION.txt")
     out = downloader("0.2", w / "assets", "-Mode", "update", "-Update", g)
     assert "updated to" in out, out[-800:]
     check_is_v02(g, save)

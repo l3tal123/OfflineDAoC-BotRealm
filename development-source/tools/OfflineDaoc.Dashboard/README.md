@@ -10,7 +10,7 @@ browser opens `http://127.0.0.1:10310/`:
 
 - **START SERVER** — runs the pre-flight (database check, content refresh from `runtime/botrealm` with a database backup) and starts
   `CoreServer.exe`, the same command the old launcher used.
-- **ENTER REALM** — starts the new Godot client logged in as the local account, as soon as port 10300 is ready.
+- **ENTER REALM** — starts the client supplied in `new-client\`, logged in as the local account, as soon as port 10300 is ready.
 - **STOP SERVER** — asks the server to shut down and waits for it (the world saves first).
 - **Server tab** — live state, pid, memory, uptime, game-client detection and the server console log.
 - **Active Population / World Map** — the live roster, and the world map: a paintable, zoomable realm overview or any
@@ -43,7 +43,7 @@ when the exe sits in `<playable>\runtime`.
 | `LauncherHost.cs` | Server and client process control, content refresh, console buffer, status. |
 | `DashboardHost.cs` | The loopback HTTP host: static files, JSON data endpoints, launcher actions. |
 | `DashboardData.cs` | Roster + live overlay, counts, bot zone placement, and the world-map payload (`/api/world`). |
-| `MapCatalog.cs` | The client's painted map catalog (`godot/content/maps/maps.json`): painted zones and their squares on each realm map. |
+| `MapCatalog.cs` | The client's painted map catalog (`new-client/godot/content/maps/maps.json`): painted zones and their squares on each realm map. |
 | `WorldReader.cs` | Read-only SQLite queries: bot roster and zones/regions. |
 | `LiveBots.cs` | The state-165 file-broker client for the live snapshot. |
 | `DashboardOptions.cs` | Command line and install/database/server/maps detection. |

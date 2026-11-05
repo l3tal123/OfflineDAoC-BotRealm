@@ -8,7 +8,7 @@ Package layout:
     runtime\\                         launcher, server (with the full navmesh and navmesh-165), BotRealm content, the
                                       clean world database
     tools\\dotnet\\                     .NET 10 (host fxr + Microsoft.NETCore.App, WindowsDesktop.App, AspNetCore.App)
-    new-client\\                       NOT made here: the new client's own package unzips beside runtime\\ (the launcher
+    new-client\\                       NOT part of a release: the player supplies the game client there (the launcher
                                       finds ..\\new-client by itself)
 
 The install is only read, never changed, and the server must be stopped (its world database is copied). What differs
@@ -152,7 +152,7 @@ def main():
         "setlocal\r\n"
         "cd /d \"%~dp0\"\r\n"
         "rem BotRealm: the launcher, with the .NET 10 bundled in tools\\dotnet (no install needed).\r\n"
-        "rem The new client goes in new-client\\ beside runtime\\; the launcher finds it there.\r\n"
+        "rem The game client goes in new-client\\ beside runtime\\; the launcher finds it there.\r\n"
         "if not exist \"%~dp0runtime\\BotRealm.exe\" (\r\n"
         "  echo runtime\\BotRealm.exe is missing: unzip the whole BotRealm package here.\r\n"
         "  pause\r\n"

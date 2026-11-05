@@ -20,9 +20,8 @@ already uses and never changes game state.
 - **Two views** – *World overview* draws one panel per region that has bots (the three realms and their Shires when
   empty); the `VIEW` dropdown opens a single region large. A region panel is built from the world database's own
   `Zones`/`Regions` rows, so old frontiers (Forest Sauvage, Hadrian's Wall, ...), dungeons, battlegrounds, capitals
-  and Darkness Falls all have their proper place. When the new client's converted content is installed, its painted
-  zone maps (`new-client/godot/content/maps/{original,x4plus}/z###.png`) are drawn as the panel background; without
-  that content the same zones are drawn as realm-coloured rectangles. At 200% and closer the zone names are drawn over
+  and Darkness Falls all have their proper place. When the client is installed with its painted zone maps, those are
+  drawn as the panel background; without them the same zones are drawn as realm-coloured rectangles. At 200% and closer the zone names are drawn over
   the painted map too, so a fully zoomed view still says which zone it shows.
 - **Zoom and pan** – the wheel zooms about the cursor (100%–1000%, 25% a step), `+` / `−` zoom about the middle,
   `RESET` returns to the fitted view, and dragging pans a zoomed map (any mouse button; middle-drag works at any
@@ -70,8 +69,8 @@ you replace — AGENTS.md rules 10 and 11):
 3. Start the server, then the launcher: the **World Map** tab appears between **Active Population** and
    **Active Groups**.
 
-The map itself needs no content: without the new-client content it draws the zone rectangles. With the content it
-uses the painted maps. The client does not need to be running; only the server must be running for live positions.
+The map itself needs no client content: without the client's painted maps it draws the zone rectangles, and with them
+it uses the painted maps. The client does not need to be running; only the server must be running for live positions.
 
 ## Verification done (2026-11-01)
 
@@ -81,7 +80,7 @@ uses the painted maps. The client does not need to be running; only the server m
   cannot start in this environment).
 - Launcher build: 0 errors.
 - The map control was rendered offscreen with synthetic snapshots against the real world database and the installed
-  new-client content (Albion, Midgard, Hibernia and Darkness Falls; overview and single-region views) to check zone
+  client's painted maps (Albion, Midgard, Hibernia and Darkness Falls; overview and single-region views) to check zone
   placement, dot placement and the painted background. The probe lives under
   `development-source/server/build/map-probe/` (git-ignored) and is not part of the shipped launcher.
 - Zoom/select probe checks (same offscreen harness): overview and single-region zoom levels (100% → 156% → 195% →
@@ -90,7 +89,7 @@ uses the painted maps. The client does not need to be running; only the server m
   (`world-map-overview-zoom.png`, `world-map-albion-zoom.png`). The same checks pass against the Release build that is
   deployed.
 - Launcher hand-off probe: the installed `BotRealm.dll` was loaded into a headless harness run from the install's
-  own `runtime/` folder (so it found the real database, server folder and client), the real `MainForm` was constructed
+  own `runtime/` folder (so it found the real database and server folder), the real `MainForm` was constructed
   without being shown, and it verified: the World Map tab exists in second position and holds the map control, the
   toolbar's `+`/`−`/`RESET` buttons drive the zoom percentage (125% → 100%), a synthetic row with a filter that hides
   it is relaxed and selected when the map asks for the bot (realm filter reset, search cleared, row selected, footer

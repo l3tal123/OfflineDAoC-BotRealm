@@ -1,8 +1,8 @@
 BOTREALM v0.2
 
-This folder is the complete game: the new client, the server, the clean
-world and the launcher. It contains no one else's account, characters or
-bots.
+This folder is the server, the launcher and the clean world. The game
+client is supplied separately. It contains no one else's account,
+characters or bots.
 
 There's nothing to install or turn on in Windows: .NET is included in
 tools\dotnet, and the game uses only that copy. You don't need the Windows
@@ -47,7 +47,6 @@ or a mod.
 
 MORE HELP
 docs\PLAY.md                full guide and troubleshooting
-docs\NEW-CLIENT.md          the client: keys, settings, logs
 CHANGELOG.md                what's in this version
 QUICK COMMANDS.txt          handy in-game commands
 ALL SERVER COMMANDS.txt     every command (GM-only ones marked)

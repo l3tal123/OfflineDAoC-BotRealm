@@ -239,8 +239,8 @@
       const enterRealmHint = computed(() => {
         if (!serverUp.value) return "Start the server first.";
         if (!ready.value) return "The server is still starting: ENTER REALM unlocks when port 10300 is ready.";
-        if (!launcher.clientAvailable) return "The new client is not installed (new-client\\ next to runtime).";
-        return "Start the new client logged in to this server.";
+        if (!launcher.clientAvailable) return "The client is not installed (new-client\\ next to runtime).";
+        return "Start the client logged in to this server.";
       });
       const stateClass = computed(() => ({
         "state-up": launcher.state === "Running",

@@ -13,7 +13,6 @@ was deployed and no server or launcher was started. No game server was running b
 | .NET SDK | OK | `10.0.100` at `C:\Program Files\dotnet`. Docs say dev builds use `10.0.11`; not required here. |
 | .NET runtimes | OK | `Microsoft.NETCore.App 10.0.0`, `Microsoft.WindowsDesktop.App 10.0.0`, `Microsoft.AspNetCore.App 10.0.0` (plus 8.0.30). .NET 10 present. |
 | Python | OK | `3.11.9` (`C:\Users\andro\AppData\Local\Programs\Python\Python311\python.exe`), meets the 3.10+ need. |
-| Godot | **MISSING** | No `godot*` on PATH, none in Program Files/registry. Only `C:\Users\andro\Desktop\Godot 4.8  dev 3.exe` (`4.8.dev3.official`, standard build, no `GodotSharp`/mono). Godot 4.7.2 stable **.NET** build absent. |
 | `tools/dotnet` | absent (expected) | Repo ships no .NET binaries; present only in the release download. |
 | Database unpack | OK | `runtime/data/opendaoc-165.sqlite3.db`, `quick_check ok`, 133 tables, empty `Account`. |
 | Server build | OK with workaround | `Build succeeded`, **619 warnings, 0 errors**, 56.95 s. Documented plain command fails in this sandbox (see Blockers). |
@@ -29,7 +28,6 @@ dotnet --list-sdks          -> 10.0.100 [C:\Program Files\dotnet\sdk]
 dotnet --list-runtimes      -> Microsoft.AspNetCore.App 10.0.0; Microsoft.NETCore.App 8.0.30, 10.0.0;
                                Microsoft.WindowsDesktop.App 8.0.30, 10.0.0
 python --version            -> Python 3.11.9
-Get-Command godot*          -> (nothing)
 ```
 
 ### Server (`development-source/server`)
@@ -113,10 +111,6 @@ unpacked database and `serverconfig.xml` are all git-ignored. Nothing was commit
 
 ## What is missing or needs installing
 
-- **Godot 4.7.2 stable .NET/mono** (`Godot_v4.7.2-stable_mono_win64`): required to open or run the client; only a
-  non-.NET 4.8 dev build is on this machine. See `source/new-client/README.md` (setup step 1).
-- **Client content** `source/new-client/godot/content` (~37 GB): absent. Required to run the client; comes from the
-  release download or the Python pipeline. See `source/new-client/README.md`.
 - **Full navigation meshes** `runtime/server/navmesh` (2.1 GB): only `runtime/server/navmesh-165` exists. From the
   release download or `development-source/tools/OpenDAoC-BuildNav`. See `docs/DEVELOPMENT.md` §0 item 3, §7.
 - **Server deployables** `runtime/server` has only `config/` and `navmesh-165/` (no `CoreServer.exe`/`lib/`). Deploy
@@ -140,6 +134,6 @@ unpacked database and `serverconfig.xml` are all git-ignored. Nothing was commit
    (MSB3030). This affects `Tests` too because it references `CoreServer`.
 4. Machine is **offline** for NuGet (`api.nuget.org` unreachable): every restore warns `NU1900`. Builds/tests still
    work from the local package cache; a machine without that cache cannot restore.
-5. Not verified here (out of scope / not run): server start, content refresh on a real install, client build/run,
-   in-game checks, navmesh generation, content pipeline. The launcher was started only on a throw-away copy of the
+5. Not verified here (out of scope / not run): server start, content refresh on a real install, in-game checks,
+   navmesh generation, content pipeline. The launcher was started only on a throw-away copy of the
    world for the endpoint smoke test, never against the playable install.

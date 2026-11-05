@@ -6,17 +6,17 @@ need the author's permission to fork it.
 ## 1. Get your own copy
 
 1. **Fork it:** click **Fork** on this GitHub page, then clone your fork, or use **Code > Download ZIP**.
-2. **Get a playable folder:** download the playable release, as described in [PLAY.md](PLAY.md). The source alone
-   isn't the playable game: the client's converted content, the full navigation meshes and the binaries come with
-   the release.
+2. **Get a playable folder:** download the server release and put your game client in `new-client\`, as described
+   in [PLAY.md](PLAY.md). The source alone isn't the playable game: the full navigation meshes and the binaries come
+   with the server release, and the client's converted content comes with the client.
 3. **Keep two folders:** the source checkout, where you edit code, and a separate playable folder, where you test
    builds.
 
 ## 2. Start your assistant with this prompt
 
 > This is my copy of BotRealm, a single-player Dark Age of Camelot world built around autonomous gamebots and hired companions, on a 1.65-era Classic and Shrouded Isles content
-> base with BotRealm's own quality-of-life changes. Read AGENTS.md, docs/DEVELOPMENT.md and source/new-client/README.md
-> first, and follow the project rules in AGENTS.md: period sources first, nothing from Trials of Atlantis or later,
+> base with BotRealm's own quality-of-life changes. Read AGENTS.md and docs/DEVELOPMENT.md first, and follow the
+> project rules in AGENTS.md: period sources first, nothing from Trials of Atlantis or later,
 > no difficulty changes, bots on the player rules. My source checkout is this folder; my playable game is at
 > [path to playable folder]. Look at the current code before changing it. Don't start the server or replace files
 > in the playable folder without asking me, and back up anything you replace. Protect my account, characters,
@@ -34,8 +34,7 @@ need the author's permission to fork it.
 | Commands, combat, spells, pets | `development-source/server/GameServer` |
 | World content: drops, item stats, spawns, merchants, inns | `runtime/botrealm` (the JSON) and the generator in `tools/claude-version/botrealm` that writes it |
 | The launcher | `development-source/tools/OfflineDaoc.Dashboard` |
-| The new client: interface, world, controls | `source/new-client/godot/game` (see its [README](../source/new-client/README.md)) |
-| The client's converted content | `source/new-client/pipeline` |
+
 
 ## Good habits
 

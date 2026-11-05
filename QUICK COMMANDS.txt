@@ -104,4 +104,3 @@ GM ONLY
 These controls apply to your hired companions, not the autonomous gamebots.
 ALL SERVER COMMANDS.txt is the exhaustive advanced reference, not this quick guide.
 
-The new client's own commands and keys: source/new-client/docs/CLIENT COMMANDS AND KEYS.txt

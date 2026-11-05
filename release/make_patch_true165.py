@@ -1,18 +1,22 @@
 """Build the update patch for a new BotRealm version, and add it to that version's download manifest.
 
-    python -I make_patch_true165.py --base 0.1=<release-baselines/0.1/package.sha256> [--base 0.2=...]
-                                    --game <new game folder> --client <new client folder> --repo <repository>
+    python -I make_patch_true165.py --base 0.1=<baseline-0.1.sha256> [--base 0.2=...]
+                                    --game <new game folder> --repo <repository>
                                     --out <assets folder> --version 0.2
 
 Run it AFTER make_release_true165.py has made the new version's full download in <assets folder>\\v<version>\\ (new
 players still get the full download). This adds:
     BotRealm-v<version>-patch[-partNN].zip   only the files that changed since any released version
-and a "Patch" section in download-manifest.json, then refreshes SHA256SUMS.txt.
+and a "Patch" section in download-manifest.json, then refreshes SHA256SUMS.txt. Each --base is the
+baseline-<version>.sha256 that make_release_true165.py wrote beside an earlier release's assets.
 
 The patch is cumulative: it brings ANY released version (every --base) up to the new one, so a player who skipped a
 version still needs one download. For every file it carries, the manifest lists the SHA-256 that file had in each
 released version ("From"). The downloader's update mode only replaces a file whose current SHA-256 is one of those
 (or already the new one); any other file was changed on that PC, and the update stops before touching anything.
+
+The game client is not part of a release and is never in the patch: new-client/ belongs to the player, who supplies the
+client themselves, so an update leaves it exactly as it is.
 
 Never patched (the player's own data): NEVER_TOUCH. The world database there is the player's save; world content
 changes ship as runtime/botrealm JSON instead, which the launcher applies at the next START SERVER, keeping every save.
@@ -28,8 +32,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import make_release_true165 as mr  # noqa: E402
 
 # Paths a patch never writes, replaces or removes (lower case, relative to the game folder).
-NEVER_TOUCH = ("runtime/data/", "runtime/account.txt", "runtime/logs/", "runtime/server/logs/",
-               "runtime/server/state-165/", "new-client/save/", "patch-backups/", ".install/", ".patch/")
+NEVER_TOUCH = ("new-client/", "runtime/data/", "runtime/account.txt", "runtime/logs/", "runtime/server/logs/",
+               "runtime/server/state-165/", "patch-backups/", ".install/", ".patch/")
 
 
 def never_touch(rel: str) -> bool:
@@ -50,7 +54,6 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base", action="append", required=True, help="<version>=<baseline .sha256>, once per release")
     parser.add_argument("--game", type=Path, required=True)
-    parser.add_argument("--client", type=Path, required=True)
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--version", required=True)
@@ -78,7 +81,7 @@ def main():
     snapshot = out / f"player-docs-{version}-patch"
     if snapshot.exists():
         raise SystemExit(f"{snapshot} exists; remove it first")
-    files = mr.check_package(mr.collect(args.game.resolve(), args.client.resolve(), args.repo.resolve(), snapshot))
+    files = mr.check_package(mr.collect(args.game.resolve(), args.repo.resolve(), snapshot))
     new_baseline = read_baseline(out / f"baseline-{version}.sha256")
     new = {r: p for r, p in files.items() if not never_touch(r)}
     for rel, path in new.items():   # the full download and the patch must be the same files

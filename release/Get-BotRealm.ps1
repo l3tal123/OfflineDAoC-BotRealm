@@ -1,12 +1,13 @@
-# BotRealm downloader: installs the game into a NEW folder, or updates an installed game in place.
+# BotRealm downloader: installs the server and launcher into a NEW folder, or updates them in place.
 #
 # GET-BOTREALM.cmd runs this. It checks the PC, then either
-#  - New install: downloads the complete game in verified parts (resuming if stopped) into a new folder, or
-#  - Update (from v0.2 on): updates an installed game in the folder it is in, with a small patch. Every file it would
-#    replace is checked against the released versions first; nothing is touched if any was changed. Everything it
-#    replaces is backed up in patch-backups\, and a failed update is undone. Saves are never touched.
-#  -Update can be narrowed to the client (-ClientOnly), which leaves the server, the launcher and runtime\botrealm as
-#    they are; fork installs use that to take upstream's client without rebuilding or redownloading the whole game.
+#  - New install: downloads the server, the launcher (the browser dashboard) and everything they need in verified parts
+#    (resuming if stopped) into a new folder, or
+#  - Update: updates an installed folder in place with a small patch. Every file it would replace is checked against
+#    the released versions first; nothing is touched if any was changed. Everything it replaces is backed up in
+#    patch-backups\, and a failed update is undone. Saves are never touched.
+# The game client is NOT downloaded: the player supplies it in new-client\ beside runtime\ (or points
+# runtime\new-client.txt at its folder). The launcher finds it there and ENTER REALM starts it.
 param(
     # New install: where the game goes (a new folder). Default: BotRealm next to this downloader's folder,
     # or <drive>:\Games\BotRealm when that path would be too long.
@@ -21,13 +22,10 @@ param(
     [ValidateSet('ask','install','update')]
     [string]$Mode = 'ask',
     [switch]$NoShortcut,
-    # Fork installs: update in place even where files were changed on this PC (the fork's own launcher, server and
-    # content builds), after backing them up. The fork's builds have to be put back after the update; without the
-    # switch the update stops and touches nothing.
-    [switch]$AllowLocalChanges,
-    # Update only the new-client files from the patch. The server, the launcher and runtime\botrealm are not planned at
-    # all, so nothing under runtime\ is replaced and no fork build has to be put back.
-    [switch]$ClientOnly
+    # Local builds: update in place even where files were changed on this PC (a launcher, server or content build of
+    # your own), after backing them up. Those builds have to be put back after the update; without the switch the
+    # update stops and touches nothing.
+    [switch]$AllowLocalChanges
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -43,8 +41,8 @@ $LegacyStartFile = 'START OFFLINE DAOC TRUE 1.65.cmd'
 $GameFolders = @('BotRealm', 'OfflineDAoC-True165')
 $LauncherExe = 'runtime\BotRealm.exe'
 $LegacyLauncherExe = 'runtime\OfflineDAoC.exe'
-# The new client keeps its graphics (shader) cache in new-client\save, up to 200 characters deeper, and Windows refuses
-# paths over 260. So the game folder's own path should stay within 42 characters, or every start recompiles the shaders.
+# The client keeps its graphics (shader) cache in new-client\save and the server writes deep paths under the folder,
+# and Windows refuses paths over 260. So the game folder's own path should stay within 42 characters.
 $MaxGamePath = 42
 $cache = Join-Path $PSScriptRoot (Join-Path '.downloads' "v$ReleaseVersion")
 
@@ -59,7 +57,15 @@ function Stop-Install([string]$why) {
     Write-Host $why -ForegroundColor Yellow
     exit 1
 }
-function Get-Sha([string]$path) { return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() }
+function Get-Sha([string]$path) {
+    # .NET, not Get-FileHash: no module auto-loading, so it works in more environments (and is the same SHA-256).
+    $stream = [System.IO.File]::OpenRead($path)
+    try {
+        $sha = [System.Security.Cryptography.SHA256]::Create()
+        try { return ([BitConverter]::ToString($sha.ComputeHash($stream)) -replace '-', '').ToLowerInvariant() }
+        finally { $sha.Dispose() }
+    } finally { $stream.Dispose() }
+}
 
 # The start file of an installed game, current or pre-rename, or $null.
 function Get-StartFile([string]$game) {
@@ -78,12 +84,6 @@ if ([Environment]::OSVersion.Version.Major -lt 10) { Stop-Install 'This game nee
 Add-Type -Namespace BotRealm -Name Cpu -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool IsProcessorFeaturePresent(uint feature);'
 if (![BotRealm.Cpu]::IsProcessorFeaturePresent(40)) {   # 40 = PF_AVX2_INSTRUCTIONS_AVAILABLE
     Stop-Install 'Your CPU does not support AVX2, which the bots'' navigation needs (most CPUs from 2014 onward have it). The game cannot run on this PC.'
-}
-if (!(Test-Path -LiteralPath (Join-Path $env:SystemRoot 'System32\vulkan-1.dll'))) {
-    Say ''
-    Say 'Vulkan was not found on this PC. The game is made for Vulkan; without it, it tries DirectX 12 instead.'
-    Say 'Installing the latest graphics driver from NVIDIA, AMD or Intel usually adds Vulkan.'
-    if (!(Ask 'Continue anyway?')) { Stop-Install 'Nothing was downloaded.' }
 }
 $memory = (Get-CimInstance Win32_ComputerSystem -ErrorAction SilentlyContinue).TotalPhysicalMemory
 if ($memory -and $memory -lt 15GB) {
@@ -115,7 +115,7 @@ function Get-Part($part, [int]$index, [int]$count) {
     if ($part.Name -notmatch '^[A-Za-z0-9._-]+\.zip$' -or $part.SHA256 -notmatch '^[A-Fa-f0-9]{64}$') { Stop-Install 'The download list has an invalid entry.' }
     $file = Join-Path $cache $part.Name
     $ok = (Test-Path -LiteralPath $file) -and (Get-Item -LiteralPath $file).Length -eq $part.Bytes
-    if ($ok) { $ok = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -eq $part.SHA256 }
+    if ($ok) { $ok = (Get-Sha $file) -eq $part.SHA256 }
     if (!$ok) {
         Say ''
         Say ("Downloading part {0} of {1} ({2:N2} GB)..." -f $index, $count, ($part.Bytes / 1GB))
@@ -123,7 +123,7 @@ function Get-Part($part, [int]$index, [int]$count) {
             Stop-Install "The download stopped: $($_.Exception.Message). Run this file again to continue; finished parts are kept."
         }
         Say 'Checking it...'
-        if ((Get-Item -LiteralPath $file).Length -ne $part.Bytes -or (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ne $part.SHA256) {
+        if ((Get-Item -LiteralPath $file).Length -ne $part.Bytes -or (Get-Sha $file) -ne $part.SHA256) {
             Remove-Item -LiteralPath $file -Force -ErrorAction SilentlyContinue
             Stop-Install 'That part did not download correctly. Run this file again to retry it; finished parts are kept.'
         }
@@ -184,7 +184,7 @@ function Test-Folder([string]$game) {
         Say ''
         Say "The game folder's path is long ($($game.Length) characters): $game"
         Say "The game works best within $MaxGamePath characters, such as C:\Games\BotRealm. With a longer path it"
-        Say 'still runs, but loads slowly (it cannot keep its graphics cache), and some files may not install.'
+        Say 'still runs, but some files may not install, and the client may not keep its cache.'
         if (!(Ask 'Install here anyway?')) { Stop-Install 'Nothing was downloaded. Run this again without choosing a folder, or choose a shorter one.' }
     }
     if ($game -match '[^\x20-\x7E]') {
@@ -212,7 +212,7 @@ function Install-Game([string]$game) {
         Stop-Install ("The game needs about {0:N0} GB of free space on {1} while it installs ({2:N0} GB free). Free up space, or move this downloader folder to another drive, and run it again." -f ($need / 1GB), $drive.Name, ($drive.AvailableFreeSpace / 1GB))
     }
     Say ''
-    Say "This installs $Product v$ReleaseVersion into this new folder:"
+    Say "This installs $Product v$ReleaseVersion (server and launcher) into this new folder:"
     Say "  $game"
     Say ("Download: {0:N1} GB in {1} parts. Installed size: {2:N1} GB." -f ($totalDownload / 1GB), $parts.Count, ($installed / 1GB))
     Say 'If it stops (or you close this window), run the same file again: it continues where it stopped.'
@@ -274,9 +274,6 @@ function Get-Plan([string]$game) {
     $plan = @()
     foreach ($f in @($patch.Files)) {
         if (Test-NeverTouch $f.Path) { Stop-Install 'The update list has an invalid entry.' }
-        # -ClientOnly (fork addition): the client moves with upstream's releases, the server/launcher/content are the
-        # fork's own and are not planned at all.
-        if ($ClientOnly -and $f.Path -notlike 'new-client/*') { continue }
         $path = Join-Path $game $f.Path
         if (!(Test-Path -LiteralPath $path -PathType Leaf)) { $plan += [pscustomobject]@{ File = $f; Action = 'add' }; continue }
         $have = Get-Sha $path
@@ -331,19 +328,18 @@ function Update-Game([string]$game) {
     $work = @($plan | Where-Object { $_.Action -eq 'replace' -or $_.Action -eq 'add' })
     $removes = @()
     foreach ($r in @($patch.Remove)) {
-        if ($ClientOnly -and $r.Path -notlike 'new-client/*') { continue }
         $path = Join-Path $game $r.Path
         if ((Test-Path -LiteralPath $path -PathType Leaf) -and (@($r.From) -contains (Get-Sha $path))) { $removes += $r }
     }
     if ($changed.Count -gt 0 -and $AllowLocalChanges) {
-        # Fork installs (fork addition): the fork replaces the launcher and server builds, so those files never match a
-        # released version. Treat them like ordinary files to replace - they are backed up and can be put back - and
-        # carry on with the update.
+        # Local builds (a BotRealm addition): this folder may hold a launcher, server or content build from this PC, so
+        # those files never match a released version. Treat them like ordinary files to replace - they are backed up
+        # and can be put back - and carry on with the update.
         Say ''
-        Say "$($changed.Count) file(s) this update replaces were changed on this PC (the fork's own builds):"
+        Say "$($changed.Count) file(s) this update replaces were changed on this PC (your own builds):"
         $changed | ForEach-Object { Say "  $($_.File.Path)" }
         Say 'Replacing them after backing them up, because -AllowLocalChanges was given.'
-        Say 'The fork builds have to be put back afterwards; without that, the game runs the released versions.'
+        Say 'Your builds have to be put back afterwards; without that, the folder runs the released versions.'
         foreach ($item in $changed) { $item.Action = 'replace' }
         $changed = @()
         $work = @($plan | Where-Object { $_.Action -eq 'replace' -or $_.Action -eq 'add' })
@@ -371,12 +367,7 @@ function Update-Game([string]$game) {
     if ($work.Count -eq 0 -and $removes.Count -eq 0) {
         if (Test-Path -LiteralPath $state) { Remove-Item -LiteralPath $state -Recurse -Force }
         Say ''
-        if ($ClientOnly) {
-            Write-Host "The client in $game is already up to date (v$ReleaseVersion)." -ForegroundColor Green
-            Say 'The server, the launcher and runtime\botrealm were not checked (-ClientOnly).'
-        } else {
-            Write-Host "Your game is already up to date (v$ReleaseVersion)." -ForegroundColor Green
-        }
+        Write-Host "Your game is already up to date (v$ReleaseVersion)." -ForegroundColor Green
         return $game
     }
     $replaceBytes = [int64](($work | Where-Object { $_.Action -eq 'replace' } | ForEach-Object { (Get-Item -LiteralPath (Join-Path $game $_.File.Path)).Length } | Measure-Object -Sum).Sum)
@@ -387,11 +378,7 @@ function Update-Game([string]$game) {
     }
     Say ''
     Say ("Update v{0} -> v{1}: {2} file(s) to update or add, {3} to remove. Download: {4:N0} MB." -f $from, $ReleaseVersion, $work.Count, $removes.Count, ($patch.Bytes / 1MB))
-    if ($ClientOnly) {
-        Say 'Client-only update (-ClientOnly): only the new-client files are replaced. The server, the launcher and'
-        Say 'runtime\botrealm keep exactly what they have now, so no fork build has to be put back afterwards.'
-    }
-    Say 'Everything it replaces is backed up first, and your saves are never touched.'
+    Say 'Everything it replaces is backed up first, and your saves and your client (new-client\) are never touched.'
     if (!(Ask 'Update now?')) { Stop-Install 'Nothing was changed.' }
 
     # download and unpack the patch into a staging folder inside the game folder (same drive: fast, safe moves)
@@ -496,7 +483,7 @@ if ($choice -eq 'ask') {
         $found = @(Find-Installed)
         Say ''
         Say "1 = Update my game (v$(($patch.From) -join ' / v') to v$ReleaseVersion, in the folder it is in; a smaller download)"
-        Say '2 = New install (the complete game, into a new folder)'
+        Say '2 = New install (the server and launcher, into a new folder)'
         if ($found.Count -gt 0) { Say "Found an installed game: $($found -join ', ')" }
         do { $answer = Read-Host 'Press 1 or 2, then Enter' } until ($answer -match '^\s*[12]\s*$')
         $choice = if ($answer.Trim() -eq '1') { 'update' } else { 'install' }
@@ -538,8 +525,11 @@ Remove-Item -LiteralPath (Split-Path -Parent $cache) -Recurse -Force -ErrorActio
 
 Say ''
 Say 'To play:'
-Say "  1. Double-click $StartFile in $game (or the desktop shortcut)."
-Say '  2. Click START SERVER and wait until the launcher shows RUNNING. The first start after an update can take a few minutes.'
-Say '  3. Click ENTER REALM. Your account is created the first time.'
+Say "  1. Put your BotRealm client in new-client\ next to runtime\ in $game."
+Say '     (Or write its folder into runtime\new-client.txt. The launcher looks in both places.)'
+Say "  2. Double-click $StartFile in $game (or the desktop shortcut)."
+Say '  3. Click START SERVER and wait until the launcher shows RUNNING.'
+Say '  4. Click ENTER REALM. Your account is created the first time.'
 Say ''
+Say 'The client is not part of this download: it is supplied separately, so this downloader never fetches or changes it.'
 Say 'READ ME FIRST.txt in the game folder has more, and you can delete this downloader folder now.'

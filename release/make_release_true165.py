@@ -1,26 +1,27 @@
-"""Pack BotRealm into GitHub release parts, and record its baseline.
+"""Pack BotRealm's server into GitHub release parts, and record its baseline.
 
-    python -I make_release_true165.py --game <game folder> --client <client folder> --repo <this repository>
+    python -I make_release_true165.py --game <game folder> --repo <this repository>
                                       --out <assets folder> [--version 0.1]
 
-What a player ends up with comes from three places, and none of them is written to:
+A release is the server, the launcher (the browser dashboard) and everything the two need to run; the game client is
+NOT part of it. The player provides the client and puts it in new-client\\ beside runtime\\ (the launcher finds it
+there), or points runtime\\new-client.txt at its folder.
+
+What goes into it comes from two places, and neither is written to:
     --game     START BOTREALM.cmd, runtime\\ (the launcher, the server, the navigation meshes, the
                world content and the clean world) and tools\\dotnet\\ (the bundled .NET 10), made by
-               development-source/tools/build_release_true165.py
-    --client   a folder holding new-client\\ (godot\\ with its content, tools\\godot_net\\, VERSION.txt), made by the
-               new client's packaging (source/new-client/tools)
+               development-source/tools/build_release_true165.py; it must not hold new-client\\
     --repo     the player docs (PLAYER_DOCS), placed at the same paths in the game folder
 
 <assets folder>\\v<version>\\ gets:
-    BotRealm-v<version>-game[-partNN].zip     everything but new-client\\
-    BotRealm-v<version>-client-partNN.zip     new-client\\
+    BotRealm-v<version>-game[-partNN].zip     the server, the launcher, the content and the bundled .NET
     download-manifest.json                    the parts, their sizes and SHA-256, for the downloader
     SHA256SUMS.txt                            every asset's SHA-256
-and <assets folder>\\baseline-<version>.sha256 is the SHA-256 of every installed file. Commit it to the repository as
-release-baselines/<version>/package.sha256, so an install can be checked against it.
+and <assets folder>\\baseline-<version>.sha256 is the SHA-256 of every installed file. Keep it beside the release
+assets (not in the repository): the next release's update patch is built against it.
 
 Every part is a verified zip under GitHub's 2 GB limit. The downloader unpacks and deletes one part before the next, so
-an install never needs much more than the game's own size on disk. The package is checked first: no account, login,
+an install never needs much more than the package's own size on disk. The package is checked first: no account, login,
 log, backup, test character, developer switch or played world may be in it.
 """
 from __future__ import annotations
@@ -36,7 +37,7 @@ from pathlib import Path
 PART_BUDGET = 1_900_000_000          # bytes of files per part (GitHub's limit is 2 GiB per asset)
 # The player docs every install gets, from the repository, at the same paths in the game folder.
 PLAYER_DOCS = ["READ ME FIRST.txt", "QUICK COMMANDS.txt", "ALL SERVER COMMANDS.txt", "CHANGELOG.md", "LICENSE",
-               "THIRD_PARTY.md", "docs/PLAY.md", "docs/NEW-CLIENT.md"]
+               "THIRD_PARTY.md", "docs/PLAY.md"]
 # Already-compressed formats are stored, not deflated again.
 STORED = {".png", ".jpg", ".jpeg", ".ogg", ".mp3", ".zip", ".7z", ".webp", ".ctex", ".scn", ".res", ".pck"}
 
@@ -49,15 +50,11 @@ REQUIRED = [
     "runtime/botrealm/true165-rules.json",
     "tools/dotnet/dotnet.exe",
     "READ ME FIRST.txt",
-    "new-client/VERSION.txt",
-    "new-client/godot/project.godot",
-    "new-client/godot/content/.gdignore",
-    "new-client/godot/.godot/mono/temp/bin/Debug/MMOEngine.dll",
 ]
 FORBIDDEN_NAMES = {"account.txt", "dev_mode.txt", "claude_test_account.txt", "d3d9.dll", "dxvk.conf"}
 FORBIDDEN_PARTS = ("/logs/", "/deployment-backups/", "/mode-switch-backups/", "/keep-relic-reset-backups/",
-                   "/true165-devtool-build/", "/client-opendaoc/", "/new-client/save/", "/new-client/godot/tests/",
-                   "/new-client/godot/.godot/editor/", "/runtime/win-x64/", "/runtime/server/state-165/")
+                   "/true165-devtool-build/", "/client-opendaoc/", "/new-client/", "/runtime/win-x64/",
+                   "/runtime/server/state-165/")
 FORBIDDEN_SUFFIXES = (".log", ".dmp", ".bak", ".tmp", ".db-wal", ".db-shm", "-wal", "-shm")
 # Tables that must be empty in the shipped world (saved progress); database/make_clean_db.py empties them all.
 SAVE_TABLES = ("Account", "DOLCharacters", "Inventory", "AccountXMoney", "offline_world_bots", "offline_hired_companions")
@@ -71,7 +68,7 @@ def sha(path: Path) -> str:
     return digest.hexdigest()
 
 
-def collect(game: Path, client: Path, repo: Path, snapshot: Path) -> dict[str, Path]:
+def collect(game: Path, repo: Path, snapshot: Path) -> dict[str, Path]:
     """Every file of the install, as <path in the game folder> -> <file on disk>. The player docs are copied to
     snapshot first, so an edit to the repository while the release packs can't make the baseline and the parts differ."""
     files: dict[str, Path] = {}
@@ -79,16 +76,8 @@ def collect(game: Path, client: Path, repo: Path, snapshot: Path) -> dict[str, P
         if path.is_file():
             rel = path.relative_to(game).as_posix()
             if rel.startswith("new-client/"):
-                raise SystemExit(f"--game must not hold new-client ({rel}); the client comes from --client")
+                raise SystemExit(f"--game must not hold new-client ({rel}); the client is provided by the player")
             files[rel] = path
-    if not (client / "new-client").is_dir():
-        raise SystemExit("--client must hold a new-client folder")
-    for path in client.iterdir():
-        if path.name != "new-client" and not path.name.endswith("stage-report.json"):
-            raise SystemExit(f"--client holds something besides new-client: {path.name}")
-    for path in (client / "new-client").rglob("*"):
-        if path.is_file():
-            files[path.relative_to(client).as_posix()] = path
     for rel in PLAYER_DOCS:
         source = repo / rel
         if not source.is_file():
@@ -235,7 +224,6 @@ def main():
                         "parts from, with --like-baseline; the parts keep its names and root folder")
     parser.add_argument("--like-baseline", type=Path)
     parser.add_argument("--game", type=Path, required=True)
-    parser.add_argument("--client", type=Path, required=True)
     parser.add_argument("--repo", type=Path, required=True, help="this repository (for the player docs)")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--version", default="0.1")
@@ -251,7 +239,7 @@ def main():
     snapshot = out / f"player-docs-{version}"
     if snapshot.exists():
         raise SystemExit(f"{snapshot} exists; remove it first")
-    files = check_package(collect(args.game.resolve(), args.client.resolve(), args.repo.resolve(), snapshot))
+    files = check_package(collect(args.game.resolve(), args.repo.resolve(), snapshot))
     print(f"  {len(files):,} files, {sum(p.stat().st_size for p in files.values()) / 1e9:.2f} GB", flush=True)
 
     print("Recording the baseline (SHA-256 of every file)...", flush=True)
@@ -263,8 +251,6 @@ def main():
 
     release.mkdir(parents=True)
     root = f"BotRealm-v{version}"
-    game = {r: p for r, p in files.items() if not r.startswith("new-client/")}
-    client = {r: p for r, p in files.items() if r.startswith("new-client/")}
     if args.like:
         old = args.like.resolve()
         old_baseline = {}
@@ -272,35 +258,30 @@ def main():
             digest, rel = line.split("  ", 1)
             old_baseline[rel] = digest
         root = json.loads((old / "download-manifest.json").read_text(encoding="utf-8"))["RootFolder"]
-        print("Packing the game like the previous release...", flush=True)
-        game_parts, g_reused = pack_like(game, old, "game", old_baseline, release, args.part_budget)
-        print("Packing the new client like the previous release...", flush=True)
-        client_parts, c_reused = pack_like(client, old, "client", old_baseline, release, args.part_budget)
-        print(f"  {g_reused + c_reused} of {len(game_parts) + len(client_parts)} parts unchanged", flush=True)
+        print("Packing like the previous release...", flush=True)
+        game_parts, reused = pack_like(files, old, "game", old_baseline, release, args.part_budget)
+        print(f"  {reused} of {len(game_parts)} parts unchanged", flush=True)
     else:
-        print("Packing the game...", flush=True)
-        game_parts = pack(game, root, release, f"{root}-game", False, args.part_budget)
-        print("Packing the new client...", flush=True)
-        client_parts = pack(client, root, release, f"{root}-client", True, args.part_budget)
+        print("Packing the server...", flush=True)
+        game_parts = pack(files, root, release, f"{root}-game", False, args.part_budget)
 
     manifest = {
         "Product": "BotRealm",
         "Version": version,
         "RootFolder": root,
-        "Parts": [dict(p, Kind="game") for p in game_parts] + [dict(p, Kind="client") for p in client_parts],
-        "InstalledBytes": sum(p["UnpackedBytes"] for p in game_parts + client_parts),
+        "Parts": [dict(p, Kind="game") for p in game_parts],
+        "InstalledBytes": sum(p["UnpackedBytes"] for p in game_parts),
         "InstalledFiles": len(files),
-        "Required": ["START BOTREALM.cmd", "runtime/BotRealm.exe", "new-client/godot/project.godot",
-                     "new-client/VERSION.txt"],
+        "Required": ["START BOTREALM.cmd", "runtime/BotRealm.exe"],
         "BaselineSHA256": sha(baseline).upper(),
     }
     (release / "download-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     lines = [f"{sha(p)}  {p.name}" for p in sorted(release.iterdir()) if p.is_file() and p.name != "SHA256SUMS.txt"]
     (release / "SHA256SUMS.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    total = sum(p["Bytes"] for p in game_parts + client_parts)
+    total = sum(p["Bytes"] for p in game_parts)
     print(json.dumps({"version": version, "files": len(files), "installed_gb": round(manifest["InstalledBytes"] / 1e9, 2),
                       "download_gb": round(total / 1e9, 2), "game_parts": len(game_parts),
-                      "client_parts": len(client_parts), "baseline": str(baseline)}, indent=2), flush=True)
+                      "baseline": str(baseline)}, indent=2), flush=True)
 
 
 if __name__ == "__main__":

@@ -374,7 +374,7 @@ internal sealed class LauncherHost : IDisposable
         NewClient? client = Client();
         if (client == null)
             return new ActionOutcome(false,
-                "The new client is not installed: expected new-client\\ next to runtime, or a runtime\\new-client.txt pointer.");
+                "The client is not installed: expected new-client\\ next to runtime, or a runtime\\new-client.txt pointer.");
         try
         {
             (string account, string password) = ReadCredentials();

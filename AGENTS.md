@@ -1,8 +1,7 @@
 # BotRealm: instructions for AI assistants and developers
 
-Read this first, then [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) (server, launcher, content) and
-[source/new-client/README.md](source/new-client/README.md) (the client). Claude Code loads this file as
-`CLAUDE.md` too.
+Read this first, then [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) (server, launcher, content).
+Claude Code loads this file as `CLAUDE.md` too.
 
 ## What this is
 
@@ -15,7 +14,7 @@ Shrouded Isles game of the 1.65 era (1 November 2003), and on top of that base i
 It has these parts:
 - a server: an OpenDAoC fork, C#, .NET 10, SQLite;
 - a launcher: a .NET host plus a browser dashboard;
-- a new game client built in Godot 4.
+- a separate game client, supplied by the player and not part of this repository.
 
 BotRealm is **not** a promise of a faithful 1.65 reproduction. The 1.65-era world is the starting point; the owner
 changes it as he pleases (see the rules below), and departures from the period game are expected, not defects. The old
@@ -24,10 +23,10 @@ names survive only as internal identifiers (see *Some names are older than the b
 - **One world, one database.** The game runs only the BotRealm database; there is no normal mode and no mode switch.
   Some code paths of the discontinued normal mode are still in the server and the client, switched off behind
   `Classic165Mode.IsOn` (server) and `Server.world_mode` (client). Nothing new goes into them.
-- **One client.** The new client is the only one. The original DAoC client is not supported, and there is no DXVK.
+- **One client.** The BotRealm client is the only supported client; it is supplied separately by the player. The
+  original DAoC client is not supported, and there is no DXVK.
 - **A fresh start.** Nothing transfers from Offline DAoC (the earlier project), and there is no progress importer.
-- **Version:** v0.2. The launcher's version is `LauncherHost.DisplayVersion`, and
-  the client's window title is `LoginScreen.GAME_TITLE` in `godot/game/login_screen.gd`.
+- **Version:** v0.2. The launcher's version is `LauncherHost.DisplayVersion`.
 
 ## Layout
 
@@ -39,17 +38,15 @@ The repository mirrors the development folders, so the tools find their files as
 | `development-source/server/GameServer/mode165` | The world rules and systems: `Classic165Mode`, `PlayerRules165`, hired companions, inns, the horn, crafting, charm, death penalties. The folder name is historical. |
 | `development-source/server/GameServer/bots` | Gamebots and companions: `GameBot`, the brains, equipment, resting. |
 | `development-source/server/GameServer/bots/autonomous` | The world population AI: goals, camps, groups, travel, RvR, relic raids, sieges. |
-| `development-source/tools/OfflineDaoc.Dashboard` | **The launcher** (`BotRealm.exe`): starts the server and the new client, and serves the browser dashboard from `dashboard\wwwroot` on `http://127.0.0.1:10310/`. The launcher-only logic (world content and refresh, the client launcher, the console log) is in its `Launcher\` folder. |
+| `development-source/tools/OfflineDaoc.Dashboard` | **The launcher** (`BotRealm.exe`): starts the server and the client, and serves the browser dashboard from `dashboard\wwwroot` on `http://127.0.0.1:10310/`. The launcher-only logic (world content and refresh, the client launcher, the console log) is in its `Launcher\` folder. |
 | `development-source/tools/OpenDAoC-BuildNav` | The navigation mesh builder. |
 | `tools/claude-version/botrealm` | The Python generators that build the world content files. |
 | `runtime/botrealm` | The world content (JSON) that the launcher writes into the world database at START SERVER. |
 | `runtime/server` | Server settings and content files, and `navmesh-165` (the inn zones' meshes). |
 | `database` | The clean world database (zipped) and the scripts that make and unpack it. |
-| `source/new-client` | The new client: the Godot project (`godot/`), its C# network client and the content pipeline (`pipeline/`). |
 | `docs` | Player and developer guides. |
 
 Not in the repository:
-- the converted client content (about 37 GB, from the DAoC client's files);
 - the full navigation meshes (2.1 GB);
 - the server and launcher binaries and the bundled .NET;
 - the 1.64 client's data files;
@@ -63,7 +60,7 @@ In a playable folder:
 - `runtime/server` holds the server and the navigation meshes;
 - `runtime/data/opendaoc-165.sqlite3.db` holds the world and the player's saves;
 - `runtime/botrealm` holds the content;
-- `new-client/` holds the client, the engine and its `save/` folder.
+- `new-client/` holds the client and its `save/` folder.
 
 ## Rules
 
@@ -126,7 +123,6 @@ decides on, and changing the baseline is his call, not a silent choice for an as
 11. **Build and test separately.** Deploy only tested outputs, with a backup of what you replace.
     - `GameServer.dll` and `CoreDatabase.dll` go to `runtime/server`, `runtime/server/lib` and
       `runtime/server/win-x64`.
-    - In the client, check every edited script with `load_check.gd` before opening a window.
 12. **Navigation:** don't rebuild or replace navmeshes globally to fix one route without evidence.
 13. **Be honest in reports.** Report automated tests separately from in-game checks.
 14. **Keep the credits and licenses.** See [THIRD_PARTY.md](THIRD_PARTY.md), and credit fork fixes under its
@@ -145,12 +141,9 @@ decides on, and changing the baseline is his call, not a silent choice for an as
   can't use (`/tele`, `/tc`, `/spawn`, `/raid`...). The full list for players is
   [ALL SERVER COMMANDS.txt](ALL%20SERVER%20COMMANDS.txt).
 - **Hired companions** are persistent bots owned by a player (`offline_hired_companions`). The client talks to their
-  windows over the server's DebugMode 0x21 'H' messages; see
-  `source/new-client/docs/TRUE 1.65 MODE HIRE WINDOW PROTOCOL.md`.
+  windows over the server's DebugMode 0x21 'H' messages.
 - **The client is drawn by the server.** The client never decides game numbers. A protocol addition is agreed on
   both sides and written down.
-- **The client's settings:** `source/new-client/pipeline/paths.py` lists every outside input the content pipeline
-  needs, set by environment variable.
 - **Server settings** are in the `ServerProperty` table (set by `true165-rules.json`), the
   `offline_population_settings` and `offline_local_options` tables, and `runtime/server/state-165/bot-goals.json`.
 

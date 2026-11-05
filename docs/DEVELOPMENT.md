@@ -1,7 +1,7 @@
 # Developing BotRealm
 
 How to build, test and run the server and launcher, how the BotRealm world content reaches the world, and how a release
-is put together. The new client has its own guide: [source/new-client/README.md](../source/new-client/README.md).
+is put together. The game client is supplied separately and is not part of this repository.
 Read the project rules in [AGENTS.md](../AGENTS.md) (section 5 below repeats them in full) before you change
 anything.
 
@@ -13,7 +13,6 @@ anything.
 | World-content generators | `tools/claude-version/botrealm` | Python scripts that build the BotRealm world content files. |
 | World content | `runtime/botrealm` | The JSON files the launcher writes into the world database. |
 | Clean world | `database/` | The clean world database (zipped) and the scripts that make and unpack it. |
-| New client | `source/new-client` | The Godot client. See its README. |
 
 ## 0. A working setup from a clone
 
@@ -30,16 +29,15 @@ To get a game you can run from your clone:
 3. **Navigation meshes:** the full set (`runtime/server/navmesh`, 2.1 GB) comes from the release download. You can
    also rebuild it with `development-source/tools/OpenDAoC-BuildNav` from a DAoC client's zone data. The BotRealm
    inn zones' meshes are already in `runtime/server/navmesh-165`.
-4. **Client:** the new client's content (about 37 GB) comes from the release download, or from its pipeline. See its
-   README.
+4. **Client:** supplied separately by the player; this repository does not contain it.
 5. **.NET 10:** the runtimes `Microsoft.NETCore.App`, `Microsoft.WindowsDesktop.App` and `Microsoft.AspNetCore.App`,
    installed or bundled (section 7).
 
 The easiest start is a playable release folder: work in a copy of it and deploy your builds there.
 
 Not in the repository, and needed only by some tools:
-- **the patch 1.64 DAoC client's data files** (zones.dat, the recipe list, figure tables): read by some generators
-  and the client pipeline. They are the game's copyrighted files. Point the tools at your own copy.
+- **the patch 1.64 DAoC client's data files** (zones.dat, the recipe list, figure tables): read by some content
+  generators. They are the game's copyrighted files. Point the tools at your own copy.
 - **the raw period data** (about 85,000 archived pages from Allakhazam, Uthgard, Warcry and CapnBry): read by the
   generators that rebuild drops, stats, spawns and merchants. It is not published at this time. The content files
   those generators made are in the repository, so you only need the archive to regenerate them.
@@ -102,7 +100,7 @@ The launcher runs one world and has no normal-mode switch:
   database=opendaoc-165.sqlite3.db
   config=config\serverconfig-165.xml
   ```
-  The server and the new client read this file.
+  The server reads this file.
 - `TrueMode.DatabaseAgrees` refuses to start unless `runtime/data/opendaoc-165.sqlite3.db` exists and its
   `ServerProperty` row `classic165_mode` is `True`.
 
@@ -394,17 +392,18 @@ Useful log tags:
 
 ---
 
-## 7. The release (v0.1)
+## 7. The release
 
-A release is the clean runtime folder plus the new client, as checked parts with a downloader. v0.1 was made this
-way; the tools and the steps are in [release/README.md](../release/README.md), and its baseline is in
-`release-baselines/0.1/`.
+A release is the server, the launcher (the browser dashboard) and everything they need, as checked parts with a
+downloader. The **game client is not part of it**: the player supplies the client in `new-client\` beside `runtime\`
+(or points `runtime\new-client.txt` at its folder), and update patches never touch it. v0.1 and v0.2 shipped a client
+with the release; BotRealm's own releases are server-only. The tools and the steps are in
+[release/README.md](../release/README.md).
 
-`development-source/tools/build_release_true165.py` builds the game package from a working install: `runtime/`
+`development-source/tools/build_release_true165.py` builds the server package from a working install: `runtime/`
 (the launcher, server, both navmesh sets, the BotRealm world content and the clean world), `tools/dotnet` (.NET 10:
-the host and the NETCore, WindowsDesktop and AspNetCore runtimes) and `START BOTREALM.cmd`. It leaves
-out everything in the never-ships list below. The new client is packaged separately into `new-client/` beside
-`runtime/`.
+the host and the NETCore, WindowsDesktop and AspNetCore runtimes) and `START BOTREALM.cmd`. It leaves out everything
+in the never-ships list below and does not build or include the client.
 
 **Ships:**
 - the launcher, with SQLite;
@@ -414,7 +413,6 @@ out everything in the never-ships list below. The new client is packaged separat
 - the content files (`classic-quests.json`, `classic-quest-guides.json`, `classic-otd.json`);
 - `runtime/botrealm`;
 - the clean world from `database/make_clean_db.py`;
-- the new client (`new-client/`, with no `save/` folder and no `dev_mode.txt`);
 - a bundled .NET 10 in `tools/dotnet`;
 - `START BOTREALM.cmd`, which sets `DOTNET_ROOT`, `DOTNET_ROOT_X64` and `DOTNET_MULTILEVEL_LOOKUP=0`,
   then starts `runtime/BotRealm.exe`.
@@ -425,6 +423,7 @@ out everything in the never-ships list below. The new client is packaged separat
 - the development world database and its `-wal`/`-shm` files;
 - the contents of `state-165`;
 - the original client (`client-opendaoc`) and DXVK;
+- the game client: the package must hold no `new-client/` folder (the player supplies it);
 - the stale self-contained `runtime/win-x64` launcher publish.
 
 **Checks before packing:**
@@ -432,7 +431,8 @@ out everything in the never-ships list below. The new client is packaged separat
 - keeps, doors and relics match `release-world-defaults.json`;
 - `classic165_mode=True`, XP 1x, MakeMeGM off, population target 0;
 - `quick_check` is ok;
-- a fresh install makes its own login on first ENTER REALM, and the server creates the account.
+- a fresh install makes its own login on first ENTER REALM, and the server creates the account;
+- the package has no `new-client/` and no client files.
 
 **How the launcher finds the client** (`NewClient.cs`): `runtime/new-client.txt` (the first non-comment line), then
 `../new-client` beside `runtime/`, then the development folder. A client folder counts when it has

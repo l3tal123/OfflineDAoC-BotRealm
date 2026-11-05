@@ -8,11 +8,11 @@ This guide is for players. You don't need Git, an AI assistant or any programmin
 - 64-bit Windows 10 or 11.
 - A CPU that supports **AVX2**. The bots' navigation needs it. Most CPUs from 2014 onward have it; the downloader
   checks for you.
-- A graphics card that supports **Vulkan**, with a current driver. The game is developed and tested on an RTX 2060
-  (6 GB). If the downloader says Vulkan wasn't found, install the latest driver from NVIDIA, AMD or Intel.
+- A graphics card that supports **Vulkan**, with a current driver, for the game client. The server and the dashboard
+  don't need it. It is developed and tested on an RTX 2060 (6 GB).
 - 16 GB RAM recommended.
-- About **48 GB of free disk space** for a new install. Once installed, it takes about 43 GB. An update needs
-  about 7 GB free.
+- Free disk space for the server download plus the client you supply. The downloader shows the download and installed
+  sizes before it starts; an update needs a few GB free.
 
 **Nothing to install or turn on in Windows.**
 - .NET comes with the game, in its own folder, and the game uses only that copy.
@@ -34,13 +34,16 @@ This guide is for players. You don't need Git, an AI assistant or any programmin
      unsigned community builds.
 5. The downloader checks your PC and asks what to do. Press **2** for a new install. It shows the download size
    and asks before it starts; press **Y**.
-6. It downloads the game in checked parts and installs it into a new folder, **`BotRealm`**, next to the
-   downloader's folder (for example `C:\Games\BotRealm\BotRealm`). If that path would be too long, it
-   uses `C:\Games\BotRealm` instead: the game needs a short path to keep its graphics cache. It shows
-   you the folder before it starts. This takes a while: about 36 GB comes down. If it stops, or you close the
-   window, double-click the same file again; it continues where it stopped.
-7. At the end it offers a desktop shortcut. When it says the game is installed, you can delete the downloader
+6. It downloads the **server and the launcher** (not the game client) in checked parts and installs them into a new
+   folder, **`BotRealm`**, next to the downloader's folder (for example `C:\Games\BotRealm\BotRealm`). If that path
+   would be too long, it uses `C:\Games\BotRealm` instead: the game needs a short path. It shows you the folder
+   before it starts. If it stops, or you close the window, double-click the same file again; it continues where it
+   stopped.
+7. At the end it offers a desktop shortcut. When it says the server is installed, you can delete the downloader
    folder.
+8. **Put your game client in `new-client\` next to `runtime\`** in the new folder (or write its folder into
+   `runtime\new-client.txt`). The client is supplied separately; this download never fetches, replaces or removes
+   it. The launcher finds it there and ENTER REALM starts it.
 
 > **Code > Download ZIP** on the repository page gives you the *source code*, not the playable game.
 
@@ -52,7 +55,8 @@ BotRealm is a fresh start: saves from Offline DAoC 0.37 and earlier can't be bro
    shortcut). The launcher shows **VERSION 0.3**.
 2. Click **START SERVER** and wait until it says **RUNNING**. The first start sets up the world and can take a few
    minutes.
-3. Click **ENTER REALM**. The game opens. Your own local account is created automatically the first time.
+3. Click **ENTER REALM**. The game opens in the client you put in `new-client\`. Your own local account is
+   created automatically the first time.
 4. Choose a realm and create a character, as in the 1.64 client:
    - you start as a base class and choose your class at a trainer at level 5;
    - you start with **1 gold**, enough to buy basic gear; characters you made before this build get the same 1 gold
@@ -126,7 +130,6 @@ near Connla in Hibernia.
 
 **QUICK COMMANDS.txt** in your game folder has the everyday commands and the launcher shortcuts, and **ALL SERVER
 COMMANDS.txt** has every command. Shortcut commands such as `/tele` and `/tc` are for GM accounts only.
-The client's keys and its own commands are in [NEW-CLIENT.md](NEW-CLIENT.md).
 
 ## Updating
 
@@ -139,8 +142,9 @@ characters, companions, bots and settings stay as they are.
    [1. Download](#1-download).
 3. Double-click **`GET-BOTREALM.cmd`** and press **1 = Update my game**. It finds your
    `BotRealm` folder (or asks you to pick it) and shows what it will download.
-4. It checks every file it will replace first. Then it downloads the update (about 2.5 GB for v0.1 to v0.2), backs up
-   each file it replaces in `patch-backups\` in your game folder, and puts the new files in.
+4. It checks every file it will replace first. Then it downloads the update (smaller than a fresh install), backs
+   up each file it replaces in `patch-backups\` in your game folder, and puts the new files in. Your client,
+   `new-client\`, is never replaced or removed.
 5. Start the game as usual. The first **START SERVER** after an update brings the world up to date and can take a
    few minutes.
 
@@ -161,6 +165,7 @@ characters, companions, bots and settings stay as they are.
 | "needs about N GB of free space" | Free up space, or move the downloader folder to another drive and run it again. |
 | A download stops or a part fails its check | Run the downloader again. It keeps finished parts and fetches only what's missing. |
 | "The folder … already exists" | The downloader never overwrites a folder. Rename or move the old one, or run the downloader from another folder. |
+| The launcher says the client is not installed, or ENTER REALM does nothing | Put your game client in `new-client\` beside `runtime\`, or write its folder into `runtime\new-client.txt`. The server release does not include it. |
 | Windows SmartScreen blocks a file | Choose **More info → Run anyway**. The files are unsigned community builds. |
 | ENTER REALM stays greyed out | Wait until the launcher shows RUNNING. The first start can take a few minutes. |
 | START SERVER shows an error | The launcher couldn't apply the world content, and it changes nothing when that happens. Note the message and report it. |
@@ -172,5 +177,4 @@ characters, companions, bots and settings stay as they are.
 in `runtime\data\opendaoc-165.sqlite3.db`.
 
 **Reporting a bug:** open an [issue](https://github.com/shadowofze/OfflineDAoC-True165/issues). Say what you were
-doing, and attach the logs from `new-client\save\Godot\app_userdata\MMOEngine` (`logs\godot.log`, `spell_log.txt`, `death_log.txt`) and
-`runtime\logs` if there are any. [docs/NEW-CLIENT.md](NEW-CLIENT.md#reporting-problems) says which files to send.
+doing, and attach the client's own logs from its folder and `runtime\logs` if there are any.
